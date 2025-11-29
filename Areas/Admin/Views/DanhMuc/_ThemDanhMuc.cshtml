@@ -1,0 +1,50 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.DanhMuc
+
+<div class="modal fade" id="modalDM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-plus"></i> Thêm danh mục</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                @using (Html.BeginForm("", "", FormMethod.Post, new { id = "formAdd" }))
+                {
+                    <div class="mb-3">
+                        @Html.Label("Tên Danh Mục")
+                        @Html.TextBoxFor(m => m.TenDM, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.Label("Mô Tả")
+                        @Html.TextAreaFor(m => m.MoTa, 3, 50, new { @class = "form-control" })
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" id="btnSave">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("btnSave").addEventListener("click", function () {
+        const fd = new FormData(document.getElementById("formAdd"));
+        const obj = {};
+        fd.forEach((v, k) => obj[k] = v);
+
+        fetch("/Admin/DanhMuc/Them", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(obj)
+        })
+            .then(res => res.json())
+            .then(d => {
+                alert(d.message);
+                if (d.success) location.reload();
+            });
+    });
+</script>

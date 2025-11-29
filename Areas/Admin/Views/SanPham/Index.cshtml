@@ -1,0 +1,420 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.ProductVM>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Quản lý sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.6rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+        .filter-bar input, .filter-bar select {
+            height: 36px;
+            font-size: 15px;
+        }
+
+    /* ===== TABLE ===== */
+    .table-container {
+        max-height: 100vh;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.6s ease;
+    }
+
+        .table-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    th, td {
+        text-align: center;
+        vertical-align: middle !important;
+        font-size: 15px;
+    }
+
+    thead th {
+        background: #f8fafc;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .btn-action {
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+
+    /* ===== PHÂN TRANG ===== */
+    .pagination {
+        display: flex;
+        justify-content: center !important;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0;
+    }
+
+        .pagination li {
+            list-style: none;
+        }
+
+            .pagination li a,
+            .pagination li span {
+                display: block;
+                padding: 8px 12px;
+                border-radius: 10px !important;
+                color: #1e293b;
+                border: 1px solid #e2e8f0;
+                background: #f8fafc;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.25s ease;
+            }
+
+                .pagination li a:hover {
+                    background: #e0f2fe;
+                    color: #1d4ed8;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+                }
+
+            .pagination li.active a {
+                background: linear-gradient(90deg, #2563eb, #3b82f6);
+                color: white !important;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+            }
+
+            .pagination li.disabled a {
+                color: #cbd5e1;
+                background: #f1f5f9;
+                pointer-events: none;
+            }
+
+    /* ===== LOADING OVERLAY ===== */
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: #2563eb;
+    }
+
+    /* ===== SKELETON LOADING ===== */
+    .skeleton {
+        animation: shimmer 1.5s infinite linear;
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+        background-size: 200% 100%;
+        border-radius: 6px;
+    }
+
+    @@keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    .skeleton-table {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .skeleton-table .row {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 6px;
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .skeleton-table .cell {
+            height: 18px;
+            width: 100%;
+        }
+</style>
+
+<div id="loadingOverlay">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<div class="container-fluid p-4 pt-2">
+    <div class="text-center">
+        <h4 class="page-title">
+            <i class="fa-solid fa-box"></i>
+            Trang Quản Lý Sản Phẩm
+        </h4>
+    </div>
+
+    <div class="text-end mb-3">
+        <button class="btn btn-success btn-sm" id="btnAdd">
+            <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+        </button>
+    </div>
+
+    <!-- 🔍 Thanh tìm kiếm và bộ lọc -->
+    <form method="get" class="filter-bar bg-white p-3 rounded shadow-sm" onsubmit="showLoading()">
+        <div class="d-flex gap-2 flex-wrap">
+            <input type="text" name="search" value="@Request["search"]" placeholder="Tìm theo tên sản phẩm..." class="form-control" style="width:250px;">
+            @Html.DropDownList("danhMuc", (SelectList)ViewBag.MaDM, "Tất cả danh mục", new { @class = "form-select", style = "width:200px;" })
+            <select name="gia" class="form-select" style="width:180px;">
+                <option value="">Tất cả giá</option>
+                <option value="duoi50" @(Request["gia"] == "duoi50" ? "selected" : "")>Dưới 50.000 ₫</option>
+                <option value="50to100" @(Request["gia"] == "50to100" ? "selected" : "")>50.000 ₫ - 100.000 ₫</option>
+                <option value="tren100" @(Request["gia"] == "tren100" ? "selected" : "")>Trên 100.000 ₫</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Lọc</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary" onclick="showLoading()"><i class="fa-solid fa-rotate-right"></i> Làm mới</a>
+        </div>
+    </form>
+
+    <!-- Skeleton trước khi load -->
+    <div id="skeletonTable" class="skeleton-table mt-3">
+        @for (int i = 0; i < 6; i++)
+        {
+            <div class="row">
+                @for (int j = 0; j < 9; j++)
+                {
+                    <div class="cell skeleton"></div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Bảng sản phẩm thật -->
+    <div class="card shadow-sm mt-3" id="realTable" style="display:none;">
+        <div class="table-container" id="tableContainer">
+            <table class="table table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã SP</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá bán</th>
+                        <th>Danh mục</th>
+                        <th>Đơn vị</th>
+                        <th>Khuyến mãi</th>
+                        <th>Hoạt động</th>
+                        <th>Hình ảnh</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var sp in Model)
+                    {
+                        <tr>
+                            <td>@sp.MaSP</td>
+                            <td class="text-start">@sp.TenSP</td>
+                            <td>@String.Format("{0:N0} ₫", sp.GiaBan)</td>
+                            <td>@sp.TenDanhMuc</td>
+                            <td>@sp.TenDonViTinh</td>
+                            <td>@sp.TenKhuyenMai</td>
+                            <td>
+                                @if (sp.HoatDong)
+                                {<span class="badge bg-success">Bán</span>}
+                                else
+                                {<span class="badge bg-secondary">Ngưng</span>}
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(sp.HinhAnh))
+                                {<img src="@Url.Content("~/Content/Images/" + sp.HinhAnh)"
+                                      width="100" class="rounded shadow-sm" />
+                                }
+                                else
+                                {<span class="text-muted fst-italic">Không có Hình Ảnh</span>}
+                            </td>
+                            <td>
+                                <button class="btn btn-info btn-action me-1" title="Xem" onclick="viewDetail(@sp.MaSP)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn btn-primary btn-action me-1" title="Sửa" onclick="openEdit(@sp.MaSP)">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn btn-danger btn-action" title="Xóa" onclick="deleteProduct(@sp.MaSP)">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white text-center">
+            @Html.PagedListPager(Model,
+                page => Url.Action("Index", new { page, search = Request["search"], danhMuc = Request["danhMuc"], gia = Request["gia"] }),
+                new PagedListRenderOptions
+                {
+                    Display = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                    MaximumPageNumbersToDisplay = 5,
+                    UlElementClasses = new[] { "pagination" }
+                })
+        </div>
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+
+<script>
+    // ===== Skeleton → Hiện bảng thật =====
+    let skeletonTimeout;
+    window.addEventListener("load", () => {
+        clearTimeout(skeletonTimeout);
+        hideSkeleton();
+    });
+
+    // Ẩn skeleton & overlay an toàn
+    function hideSkeleton() {
+        const skeleton = document.getElementById("skeletonTable");
+        const realTable = document.getElementById("realTable");
+        if (skeleton) skeleton.style.display = "none";
+        if (realTable) {
+            realTable.style.display = "block";
+            document.getElementById("tableContainer").classList.add("show");
+        }
+        document.getElementById("loadingOverlay").style.display = "none";
+    }
+
+    // Timeout fallback (3s)
+    skeletonTimeout = setTimeout(() => {
+        hideSkeleton();
+    }, 3000);
+
+    // ===== Loading Overlay =====
+    function showLoading() {
+        document.getElementById("loadingOverlay").style.display = "flex";
+        skeletonTimeout = setTimeout(() => {
+            hideSkeleton();
+        }, 3000);
+    }
+
+    document.addEventListener("click", function (e) {
+        if (e.target.closest(".pagination a")) showLoading();
+    });
+
+    // ===== Modal thêm / sửa / chi tiết =====
+    document.getElementById("btnAdd").addEventListener("click", function () {
+        showLoading();
+        fetch("/Admin/SanPham/Them")
+            .then(res => res.text())
+            .then(html => {
+                hideSkeleton();
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    });
+
+    function openEdit(id) {
+        showLoading();
+        fetch(`/Admin/SanPham/Sua/${id}`)
+            .then(res => res.text())
+            .then(html => {
+                hideSkeleton();
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    }
+
+    function viewDetail(id) {
+        showLoading();
+        fetch(`/Admin/SanPham/ChiTiet/${id}`)
+            .then(res => res.text())
+            .then(html => {
+                hideSkeleton();
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    }
+
+    function deleteProduct(id) {
+        if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
+        showLoading();
+        fetch("/Admin/SanPham/Xoa", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        }).then(res => res.json()).then(data => {
+            alert(data.message);
+            hideSkeleton();
+            if (data.success) location.reload();
+        });
+    }
+</script>

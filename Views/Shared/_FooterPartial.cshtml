@@ -1,0 +1,225 @@
+﻿@* _FooterPartial.cshtml *@
+
+<style>
+    /* --- FOOTER MAIN STYLES --- */
+    .app-footer {
+        background: linear-gradient(180deg, #166534 0%, #052e16 100%); /* Gradient xanh đậm sang trọng */
+        color: #ecfdf5; /* Màu chữ trắng xanh rất nhạt */
+        font-size: 0.95rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        /* Tiêu đề cột */
+        .app-footer h5, .app-footer h6 {
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+    /* Thương hiệu */
+    .brand-title {
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: 800 !important;
+        background: linear-gradient(to right, #4ade80, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* --- LINKS STYLE --- */
+    .footer-link-list li {
+        margin-bottom: 10px;
+    }
+
+    .footer-link-list a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+        .footer-link-list a:hover {
+            color: #4ade80; /* Màu xanh lá sáng */
+            transform: translateX(5px); /* Trượt sang phải */
+            text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+        }
+
+    /* --- FORM NEWSLETTER --- */
+    .footer-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 6px;
+        backdrop-filter: blur(5px);
+    }
+
+        .footer-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4ade80;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
+        }
+        .footer-input:hover  {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4ade80;
+            color: white;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
+        }
+
+        .footer-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+   
+
+
+
+
+
+    /* --- SOCIAL ICONS GLOWING GRADIENT EFFECT --- */
+    .social-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        /* Nền mờ mặc định */
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* Icon luôn màu trắng */
+        color: #ffffff !important;
+        font-size: 1.2rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hiệu ứng nảy */
+        position: relative;
+        text-decoration: none;
+        /* Viền phát sáng mặc định (mờ) */
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+
+    /* 1. Facebook Glow & Hover */
+    .sb-fb {
+            background: linear-gradient(45deg, #1877F2, #0099FF);
+        }
+    .sb-fb {
+        box-shadow: 0 0 10px rgba(24, 119, 242, 0.5); /* Phát sáng xanh nhẹ khi chưa hover */
+    }
+
+        .sb-fb:hover {
+            background: linear-gradient(45deg, #1877F2, #0099FF);
+            box-shadow: 0 0 25px #1877F2; /* Phát sáng mạnh khi hover */
+            transform: translateY(-5px);
+        }
+
+    /* 2. Instagram Glow & Hover (Gradient cầu vồng) */
+    .sb-ins {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+           
+        }
+    .sb-ins {
+        box-shadow: 0 0 10px rgba(214, 36, 159, 0.5); /* Phát sáng tím hồng nhẹ */
+    }
+
+        .sb-ins:hover {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            box-shadow: 0 0 25px #d6249f; /* Phát sáng mạnh khi hover */
+            transform: translateY(-5px);
+        }
+
+    /* 3. Youtube Glow & Hover */
+    .sb-yt {
+            background: linear-gradient(45deg, #FF0000, #ff4b4b);
+          
+        }
+    .sb-yt {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); /* Phát sáng đỏ nhẹ */
+    }
+
+        .sb-yt:hover {
+            background: linear-gradient(45deg, #FF0000, #ff4b4b);
+            box-shadow: 0 0 25px #FF0000; /* Phát sáng mạnh khi hover */
+            transform: translateY(-5px);
+        }
+
+    /* 4. Tiktok Glow & Hover */
+    .sb-tik {
+        
+            background: linear-gradient(45deg, #000000, #25F4EE, #FE2C55);
+           
+        }
+    .sb-tik {
+        box-shadow: 0 0 10px rgba(37, 244, 238, 0.5); /* Phát sáng cyan nhẹ */
+    }
+
+        .sb-tik:hover {
+            background: linear-gradient(45deg, #000000, #25F4EE, #FE2C55);
+            box-shadow: 0 0 25px rgba(37, 244, 238, 0.7); /* Phát sáng mạnh khi hover */
+            transform: translateY(-5px);
+        }
+</style>
+
+<footer id="footer-contact" class="app-footer pt-5 pb-3">
+    <div class="container">
+        <div class="row g-4">
+
+            <div class="col-12 col-md-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="d-flex align-items-center justify-content-center bg-white rounded-circle me-2" style="width:40px; height:40px;">
+                        <i class="bi bi-shop fs-5 text-success"></i>
+                    </div>
+                    <h5 class="m-0 brand-title">THANH NHAN GROCERY</h5>
+                </div>
+                <p class="mb-4 text-white-50" style="max-width: 300px;">
+                    Tươi – Nhanh – Giá tốt. Cam kết thực phẩm sạch, giao hàng tận nơi và phục vụ tận tâm mỗi ngày.
+                </p>
+
+                <div class="d-flex gap-3">
+                    <a href="#" class="social-btn sb-fb" title="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-btn sb-ins" title="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-btn sb-yt" title="Youtube"><i class="bi bi-youtube"></i></a>
+                    <a href="#" class="social-btn sb-tik" title="Tiktok"><i class="bi bi-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <h6 class="text-uppercase">Khám Phá</h6>
+                <ul class="list-unstyled footer-link-list">
+                    <li><a href="#best-sellers"><i class="bi bi-chevron-right small me-1"></i> Bán chạy</a></li>
+                    <li><a href="#featured"><i class="bi bi-chevron-right small me-1"></i> Nổi bật</a></li>
+                    <li><a href="#top-products"><i class="bi bi-chevron-right small me-1"></i> Top hôm nay</a></li>
+                    <li><a href="#knowledge"><i class="bi bi-chevron-right small me-1"></i> Góc nội trợ</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <h6 class="text-uppercase">Hỗ Trợ KH</h6>
+                <ul class="list-unstyled footer-link-list">
+                    <li><a href="#">Trung tâm trợ giúp</a></li>
+                    <li><a href="#">Chính sách giao hàng</a></li>
+                    <li><a href="#">Đổi trả & Hoàn tiền</a></li>
+                    <li><a href="#">Bảo mật thông tin</a></li>
+                </ul>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <h6 class="text-uppercase">Nhận Ưu Đãi HOT</h6>
+                <p class="small text-white-50 mb-3">Đăng ký để nhận voucher giảm giá 10% cho đơn hàng đầu tiên.</p>
+                <form class="d-flex gap-2">
+                    <input type="email" class="form-control footer-input" placeholder="Email của bạn..." required />
+                    <button class="btn btn-success fw-bold px-3" type="submit">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-bottom mt-5 py-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+            <div class="mb-2 mb-sm-0">
+                &copy; @DateTime.Now.Year <strong>Thanh Nhan Grocery</strong>. All rights reserved.
+            </div>
+            <div class="d-flex gap-3">
+                <span>Designed by <span class="text-white fw-bold">Apollo Dev</span></span>
+            </div>
+        </div>
+    </div>
+</footer>

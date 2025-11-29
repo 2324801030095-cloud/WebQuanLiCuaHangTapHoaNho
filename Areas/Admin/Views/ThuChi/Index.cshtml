@@ -1,0 +1,469 @@
+﻿@{
+    ViewBag.Title = "Quản lý Thu – Chi";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="text-center mb-3">
+        <h4 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+            <i class="fa-solid fa-money-bill-wave"></i>
+            Quản Lý Thu Chi
+        </h4>
+    </div>
+
+
+    <!-- ===================== NÚT KPI ===================== -->
+    <div class="text-center mb-3">
+        <div class="btn-group kpi-group">
+            <button class="btn kpi-btn active" data-range="today">Hôm nay</button>
+            <button class="btn kpi-btn" data-range="week">Tuần</button>
+            <button class="btn kpi-btn" data-range="month">Tháng</button>
+            <button class="btn kpi-btn" data-range="year">Năm</button>
+        </div>
+    </div>
+
+    <!-- ===================== KPI BOXES ===================== -->
+    <div class="row g-3 mb-4 text-center">
+
+        <div class="col-md-4 col-sm-6">
+            <div class="card shadow-sm p-3 bg-success bg-opacity-10 kpi-border-glow">
+                <h6 class="fw-semibold text-success">THU</h6>
+                <h3 id="kpiThu" class="fw-bold text-success">
+                    @String.Format("{0:N0}", ViewBag.ThuNgay) ₫
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <div class="card shadow-sm p-3 bg-danger bg-opacity-10 kpi-border-glow">
+                <h6 class="fw-semibold text-danger">CHI</h6>
+                <h3 id="kpiChi" class="fw-bold text-danger">
+                    @String.Format("{0:N0}", ViewBag.ChiNgay) ₫
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <div class="card shadow-sm p-3 bg-info bg-opacity-10 kpi-border-glow">
+                <h6 class="fw-semibold text-info">LỢI NHUẬN</h6>
+                <h3 id="kpiLN" class="fw-bold text-info">
+                    @String.Format("{0:N0}", ViewBag.LNNgay) ₫
+                </h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================== TABS ===================== -->
+    <ul class="nav nav-tabs mb-3" id="tcTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-tab="chart">Biểu đồ</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-tab="list">Danh sách</a>
+        </li>
+    </ul>
+
+    <!-- ===================== TAB: CHART ===================== -->
+    <div id="tabChart">
+
+        <div class="mb-3 d-flex justify-content-between">
+            <div class="btn-group">
+                <button class="btn btn-outline-primary tc-range" data-range="today">Hôm nay</button>
+                <button class="btn btn-outline-primary tc-range" data-range="week">Tuần</button>
+                <button class="btn btn-outline-primary tc-range" data-range="month">Tháng</button>
+                <button class="btn btn-outline-primary tc-range" data-range="year">Năm</button>
+            </div>
+
+            <div>
+                <button id="exportPNG" class="btn btn-primary">
+                    <i class="fa-solid fa-image"></i> PNG
+                </button>
+
+                <a class="btn btn-danger"
+                   href="@Url.Action("ExportPDF", new { range = "month" })"
+                   target="_blank">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                </a>
+            </div>
+        </div>
+
+        <div id="chartLoading" class="text-center p-5 d-none">
+            <div class="spinner-border text-primary"></div>
+            <div>Tải biểu đồ...</div>
+        </div>
+
+        <div class="card shadow-sm p-3 mb-4">
+            <h6 class="fw-bold text-primary">
+                <i class="fa-solid fa-chart-line"></i> Thu – Chi
+            </h6>
+            <div id="chartThuChi" style="height: 360px;"></div>
+        </div>
+
+        <div class="card shadow-sm p-3">
+            <h6 class="fw-bold text-success">
+                <i class="fa-solid fa-sack-dollar"></i> Lợi nhuận
+            </h6>
+            <div id="chartLoiNhuan" style="height: 360px;"></div>
+        </div>
+    </div>
+
+    <!-- ===================== TAB LIST ===================== -->
+    <div id="tabList" class="d-none">
+        <div class="mb-3">
+            <button class="btn btn-success" id="btnAddTC">
+                <i class="fa-solid fa-plus"></i> Thêm mới
+            </button>
+        </div>
+
+        <div id="listContainer">
+            <div class="text-center p-3">Đang tải...</div>
+        </div>
+    </div>
+
+</div>
+
+<div id="modalArea"></div>
+
+
+<!-- ===================== STYLE ===================== -->
+<style>
+
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.6rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+    /* ============================================================
+       VIỀN PHÁT SÁNG KPI
+    ============================================================ */
+    .kpi-border-glow {
+        position: relative;
+        border-radius: 16px !important;
+        overflow: hidden;
+    }
+
+    .kpi-border-glow::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 2px;
+        border-radius: inherit;
+        background: linear-gradient(120deg, #4facfe, #00f2fe, #43e97b, #fa709a, #4facfe);
+        background-size: 300% 300%;
+        animation: kpiGlowRun 4s linear infinite;
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        z-index: 1;
+    }
+
+    @@keyframes kpiGlowRun {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .kpi-border-glow > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* ===== NÚT KPI ===== */
+    .kpi-group .kpi-btn {
+        background: #e2e8f0;
+        color: #0f172a;
+        border: none;
+        padding: 8px 18px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: 0.25s ease;
+        margin-right: 4px;
+    }
+
+    .kpi-group .kpi-btn:hover {
+        background: #cbd5e1;
+        transform: translateY(-3px);
+    }
+
+    .kpi-group .kpi-btn.active {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.45);
+        transform: translateY(-2px);
+    }
+
+    /* ===== NÚT LỌC BIỂU ĐỒ ===== */
+    .tc-range {
+        background: #e2e8f0;
+        color: #0f172a;
+        border: none !important;
+        padding: 8px 18px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: 0.25s ease;
+        margin-right: 4px;
+    }
+
+    .tc-range:hover {
+        background: #cbd5e1;
+        transform: translateY(-3px);
+    }
+
+    .tc-range.active {
+        background: #3b82f6 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.45);
+        transform: translateY(-2px);
+    }
+
+</style>
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+
+    <script>
+
+        /* ===== Tabs ===== */
+        document.querySelectorAll("#tcTabs .nav-link").forEach(a => {
+            a.onclick = function () {
+
+                document.querySelectorAll("#tcTabs .nav-link").forEach(x => x.classList.remove("active"));
+                this.classList.add("active");
+
+                const tab = this.dataset.tab;
+
+                document.getElementById("tabChart").classList.toggle("d-none", tab !== "chart");
+                document.getElementById("tabList").classList.toggle("d-none", tab !== "list");
+
+                if (tab === "list") loadList();
+            };
+        });
+
+        /* ===== Load List ===== */
+        function loadList(page = 1) {
+            fetch(`/Admin/ThuChi/DanhSach?page=${page}`)
+                .then(r => r.text())
+                .then(html => document.getElementById("listContainer").innerHTML = html);
+        }
+
+
+        /* ===== Modal ===== */
+        function loadModal(url) {
+            fetch(url)
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById("modalArea").innerHTML = html;
+                    new bootstrap.Modal(document.getElementById("modalTC")).show();
+                });
+        }
+
+        document.addEventListener("click", e => {
+            const add = e.target.closest("#btnAddTC");
+            const edit = e.target.closest(".btn-edit-tc");
+            const view = e.target.closest(".btn-view-tc");
+            const del = e.target.closest(".btn-del-tc");
+
+            if (add) loadModal("/Admin/ThuChi/Them");
+            if (edit) loadModal(`/Admin/ThuChi/Sua/${edit.dataset.id}`);
+            if (view) loadModal(`/Admin/ThuChi/ChiTiet/${view.dataset.id}`);
+
+            if (del) {
+                if (!confirm("Xóa bản ghi này?")) return;
+
+                fetch("/Admin/ThuChi/Xoa", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: del.dataset.id })
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        alert(d.message);
+                        if (d.success) loadList();
+                    });
+            }
+        });
+
+
+        /* ===== Apex Charts ===== */
+        let chartThuChi;
+        function loadChartThuChi(range) {
+
+            document.getElementById("chartLoading").classList.remove("d-none");
+
+            fetch(`/Admin/ThuChi/GetDataChart?range=${range}`)
+                .then(r => r.json())
+                .then(d => {
+
+                    document.getElementById("chartLoading").classList.add("d-none");
+
+                    if (chartThuChi) chartThuChi.destroy();
+
+                    chartThuChi = new ApexCharts(
+                        document.querySelector("#chartThuChi"),
+                        {
+                            chart: { type: "area", height: 350, toolbar: { show: false } },
+                            colors: ["#28a745", "#dc3545"],
+                            series: [
+                                { name: "Thu", data: d.thu },
+                                { name: "Chi", data: d.chi }
+                            ],
+                            xaxis: { categories: d.labels },
+                            stroke: { curve: "smooth", width: 3 },
+                            fill: {
+                                type: "gradient",
+                                gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 }
+                            }
+                        }
+                    );
+
+                    chartThuChi.render();
+                });
+        }
+
+
+        /* ===== ECharts : Lợi nhuận ===== */
+        let chartLN = echarts.init(document.getElementById("chartLoiNhuan"));
+        function loadChartLN(range) {
+
+            fetch(`/Admin/ThuChi/GetProfitChart?range=${range}`)
+                .then(r => r.json())
+                .then(d => {
+
+                    chartLN.setOption({
+                        xAxis: { type: "category", data: d.labels },
+                        yAxis: { type: "value" },
+                        series: [{
+                            data: d.values,
+                            type: "line",
+                            smooth: true,
+                            areaStyle: {
+                                opacity: 0.25,
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: "#28a745" },
+                                    { offset: 1, color: "#ffffff" }
+                                ])
+                            },
+                            lineStyle: { width: 3, color: "#28a745" }
+                        }]
+                    });
+                });
+        }
+
+
+        /* ===== Lọc Biểu đồ ===== */
+        document.querySelectorAll(".tc-range").forEach(btn => {
+            btn.addEventListener("click", function () {
+                document.querySelectorAll(".tc-range").forEach(x => x.classList.remove("active"));
+                this.classList.add("active");
+
+                let r = this.dataset.range;
+
+                loadChartThuChi(r);
+                loadChartLN(r);
+            });
+        });
+
+        document.querySelector('.tc-range[data-range="month"]').classList.add("active");
+
+        loadChartThuChi("month");
+        loadChartLN("month");
+
+
+        /* ===== Counter Animation ===== */
+        function animateValue(element, start, end, duration) {
+
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+
+                let progress = timestamp - startTime;
+                let value = Math.floor(start + (end - start) * (progress / duration));
+
+                element.innerHTML = value.toLocaleString() + " ₫";
+
+                if (progress < duration) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    element.innerHTML = end.toLocaleString() + " ₫";
+                }
+            }
+
+            window.requestAnimationFrame(step);
+        }
+
+        function removeCurrency(str) {
+            return str.replace(/[^\d\-]/g, "");
+        }
+
+        /* ===== Load KPI ===== */
+        function loadKPI(range) {
+
+            fetch(`/Admin/ThuChi/GetKPI?range=${range}`)
+                .then(r => r.json())
+                .then(d => {
+
+                    // Thu
+                    animateValue(
+                        document.getElementById("kpiThu"),
+                        parseInt(removeCurrency(document.getElementById("kpiThu").innerText)),
+                        d.thu, 600);
+
+                    // Chi
+                    animateValue(
+                        document.getElementById("kpiChi"),
+                        parseInt(removeCurrency(document.getElementById("kpiChi").innerText)),
+                        d.chi, 600);
+
+                    // Lợi nhuận
+                    animateValue(
+                        document.getElementById("kpiLN"),
+                        parseInt(removeCurrency(document.getElementById("kpiLN").innerText)),
+                        d.loinhuan, 600);
+                });
+        }
+
+        document.querySelectorAll(".kpi-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+
+                document.querySelectorAll(".kpi-btn").forEach(x => x.classList.remove("active"));
+                this.classList.add("active");
+
+                loadKPI(this.dataset.range);
+            });
+        });
+
+        loadKPI("today");
+
+    </script>
+}

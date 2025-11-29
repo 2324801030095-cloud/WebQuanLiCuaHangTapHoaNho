@@ -1,0 +1,251 @@
+﻿@{
+    ViewBag.Title = "Trang quản trị - Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid p-4 pt-2">
+
+    <!-- ===== TIÊU ĐỀ (căn giữa, sát nav) ===== -->
+    <div class="text-center mb-3">
+        <h4 class="text-primary fw-bold d-inline-flex align-items-center gap-2 m-0 page-title">
+            <i class="fa-solid fa-chart-line"></i>
+            Trang quản trị cửa hàng tạp hóa
+        </h4>
+    </div>
+
+    <!-- ===== BỘ LỌC THÁNG/NĂM ===== -->
+    <div class="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-primary"></i>
+            <label class="fw-semibold">Tháng:</label>
+            <select id="monthSelect" class="form-select form-select-sm" style="width:90px;">
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <option value="@i" @(i == DateTime.Now.Month ? "selected" : "")>@i</option>
+                }
+            </select>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="fw-semibold">Năm:</label>
+            <select id="yearSelect" class="form-select form-select-sm" style="width:100px;">
+                @for (int y = DateTime.Now.Year - 3; y <= DateTime.Now.Year + 1; y++)
+                {
+                    <option value="@y" @(y == DateTime.Now.Year ? "selected" : "")>@y</option>
+                }
+            </select>
+        </div>
+        <button id="btnFilter" class="btn btn-primary btn-sm px-3">
+            <i class="fa-solid fa-filter me-1"></i>Lọc dữ liệu
+        </button>
+    </div>
+
+    <!-- ===== KHU VỰC PARTIAL ===== -->
+    <div id="statsSection">
+        @Html.Partial("_DashboardStatsPartial")
+    </div>
+</div>
+
+<!-- ===== OVERLAY LOADING ===== -->
+<div id="overlayLoading">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p>Đang xử lý...</p>
+</div>
+
+<!-- ===== LIBRARIES ===== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+    function showLoading() {
+        const overlay = document.getElementById("overlayLoading");
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.style.display = "none", 1200);
+    }
+
+    function parseJsonSafe(id) {
+        try { return JSON.parse(document.getElementById(id).value || "[]"); }
+        catch { return []; }
+    }
+
+    let _profitChart = null;
+
+    function initProfitChart() {
+        const labels = parseJsonSafe("profitLabels");
+        const values = parseJsonSafe("profitValues");
+        const canvas = document.getElementById("profitChart");
+
+        if (!canvas) return;
+
+        if (_profitChart) _profitChart.destroy();
+
+        const ctx = canvas.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight);
+        gradient.addColorStop(0, "rgba(34,197,94,0.60)");
+        gradient.addColorStop(1, "rgba(34,197,94,0.08)");
+
+        _profitChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Lợi nhuận (VND)",
+                    data: values,
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: "#22c55e",
+                    borderWidth: 3,
+                    pointBackgroundColor: "#16a34a",
+                    pointRadius: 4,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: "#0f172a", font: { size: 12, weight: "600" } } },
+                    tooltip: { backgroundColor: "#0f172a", padding: 10, cornerRadius: 8 }
+                },
+                scales: {
+                    x: { ticks: { color: "#475569" }, grid: { display: false } },
+                    y: { ticks: { color: "#475569" }, grid: { color: "rgba(203,213,225,0.35)" } }
+                }
+            }
+        });
+    }
+
+    function hookActionButtons() {
+        document.querySelector(".btn-export-png")?.addEventListener("click", () => {
+            if (!_profitChart) return;
+            const a = document.createElement("a");
+            a.href = _profitChart.toBase64Image();
+            a.download = "loi-nhuan.png";
+            a.click();
+        });
+
+        document.querySelector(".btn-export-excel")?.addEventListener("click", () => {
+            const labels = parseJsonSafe("profitLabels");
+            const values = parseJsonSafe("profitValues");
+            const rows = [["Tháng", "Lợi nhuận (VND)"], ...labels.map((l, i) => [l, values[i] || 0])];
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "LoiNhuan");
+            XLSX.writeFile(wb, "loi-nhuan.xlsx");
+        });
+
+        document.querySelector(".btn-zoom")?.addEventListener("click", () => {
+            const wrap = document.querySelector(".profit-wrap");
+            wrap?.classList.toggle("fullscreen");
+            setTimeout(() => { _profitChart?.resize(); }, 10);
+        });
+    }
+
+    document.getElementById("btnFilter").addEventListener("click", function () {
+        const month = document.getElementById("monthSelect").value;
+        const year = document.getElementById("yearSelect").value;
+        showLoading();
+
+        fetch(`/Admin/Admin/FilterDashboard?month=${month}&year=${year}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("statsSection").innerHTML = html;
+                initProfitChart();
+                hookActionButtons();
+            });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initProfitChart();
+        hookActionButtons();
+    });
+</script>
+
+<style>
+    /* ===== Overlay loading ===== */
+    #overlayLoading {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,.85);
+        backdrop-filter: blur(3px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: #0f172a;
+    }
+
+        #overlayLoading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 8px;
+        }
+
+    .profit-wrap {
+        display: flex;
+        gap: 16px;
+        height: 360px;
+    }
+
+    .profit-canvas {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .profit-actions {
+        width: 110px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .profit-actions .btn {
+            width: 100%;
+        }
+
+    .profit-wrap.fullscreen {
+        position: fixed;
+        inset: 5vh 5vw;
+        z-index: 1050;
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 8px;
+    }
+
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 2.5rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.3rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+</style>

@@ -1,0 +1,620 @@
+﻿@model dynamic
+@{
+    Layout = null;
+}
+
+<div class="container-fluid">
+
+    <!-- ===== HÀNG 1: KPI BOXES ===== -->
+    <div class="row g-3 mb-4 text-center">
+        <!-- SẢN PHẨM -->
+        <div class="col-md-3 col-sm-6">
+            <a href="@Url.Action("Index", "SanPham")" class="text-decoration-none text-dark">
+                <div class="card stat-card glow-border shadow-sm p-3 kpi-box" data-count="@ViewBag.TongSP">
+                    <div class="icon-box text-primary mb-2">
+                        <i class="fa-solid fa-box fa-2x"></i>
+                    </div>
+                    <h6 class="fw-semibold text-secondary">Sản phẩm</h6>
+                    <h4 class="fw-bold text-dark count-up">0</h4>
+                </div>
+            </a>
+        </div>
+        <!-- KHÁCH HÀNG -->
+        <div class="col-md-3 col-sm-6">
+            <a href="@Url.Action("Index", "KhachHang")" class="text-decoration-none text-dark">
+                <div class="card stat-card glow-border shadow-sm p-3 kpi-box" data-count="@ViewBag.TongKH">
+                    <div class="icon-box text-success mb-2">
+                        <i class="fa-solid fa-users fa-2x"></i>
+                    </div>
+                    <h6 class="fw-semibold text-secondary">Khách hàng</h6>
+                    <h4 class="fw-bold text-dark count-up">0</h4>
+                </div>
+            </a>
+        </div>
+        <!-- NHÂN VIÊN -->
+        <div class="col-md-3 col-sm-6">
+            <a href="@Url.Action("Index", "NhanVien")" class="text-decoration-none text-dark">
+                <div class="card stat-card glow-border shadow-sm p-3 kpi-box" data-count="@ViewBag.TongNV">
+                    <div class="icon-box text-warning mb-2">
+                        <i class="fa-solid fa-user-tie fa-2x"></i>
+                    </div>
+                    <h6 class="fw-semibold text-secondary">Nhân viên</h6>
+                    <h4 class="fw-bold text-dark count-up">0</h4>
+                </div>
+            </a>
+        </div>
+        <!-- HÓA ĐƠN -->
+        <div class="col-md-3 col-sm-6">
+            <a href="@Url.Action("Index", "HoaDon")" class="text-decoration-none text-dark">
+                <div class="card stat-card glow-border shadow-sm p-3 kpi-box" data-count="@ViewBag.TongHD">
+                    <div class="icon-box text-danger mb-2">
+                        <i class="fa-solid fa-file-invoice fa-2x"></i>
+                    </div>
+                    <h6 class="fw-semibold text-secondary">Hóa đơn</h6>
+                    <h4 class="fw-bold text-dark count-up">0</h4>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== HÀNG 2: DOANH THU ===== -->
+    <div class="row g-3 mb-4 text-center">
+        <!-- DOANH THU NGÀY -->
+        <div class="col-md-4">
+            <a href="@Url.Action("Index","ThuChi")" class="text-decoration-none text-dark">
+                <div class="card shadow-sm glow-border p-3 bg-light kpi-box" data-money="@ViewBag.DoanhThuNgay">
+                    <h6 class="fw-semibold text-success">Doanh thu hôm nay</h6>
+                    <h3 class="fw-bold text-dark money-up">0 ₫</h3>
+                </div>
+            </a>
+        </div>
+        <!-- DOANH THU TUẦN -->
+        <div class="col-md-4">
+            <a href="@Url.Action("Index","ThuChi")" class="text-decoration-none text-dark">
+                <div class="card shadow-sm glow-border p-3 bg-light kpi-box" data-money="@ViewBag.DoanhThuTuan">
+                    <h6 class="fw-semibold text-info">Doanh thu tuần này</h6>
+                    <h3 class="fw-bold text-dark money-up">0 ₫</h3>
+                </div>
+            </a>
+        </div>
+        <!-- DOANH THU THÁNG -->
+        <div class="col-md-4">
+            <a href="@Url.Action("Index","ThuChi")" class="text-decoration-none text-dark">
+                <div class="card shadow-sm glow-border p-3 bg-light kpi-box" data-money="@ViewBag.DoanhThuThang">
+                    <h6 class="fw-semibold text-primary">Doanh thu tháng</h6>
+                    <h3 class="fw-bold text-dark money-up">0 ₫</h3>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== BIỂU ĐỒ LỢI NHUẬN ===== -->
+    <div class="card shadow-sm p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="fw-bold text-success mb-0">
+                <i class="fa-solid fa-sack-dollar me-2"></i>Lợi nhuận 6 tháng gần nhất
+            </h6>
+        </div>
+        <div class="profit-wrap">
+            <div class="profit-canvas">
+                <canvas id="profitChart" style="width:100%;height:100%"></canvas>
+            </div>
+            <div class="profit-actions mt-3">
+                <button type="button" class="btn btn-success btn-sm btn-export-excel">
+                    <i class="fa-solid fa-file-excel"></i> Excel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm btn-export-png">
+                    <i class="fa-solid fa-image"></i> PNG
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm btn-zoom">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Zoom
+                </button>
+            </div>
+        </div>
+        <input type="hidden" id="profitLabels" value='@Html.Raw(ViewBag.ProfitLabelsJson ?? "[]")' />
+        <input type="hidden" id="profitValues" value='@Html.Raw(ViewBag.ProfitValuesJson ?? "[]")' />
+    </div>
+
+    <!-- ===== BẢNG TOP SẢN PHẨM BÁN CHẠY ===== -->
+    <!-- ===== BẢNG TOP SẢN PHẨM BÁN CHẠY ===== -->
+    @if (ViewBag.TopBanChay != null)
+    {
+        var topList = (PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.TopBanChayVM>)ViewBag.TopBanChay;
+        <div class="mt-4">
+
+            <!-- ⭐ TIÊU ĐỀ CĂN GIỮA (GIỮ ICON) -->
+            <div class="text-center mb-3">
+                <h5 class="fw-bold text-primary d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-fire"></i>
+                    Top Sản phẩm bán chạy
+                </h5>
+            </div>
+
+            <!-- FILTER -->
+            <form method="get" class="filter-bar mb-3">
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <label class="fw-semibold">Từ ngày:</label>
+                    <input type="date" name="from" value="@Request["from"]" class="form-control" style="width:140px;" />
+
+                    <label class="fw-semibold">Đến ngày:</label>
+                    <input type="date" name="to" value="@Request["to"]" class="form-control" style="width:140px;" />
+
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-filter"></i> Lọc
+                    </button>
+
+                    <a href="@Url.Action("Index")" class="btn btn-secondary btn-sm">
+                        <i class="fa-solid fa-rotate-right"></i> Reset
+                    </a>
+                </div>
+            </form>
+
+            <!-- TABLE -->
+            <div class="card shadow-sm">
+                <div class="table-container">
+                    <table class="table table-bordered mb-0">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Top</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Giá bán</th>
+                                <th>Danh mục</th>
+                                <th>Trạng thái</th>
+                                <th>Số lượng bán</th>
+                                <th>Tổng doanh thu</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @{
+                                int index = (topList.PageNumber - 1) * topList.PageSize;
+                            }
+                            @foreach (var item in topList)
+                            {
+                                index++;
+                                <tr>
+                                    <td class="text-center fw-bold">@index</td>
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                                        {
+                                            <img src="@Url.Content("~/Content/Images/" + item.HinhAnh)" width="80" class="rounded shadow-sm" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Không có hình</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-start">@item.TenSP</td>
+                                    <td class="text-center">@String.Format("{0:N0} ₫", item.GiaBan)</td>
+                                    <td class="text-center">@item.TenDanhMuc</td>
+
+                                    <td class="text-center">
+                                        @if (item.HoatDong)
+                                        {
+                                            <span class="badge bg-success">Đang bán</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Ngưng</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">@item.SoLuongBan</td>
+                                    <td class="text-center">@String.Format("{0:N0} ₫", item.TongDoanhThu)</td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-info btn-action" title="Xem chi tiết" onclick="viewDetail(@item.MaSP)">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ⭐ PHÂN TRANG CHUẨN TRANG SẢN PHẨM + ICON + DISABLED -->
+                <div class="card-footer bg-white text-center">
+                    @Html.PagedListPager(topList,
+                        page => Url.Action("Index", new { page, from = Request["from"], to = Request["to"] }),
+                        new PagedListRenderOptions
+                        {
+                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                            DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                            MaximumPageNumbersToDisplay = 5,
+
+                            LinkToFirstPageFormat = "&#171;&#171;",
+                            LinkToPreviousPageFormat = "&#171;",
+                            LinkToNextPageFormat = "&#187;",
+                            LinkToLastPageFormat = "&#187;&#187;",
+
+                            UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        })
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL LOADER -->
+        <script>
+            function viewDetail(id) {
+                fetch(`/Admin/SanPham/ChiTiet/${id}`)
+                    .then(res => res.text())
+                    .then(html => {
+                        document.getElementById("modalContainer").innerHTML = html;
+                        new bootstrap.Modal(document.getElementById("modalSP")).show();
+                    });
+            }
+        </script>
+    }
+
+    @if (ViewBag.TopKhachHang != null)
+    {
+        var topKH = (PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.TopKhachHangVM>)
+                    ViewBag.TopKhachHang;
+
+        int stt = (topKH.PageNumber - 1) * topKH.PageSize;
+
+        <div class="mt-5">
+
+            <!-- ⭐ TIÊU ĐỀ -->
+            <div class="text-center mb-3">
+                <h5 class="fw-bold text-success d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-crown"></i>
+                    Top khách hàng mua nhiều
+                </h5>
+            </div>
+
+            <!-- ⭐ 3 NÚT LỌC -->
+            <div class="d-flex justify-content-center mb-3 gap-2">
+                <button class="btn btn-sm btn-outline-success metric-btn @(ViewBag.CustomerMetric == 1 ? "active" : "")"
+                        data-metric="1">
+                    Tổng tiền
+                </button>
+
+                <button class="btn btn-sm btn-outline-success metric-btn @(ViewBag.CustomerMetric == 2 ? "active" : "")"
+                        data-metric="2">
+                    Tổng SL
+                </button>
+
+                <button class="btn btn-sm btn-outline-success metric-btn @(ViewBag.CustomerMetric == 3 ? "active" : "")"
+                        data-metric="3">
+                    Số hóa đơn
+                </button>
+            </div>
+
+            <div class="card shadow-sm">
+
+                <!-- Hidden để AJAX biết đang ở trang số mấy -->
+                <input type="hidden" id="TopKHPage" value="@topKH.PageNumber" />
+
+                <table class="table table-bordered mb-0">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Top</th>
+                            <th>Khách hàng</th>
+                            <th>Số điện thoại</th>
+                            <th>Kết quả</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var kh in topKH)
+                        {
+                            stt++;
+
+                            <tr>
+                                <td class="text-center fw-bold">@stt</td>
+                                <td>@kh.TenKH</td>
+                                <td class="text-center">@kh.SoDT</td>
+
+                                @if (ViewBag.CustomerMetric == 1)
+                                {
+                                    <td class="text-end fw-bold text-danger">
+                                        @String.Format("{0:N0} ₫", kh.TongTien)
+                                    </td>
+                                }
+                                else if (ViewBag.CustomerMetric == 2)
+                                {
+                                    <td class="text-center fw-bold text-primary">
+                                        @kh.TongSoLuong sản phẩm
+                                    </td>
+                                }
+                                else if (ViewBag.CustomerMetric == 3)
+                                {
+                                    <td class="text-center fw-bold text-info">
+                                        @kh.TongHoaDon hóa đơn
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- ⭐ PHÂN TRANG TOP KHÁCH HÀNG -->
+                <div class="card-footer bg-white text-center kh-pagination">
+                    @Html.PagedListPager(topKH,
+                        p => Url.Action("Index", new { customerMetric = ViewBag.CustomerMetric, pageKH = p }),
+                        new PagedListRenderOptions
+                        {
+                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                            DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                            MaximumPageNumbersToDisplay = 5,
+
+                            LinkToFirstPageFormat = "&#171;&#171;",
+                            LinkToPreviousPageFormat = "&#171;",
+                            LinkToNextPageFormat = "&#187;",
+                            LinkToLastPageFormat = "&#187;&#187;",
+
+                            UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        })
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+
+</div>
+
+<style>
+    .stat-card, .kpi-box {
+        background: #f8fafc;
+        border-radius: 10px;
+        transition: all 0.35s ease;
+        cursor: pointer;
+    }
+
+        .stat-card:hover, .kpi-box:hover {
+            background: #e0f2fe;
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 12px 22px rgba(59,130,246,0.25);
+        }
+
+        .stat-card .icon-box, .kpi-box .icon-box {
+            transition: transform 0.35s ease;
+        }
+
+        .stat-card:hover .icon-box,
+        .kpi-box:hover .icon-box {
+            transform: scale(1.22);
+        }
+
+    .glow-border {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+    }
+
+        .glow-border::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            border-radius: inherit;
+            background: linear-gradient(115deg, #4facfe, #00f2fe, #43e97b, #4facfe);
+            background-size: 300% 300%;
+            animation: borderRun 4s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            z-index: 1;
+        }
+
+    @@keyframes borderRun {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Table fix */
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .filter-bar input[type="date"] {
+        width: 140px;
+    }
+
+    /* ============================================================
+       ⭐ PAGINATION GIỐNG TRANG SẢN PHẨM — KHÔNG GẠCH CHÂN
+       ============================================================ */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 0;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            display: inline-block;
+            padding: 7px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            background: #f1f5f9;
+            border: 1px solid #d1d5db;
+            min-width: 36px;
+            text-align: center;
+            transition: all .25s ease;
+            color: #1e293b;
+            text-decoration: none !important; /* ❌ Không underline */
+        }
+
+            .pagination li a:hover {
+                background: #dbeafe;
+                border-color: #93c5fd;
+                color: #1d4ed8;
+                transform: translateY(-2px);
+                text-decoration: none !important;
+            }
+
+        .pagination li.active span,
+        .pagination li.active a {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            border-color: #2563eb;
+            color: #fff !important;
+            box-shadow: 0 3px 6px rgba(37, 99, 235, .35);
+        }
+
+        .pagination li.disabled span,
+        .pagination li.disabled a {
+            opacity: .45;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            color: #94a3b8;
+            border-color: #cbd5e1;
+            transform: none !important;
+            text-decoration: none !important;
+        }
+
+    /* ✅ Giảm kích thước các ô KPI hàng 1 */
+    .row.g-3.mb-4.text-center .col-md-3.col-sm-6 {
+        padding: 4px; /* giảm padding */
+    }
+
+    .kpi-box {
+        padding: 8px !important; /* tổng thể nhỏ hơn */
+        font-size: 14px !important;
+    }
+
+        .kpi-box .icon-box i {
+            font-size: 1.6rem !important; /* icon nhỏ hơn */
+        }
+
+    /* ✅ Giảm kích thước các ô KPI hàng 2 */
+    .row.g-3.mb-4.text-center.col-md-4 .col-md-4 {
+        padding: 8px;
+    }
+
+    .row.g-3.mb-4.text-center.col-md-4 .kpi-box {
+        padding: 12px !important;
+        font-size: 14px !important;
+    }
+
+        .row.g-3.mb-4.text-center.col-md-4 .kpi-box h3 {
+            font-size: 1.4rem !important;
+        }
+
+    /* ✅ Tăng kích thước bảng để hiển thị 5 sản phẩm không cần cuộn */
+    .table-container {
+        max-height: none !important; /* bỏ giới hạn height */
+    }
+
+        .table-container table {
+            height: auto !important;
+        }
+
+        .table-container tbody tr {
+            height: auto;
+            /* nếu cần, chỉnh margin-bottom hoặc padding để tăng khoảng cách giữa các hàng */
+        }
+</style>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".kpi-box").forEach(box => {
+            let numberEl = box.querySelector(".count-up");
+            let moneyEl = box.querySelector(".money-up");
+            if (numberEl) {
+                let val = parseInt(box.getAttribute("data-count") || 0);
+                animateCountUp(numberEl, val);
+            }
+            if (moneyEl) {
+                let val = parseInt(box.getAttribute("data-money") || 0);
+                animateMoney(moneyEl, val);
+            }
+        });
+    });
+
+    function animateCountUp(el, target, duration = 1500) {
+        let start = 0;
+        let increment = target / (duration / 16);
+        let timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                start = target;
+                clearInterval(timer);
+            }
+            el.textContent = Math.floor(start);
+        }, 16);
+    }
+
+    function animateMoney(el, target, duration = 1600) {
+        let start = 0;
+        let increment = target / (duration / 16);
+        let timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                start = target;
+                clearInterval(timer);
+            }
+            el.textContent = new Intl.NumberFormat().format(Math.floor(start)) + " ₫";
+        }, 16);
+    }
+</script>
+
+
+
+<script>
+    // ===============================
+    //  3 NÚT LỌC A/B/C (AJAX)
+    // ===============================
+   $(document).on("click", ".metric-btn", function () {
+    var metric = $(this).data("metric");
+    var from = $("input[name='from']").val();
+    var to = $("input[name='to']").val();
+    var pageKH = $("#TopKHPage").val() || 1;
+
+    $.ajax({
+        url: '@Url.Action("FilterDashboard", "Admin", new { area = "Admin" })',
+        type: 'GET',
+        data: {
+            customerMetric: metric,
+            from: from,
+            to: to,
+            pageKH: pageKH
+        },
+        success: function (html) {
+            $(".container-fluid").html(html);  // <-- ĐÃ SỬA
+        }
+    });
+});
+
+    // ===============================
+    //  PHÂN TRANG TOP KHÁCH HÀNG (AJAX)
+    // ===============================
+    $(document).on("click", ".pagination a", function (e) {
+        if (!$(this).closest(".kh-pagination").length) return; // tránh chặn phân trang Top SP
+
+        e.preventDefault();
+        var url = $(this).attr("href");
+
+        $.ajax({
+            url: url.replace("/Admin/Admin/Index", "/Admin/Admin/FilterDashboard"),
+            success: function (html) {
+                $(".container-fluid").html(html);  // <-- ĐÃ SỬA
+            }
+        });
+    });
+</script>

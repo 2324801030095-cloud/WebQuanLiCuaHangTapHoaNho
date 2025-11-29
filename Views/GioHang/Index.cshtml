@@ -1,0 +1,266 @@
+﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+
+@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<section class="py-4 modern-cart">
+    <div class="container">
+
+        <div class="d-flex align-items-center mb-4">
+            <div class="cart-icon shadow-sm me-3">
+                <i class="bi bi-bag-heart-fill"></i>
+            </div>
+
+            <!-- Inline SVG gradient: Bulletproof với modal/backdrop -->
+            <div class="svg-title-wrapper">
+                <svg viewBox="0 0 800 56" preserveAspectRatio="xMinYMid meet" class="svg-gradient-title" role="img" aria-label="Giỏ hàng của bạn">
+                    <defs>
+                        <linearGradient id="cartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4CAF50" />
+                            <stop offset="100%" stop-color="#1ABC9C" />
+                        </linearGradient>
+                    </defs>
+
+                    <text x="0" y="40" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial"
+                          font-size="28" font-weight="800" fill="url(#cartGradient)">
+                        Giỏ hàng của bạn
+                    </text>
+                </svg>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-cart-box text-center p-5 shadow-sm">
+                <i class="bi bi-emoji-frown display-4 text-muted"></i>
+                <h4 class="mt-3">Giỏ hàng đang trống</h4>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-gradient rounded-pill mt-3 px-4">
+                    Tiếp tục mua hàng
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-0">
+                    <table class="table modern-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Sản phẩm</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td style="width:120px">
+                                        <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://picsum.photos/120/100?random=" + item.MaSP : item.HinhAnh)"
+                                             class="product-img" />
+                                    </td>
+
+                                    <td class="fw-semibold">@item.TenSP</td>
+
+                                    <td class="text-muted">@String.Format("{0:N0} ₫", item.DonGia)</td>
+
+                                    <td style="width:160px;">
+                                        <form action="@Url.Action("CapNhat","GioHang")" method="post" class="d-flex">
+                                            <input type="hidden" name="maSP" value="@item.MaSP" />
+                                            <input type="number" name="soLuong" value="@item.SoLuong" min="1"
+                                                   class="form-control form-control-sm rounded-pill text-center" />
+                                            <button class="btn btn-sm btn-update rounded-pill ms-2" type="submit">
+                                                <i class="bi bi-check2"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+
+                                    <td class="fw-bold text-success">@String.Format("{0:N0} ₫", item.ThanhTien)</td>
+
+                                    <td>
+                                        <a href="@Url.Action("Xoa", "GioHang", new { maSP = item.MaSP })"
+                                           class="btn btn-sm btn-delete rounded-pill"
+                                           onclick="return confirm('Xóa sản phẩm này?');">
+                                            <i class="bi bi-trash3"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                        <tfoot class="table-light">
+                            <tr class="fw-bold">
+                                <td colspan="4" class="text-end">Tổng cộng:</td>
+                                <td class="text-success">@String.Format("{0:N0} ₫", ViewBag.TongTien)</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="@Url.Action("Index", "Home")"
+                   class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left"></i> Tiếp tục mua hàng
+                </a>
+
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("XoaTatCa", "GioHang")"
+                       class="btn btn-outline-danger rounded-pill px-4"
+                       onclick="return confirm('Xóa toàn bộ giỏ hàng?');">
+                        <i class="bi bi-x-circle"></i> Xóa tất cả
+                    </a>
+
+                    <a href="@Url.Action("DatHang", "GioHang")"
+                       class="btn btn-gradient rounded-pill px-4">
+                        <i class="bi bi-lightning-charge-fill"></i> Đặt hàng
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section styles{
+    <style>
+        /* --- Title SVG wrapper --- */
+        .svg-title-wrapper {
+            width: 100%;
+            max-width: 100%;
+            line-height: 1;
+        }
+
+        /* FIX 1 — ÉP SVG LUÔN HIỆN GRADIENT, KHÔNG BỊ CSS KHÁC ĐÈ */
+        .svg-gradient-title text {
+            fill: url(#cartGradient) !important;
+            opacity: 1 !important;
+        }
+
+        /* FIX 2 — Bảo vệ màu chữ trong khu vực Giỏ hàng không bị override bởi CSS global */
+        .modern-cart,
+        .modern-cart * {
+            color: #2c3e50 !important;
+        }
+
+        /* Riêng class có gradient thì không override */
+        .svg-gradient-title text {
+            color: unset !important;
+        }
+
+        /* FIX 3 — Dòng "Giỏ hàng đang trống" và số lượng sản phẩm */
+        .modern-cart small,
+        .modern-cart .text-muted {
+            color: #5c5c5c !important;
+            opacity: 1 !important;
+        }
+
+        .svg-gradient-title {
+            width: 420px; /* desktop width of title; tự co khi mobile */
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Responsive */
+        @@media (max-width: 480px) {
+            .svg-gradient-title {
+                width: 100%;
+            }
+
+                .svg-gradient-title text {
+                    font-size: 22px !important;
+                }
+        }
+
+        /* Fallback */
+        .text-gradient {
+            background: linear-gradient(45deg, #4CAF50, #1ABC9C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #4CAF50;
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        /* Modern UI style */
+        .cart-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #4caf50, #2ecc71);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 18px;
+            color: white;
+            font-size: 1.7rem;
+        }
+
+        .modern-table thead {
+            background: #f3fff7;
+            font-weight: bold;
+        }
+
+        .modern-table td,
+        .modern-table th {
+            vertical-align: middle !important;
+            padding: 16px;
+        }
+
+        .product-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 14px;
+            transition: .3s;
+        }
+
+            .product-img:hover {
+                transform: scale(1.05);
+            }
+
+        .btn-update {
+            background: #e9f7ef;
+            color: #2ecc71;
+            border: 1px solid #c8f2d6;
+        }
+
+            .btn-update:hover {
+                background: #2ecc71;
+                color: white;
+            }
+
+        .btn-delete {
+            background: #fff1f1;
+            color: #e74c3c;
+            border: 1px solid #ffd6d6;
+        }
+
+            .btn-delete:hover {
+                background: #e74c3c;
+                color: white;
+            }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #4CAF50, #2ECC71);
+            color: white;
+            border: none;
+            transition: 0.25s;
+        }
+
+            .btn-gradient:hover {
+                opacity: 0.85;
+                transform: translateY(-2px);
+            }
+
+        .empty-cart-box {
+            background: white;
+            border-radius: 20px;
+        }
+    </style>
+}

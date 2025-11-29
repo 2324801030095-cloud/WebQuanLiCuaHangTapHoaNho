@@ -1,0 +1,228 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.ThuChi>
+@using PagedList.Mvc;
+
+<!-- =================== BỘ LỌC =================== -->
+<div class="card shadow-sm p-3 mb-3">
+    <div class="row g-2 align-items-end">
+
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Từ ngày</label>
+            <input type="date" id="filterFrom" class="form-control" value="@ViewBag.From" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Đến ngày</label>
+            <input type="date" id="filterTo" class="form-control" value="@ViewBag.To" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label fw-semibold">Loại</label>
+            <select id="filterLoai" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="Thu" @(ViewBag.Loai == "Thu" ? "selected" : "")>Thu</option>
+                <option value="Chi" @(ViewBag.Loai == "Chi" ? "selected" : "")>Chi</option>
+            </select>
+        </div>
+
+        <!-- ===== Ô LỌC SỐ TIỀN ===== -->
+        <div class="col-md-2">
+            <label class="form-label fw-semibold">Số tiền ≥</label>
+            <input type="number" id="filterMoney" class="form-control"
+                   placeholder="VD: 50000" value="@ViewBag.Money" />
+        </div>
+
+        <div class="col-md-2">
+            <button id="btnFilter" class="btn btn-primary w-100">
+                <i class="fa-solid fa-filter"></i> Lọc
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- =================== TABLE =================== -->
+<div class="card shadow-sm">
+    <table class="table table-bordered table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th style="width:90px">Mã</th>
+                <th style="width:120px">Ngày</th>
+                <th style="width:100px">Loại</th>
+                <th>Ghi chú</th>
+                <th style="width:140px">Số tiền</th>
+                <th style="width:150px">Thao tác</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var tc in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@tc.MaTC</td>
+
+                    <td>@tc.Ngay.ToString("dd/MM/yyyy")</td>
+
+                    <td>
+                        @if (tc.Loai == "Thu")
+                        {
+                            <span class="badge bg-success">Thu</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Chi</span>
+                        }
+                    </td>
+
+                    <td>@tc.DienGiai</td>
+
+                    <td class="fw-bold text-dark">
+                        @String.Format("{0:N0} ₫", tc.SoTien)
+                    </td>
+
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1">
+
+                            <button class="btn btn-info btn-sm btn-view-tc" data-id="@tc.MaTC">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+
+                            <button class="btn btn-primary btn-sm btn-edit-tc" data-id="@tc.MaTC">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+
+                            <button class="btn btn-danger btn-sm btn-del-tc" data-id="@tc.MaTC">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- =================== PHÂN TRANG =================== -->
+<div class="text-center mt-3">
+    @Html.PagedListPager(
+        Model,
+        p => Url.Action(
+            "DanhSach",
+            new {
+                page = p,
+                from = ViewBag.From,
+                to = ViewBag.To,
+                loai = ViewBag.Loai,
+                money = ViewBag.Money
+            }
+        ),
+        new PagedListRenderOptions {
+            Display = PagedListDisplayMode.IfNeeded,
+            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+            MaximumPageNumbersToDisplay = 5,
+            UlElementClasses = new[] { "pagination" }
+        }
+    )
+</div>
+
+<!-- =================== SCRIPT LỌC + PHÂN TRANG AJAX =================== -->
+<script>
+    // ====== Lọc dữ liệu ======
+    document.getElementById("btnFilter").onclick = function () {
+
+        let from = document.getElementById("filterFrom").value;
+        let to = document.getElementById("filterTo").value;
+        let loai = document.getElementById("filterLoai").value;
+        let money = document.getElementById("filterMoney").value;
+
+        let url =
+            `/Admin/ThuChi/DanhSach?from=${from}&to=${to}&loai=${loai}&money=${money}`;
+
+        fetch(url)
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById("listContainer").innerHTML = html;
+            });
+    };
+
+    // ====== AJAX phân trang ======
+    document.addEventListener('click', function (e) {
+
+        const a = e.target.closest('.pagination a');
+        if (!a) return;
+
+        e.preventDefault();
+
+        const url = a.href;
+
+        fetch(url, { credentials: 'same-origin' })
+            .then(resp => resp.text())
+            .then(html => {
+                const container = document.getElementById('listContainer');
+                if (container) {
+                    container.innerHTML = html;
+                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    window.location.href = url;
+                }
+            })
+            .catch(() => window.location.href = url);
+    });
+</script>
+
+<!-- =================== CSS PHÂN TRANG =================== -->
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center !important;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0;
+    }
+
+    .pagination li {
+        list-style: none;
+    }
+
+    .pagination li a,
+    .pagination li span {
+        display: block;
+        padding: 8px 12px;
+        border-radius: 10px !important;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        text-decoration: none;
+        font-weight: 500;
+        transition: 0.25s ease;
+    }
+
+    .pagination li a:hover {
+        background: #e0f2fe;
+        color: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(37,99,235,0.2);
+    }
+
+    .pagination li.active span,
+    .pagination li.active a {
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        color: white !important;
+        border-color: #2563eb;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.35);
+        pointer-events: none;
+    }
+
+    .pagination li.disabled span,
+    .pagination li.disabled a {
+        color: #cbd5e1;
+        background: #f1f5f9;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+</style>

@@ -1,0 +1,150 @@
+﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+
+<div class="offcanvas offcanvas-end"
+     tabindex="-1"
+     id="cartOffcanvas"
+     style="width: 550px;"
+     aria-labelledby="cartOffcanvasLabel">
+
+
+    <!-- Header -->
+    <div class="offcanvas-header bg-success text-white">
+        <h5 class="offcanvas-title">
+            <i class="bi bi-bag-check me-2"></i> Giỏ hàng
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <!-- Body -->
+    <div class="offcanvas-body d-flex flex-column p-0">
+        <div class="cart-items flex-grow-1 overflow-auto p-3">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center text-muted mt-4">
+                    <i class="bi bi-cart-x display-6 d-block mb-2"></i>
+                    <p>Giỏ hàng trống</p>
+                </div>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+                        <!-- Ảnh -->
+                        <img src="@(string.IsNullOrEmpty(item.HinhAnh)
+                            ? "https://picsum.photos/150/120?random=" + item.MaSP
+                            : item.HinhAnh)"
+                             class="rounded me-3 shadow-sm"
+                             style="width: 110px; height: 110px; object-fit: cover;" />
+
+                        <!-- Thông tin -->
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-semibold">@item.TenSP</h6>
+                            <div class="text-success fw-bold small">
+                                @String.Format("{0:N0} ₫", item.DonGia)
+                            </div>
+
+                            <!-- Điều khiển số lượng -->
+                            <div class="d-flex align-items-center mt-2">
+                                <button class="btn btn-outline-success btn-sm me-2"
+                                        onclick="updateQuantity(@item.MaSP, @item.SoLuong - 1)">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                                <span class="fw-semibold">@item.SoLuong</span>
+                                <button class="btn btn-outline-success btn-sm ms-2"
+                                        onclick="updateQuantity(@item.MaSP, @item.SoLuong + 1)">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+
+                                <!-- Xóa -->
+                                <a href="@Url.Action("Xoa", "GioHang", new { maSP = item.MaSP })"
+                                   class="text-danger ms-3"
+                                   title="Xóa sản phẩm"
+                                   onclick="return confirm('Xóa sản phẩm này khỏi giỏ hàng?');">
+                                    <i class="bi bi-trash3-fill" style="font-size: 1.3rem;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Footer cố định -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="offcanvas-footer border-top p-3 bg-white shadow-sm">
+                <div class="d-flex justify-content-between fw-bold fs-5 mb-2">
+                    <span>Tổng cộng:</span>
+                    <span id="cartTotal" class="text-success">
+                        @String.Format("{0:N0} ₫", Model.Sum(x => x.ThanhTien))
+                    </span>
+                </div>
+                <a href="@Url.Action("DatHang", "GioHang")"
+                   class="btn btn-success btn-lg w-100"
+                   onclick="return confirm('Bạn xác nhận đơn hàng này đã thanh toán?');">
+                    <i class="bi bi-credit-card me-2"></i> Thanh toán
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Script AJAX cập nhật -->
+<script>
+    async function updateQuantity(maSP, soLuong) {
+        if (soLuong <= 0) {
+            if (!confirm("Xóa sản phẩm này khỏi giỏ hàng?")) return;
+        }
+        try {
+            const res = await fetch('@Url.Action("CapNhat", "GioHang")', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `maSP=${maSP}&soLuong=${soLuong}`
+            });
+            if (res.ok) {
+                const html = await fetch('@Url.Action("PartialCart", "GioHang")').then(r => r.text());
+                document.getElementById('cartPartial').innerHTML = html;
+            }
+        } catch (e) {
+            alert("Không thể cập nhật số lượng.");
+            console.error(e);
+        }
+    }
+</script>
+
+<!-- CSS -->
+<style>
+    #cartOffcanvas {
+        box-shadow: -4px 0 18px rgba(0, 0, 0, .25);
+        display: flex;
+        flex-direction: column;
+    }
+
+        #cartOffcanvas .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+        }
+
+        #cartOffcanvas img {
+            transition: transform .2s ease;
+        }
+
+            #cartOffcanvas img:hover {
+                transform: scale(1.05);
+            }
+
+        #cartOffcanvas .offcanvas-footer {
+            position: sticky;
+            bottom: 0;
+        }
+
+        #cartOffcanvas button.btn-sm {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+        }
+</style>

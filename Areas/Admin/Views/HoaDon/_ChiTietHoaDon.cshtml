@@ -1,0 +1,104 @@
+﻿@{
+    var hd = ViewBag.HoaDon as WebQuanLiCuaHangTapHoa.Models.HoaDon;
+    var list = Model as List<object>;
+    var tongTien = (int)ViewBag.TongTien;
+
+    // QR theo tổng tiền
+    var qrUrl =
+        "https://img.vietqr.io/image/techcombank-3398329567-print.png"
+        + "?amount=" + tongTien
+        + "&addInfo=Thanh+Toan+HD+" + hd.MaHD;
+}
+
+<!-- Modal chi tiết hóa đơn -->
+<div class="modal fade" id="modalDetailHD">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Chi tiết hóa đơn #@hd.MaHD</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- Thông tin cơ bản -->
+                <div class="mb-3">
+                    <strong>Ngày:</strong> @hd.Ngay.ToString("dd/MM/yyyy HH:mm") <br />
+                    <strong>Khách hàng:</strong> @(hd.KhachHang?.TenKH ?? "-") <br />
+                    <strong>Nhân viên:</strong> @(hd.NhanVien?.TenNV ?? "-")
+                </div>
+
+                <!-- Danh sách chi tiết -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Tên SP</th>
+                            <th>SL</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (dynamic ct in Model)
+                        {
+                            <tr>
+                                <td>@ct.MaSP</td>
+                                <td>@ct.TenSP</td>
+                                <td>@ct.SoLuong</td>
+                                <td>@String.Format("{0:N0}", ct.DonGia)</td>
+                                <td>@String.Format("{0:N0}", ct.ThanhTien)</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-end">Tổng cộng:</th>
+                            <th>@String.Format("{0:N0} ₫", tongTien)</th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <hr />
+
+                <!-- QR THANH TOÁN -->
+                <div class="text-center">
+                    <h5 class="text-primary mb-2">QR Thanh toán tổng hóa đơn</h5>
+
+                    <img src="@qrUrl"
+                         alt="QR Thanh toán Techcombank"
+                         style="width:220px;border:1px solid #ddd;border-radius:10px;
+                                padding:8px;background:#fff;" />
+
+                    <p class="mt-2 small">
+                        Ngân hàng: <b>Techcombank</b><br />
+                        Số tài khoản: <b>3398329567</b><br />
+                        Nội dung: <b>Thanh Toan HD @hd.MaHD</b><br />
+                        Số tiền: <b>@String.Format("{0:N0} ₫", tongTien)</b>
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <!-- Nút xuất PDF -->
+                <a href="@Url.Action("ExportPDF", "HoaDon", new { id = hd.MaHD })"
+                   class="btn btn-danger">
+                    <i class="fa-solid fa-file-pdf"></i> Xuất hóa đơn PDF
+                </a>
+
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

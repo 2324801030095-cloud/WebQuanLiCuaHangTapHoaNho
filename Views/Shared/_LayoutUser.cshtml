@@ -1,0 +1,508 @@
+﻿@{
+    Layout = null;                                          // Không kế thừa layout khác (layout gốc)
+    var title = ViewBag.Title as string ?? "Thanh Nhan";    // Tiêu đề mặc định nếu ViewBag.Title null
+}
+
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@title - Thanh Nhàn Grocery</title>
+
+    <!-- ===== CSS Thư viện (CDN) ===== -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- ===== CSS riêng của dự án (nếu có) ===== -->
+    <link href='@Url.Content("~/Content/ThanhNhan/Layout.css")?v=@DateTime.UtcNow.Ticks' rel="stylesheet" />
+
+    @RenderSection("styles", required: false)
+
+    <style>
+        /* ========= Biến theme chung ========= */
+        :root {
+            --g1: #16a34a;
+            --g2: #22c55e;
+            --gSoft: #f1fff6;
+            --text: #0b1320;
+            --muted: #64748b;
+            --radius: 16px;
+            --shadow: 0 12px 32px rgba(2,6,23,.08);
+            --gapSection: 3.2rem;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--text);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ========= Header 2 tầng + hiệu ứng thu gọn khi lướt ========= */
+        .tn-header {
+            position: fixed;
+            inset: 0 0 auto 0;
+            z-index: 1040;
+            transition: transform .25s ease, box-shadow .25s ease;
+            will-change: transform;
+        }
+
+        /* lớp phụ trợ (nếu bạn dùng tn-row1/tn-row2 trong header partial) */
+        .tn-row1 {
+            transition: padding .25s;
+        }
+
+        .tn-row2 {
+            transition: padding .25s;
+        }
+
+        /* Khi thu nhỏ: nhìn ngắn gọn */
+        .nav-compact .tn-row1 {
+            padding: .2rem 0;
+        }
+
+        .nav-compact .tn-row2 {
+            padding: .2rem 0;
+        }
+
+        /* Khi ẩn hoàn toàn */
+        .nav-hidden {
+            transform: translateY(-110%);
+        }
+
+        /* Ô tìm kiếm + nút tìm */
+        .tn-search-btn {
+            background: #fff;
+            color: #0f4d3a;
+            border: 1px solid #0f4d3a;
+            border-radius: 12px;
+            min-width: 50px;
+        }
+
+        /* Nút danh mục */
+        .tn-cat-btn {
+            background: linear-gradient(135deg,var(--g1),var(--g2));
+            color: #fff;
+            border: 0;
+            border-radius: 10px;
+            padding: .6rem 1rem;
+            box-shadow: 0 10px 24px rgba(22,163,74,.22);
+        }
+
+        /* Grid menu danh mục */
+        .tn-cat-menu {
+            max-width: min(92vw,880px);
+            border-radius: 16px;
+        }
+
+        .tn-cat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+            gap: 14px;
+        }
+
+            .tn-cat-grid .dropdown-item {
+                white-space: normal;
+                line-height: 1.25;
+                border-radius: 10px;
+                padding: .65rem .75rem;
+            }
+
+                .tn-cat-grid .dropdown-item:hover {
+                    background: #f0fdf4;
+                }
+
+        /* Menu chính */
+        .tn-mainnav {
+            min-height: 44px;
+        }
+
+        .tn-link {
+            color: #143d2a;
+            text-decoration: none;
+            font-weight: 600;
+            padding: .25rem;
+        }
+
+            .tn-link:hover {
+                color: #0a7f42;
+            }
+
+        /* CTA */
+        .btn-brand {
+            background: linear-gradient(135deg,var(--g1),var(--g2));
+            color: #fff;
+            border: 0;
+        }
+
+        /* Hero */
+        .hero {
+            background: radial-gradient(1200px 420px at 15% -10%, rgba(22,163,74,.18), transparent 60%), radial-gradient(900px 380px at 110% 10%, rgba(34,197,94,.15), transparent 60%), var(--gSoft);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+            .hero h1 {
+                font-size: clamp(1.8rem, 2.4vw + 1.2rem, 3.1rem);
+            }
+
+        /* Card, product, flip, swiper... (giữ nguyên phong cách của bạn) */
+        .card-soft {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .product-card {
+            overflow: hidden;
+            transition: transform .16s, box-shadow .16s;
+        }
+
+            .product-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 48px rgba(2,6,23,.12);
+            }
+
+        .product-img {
+            height: 220px;
+            object-fit: cover;
+        }
+
+        @@media(min-width:1200px) {
+            .product-img {
+                height: 240px
+            }
+        }
+
+        .price {
+            color: #15803d;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        /* Flip card */
+        .flip {
+            perspective: 1200px;
+            height: 100%;
+        }
+
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform .6s cubic-bezier(.2,.7,.2,1);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .flip.is-flipped .flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .flip-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Promo, sections, footer */
+        .promo-slide {
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            background: #fff;
+        }
+
+        .section-alt {
+            background: #f6f4ec;
+        }
+
+        .app-footer {
+            background: radial-gradient(1200px 420px at 15% -10%, rgba(22,163,74,.18), transparent 60%), radial-gradient(900px 380px at 110% 10%, rgba(34,197,94,.15), transparent 60%), var(--gSoft);
+            color: #1f2937;
+            border-top: 1px solid #e2e8f0;
+        }
+
+            .app-footer a {
+                color: #0f172a;
+                text-decoration: none;
+            }
+
+                .app-footer a:hover {
+                    color: #065f46;
+                    text-decoration: underline;
+                }
+
+        /* Back-to-top */
+        .backtop {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1050;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,var(--g1),var(--g2));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(22,163,74,.35);
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Swiper optim */
+        .swiper-slide {
+            will-change: transform;
+        }
+
+        .swiper-pagination-bullet {
+            opacity: .5;
+        }
+
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+            box-shadow: 0 2px 10px rgba(0,0,0,.15);
+        }
+
+        /* TOP CAROUSEL */
+        #topCarousel.swiper, #topCarousel .swiper-wrapper {
+            overflow: visible;
+        }
+
+        .top-slide {
+            width: clamp(280px,62vw,520px);
+            height: 320px;
+            filter: drop-shadow(0 10px 26px rgba(2,6,23,.18));
+            border-radius: 18px;
+        }
+
+        #topCarousel .swiper-slide {
+            transition: transform .35s ease, opacity .35s ease;
+            opacity: .75;
+        }
+
+        #topCarousel .swiper-slide-active {
+            transform: scale(1.02);
+            opacity: 1;
+        }
+
+        /* Fix effect nav */
+        .nav-compact {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+
+        .nav-hidden {
+            transform: translateY(-110%);
+            transition: transform .25s ease;
+        }
+
+        #appHeader {
+            transition: transform .25s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==== Header (partial) ==== -->
+    @Html.Partial("_HeaderPartial")
+
+    <!-- ==== Offcanvas Giỏ hàng ==== -->
+    @{
+        var cart = Session["CART"] as List<WebQuanLiCuaHangTapHoa.Models.CartItem> ?? new List<WebQuanLiCuaHangTapHoa.Models.CartItem>();
+    }
+    <div id="cartPartial">
+        @Html.Partial("_CartOffcanvasPartial", cart)
+    </div>
+
+    <!-- ==== Modal Đăng nhập/Đăng ký ==== -->
+    @Html.Partial("_AuthModalPartial")
+
+    <!-- ==== Nội dung trang ==== -->
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- ==== Footer ==== -->
+    @Html.Partial("_FooterPartial")
+
+    <!-- ==== Nút Back to Top ==== -->
+    <div class="backtop" id="backTop"><i class="bi bi-arrow-up"></i></div>
+
+    <!-- ===== JS thư viện ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src='@Url.Content("~/Scripts/ThanhNhan/Layout.js")?v=@DateTime.UtcNow.Ticks'></script>
+
+    @RenderSection("scripts", required: false)
+
+    <script>
+    /* ================== GIỎ HÀNG THẬT ================== */
+    async function updateCartBadge() {
+        try {
+            const res = await fetch('@Url.Action("DemSoLuong", "GioHang")');
+            const data = await res.json();
+            const badge = document.getElementById('cartCount');
+            if (badge) badge.innerText = data.tong || 0;
+        } catch (e) {
+            console.warn('Không thể cập nhật giỏ hàng:', e);
+        }
+    }
+
+    async function reloadCartOffcanvas() {
+        try {
+            const html = await fetch('@Url.Action("PartialCart", "GioHang")').then(r => r.text());
+            document.getElementById('cartPartial').innerHTML = html;
+        } catch (e) {
+            console.warn('Không thể nạp lại giỏ hàng:', e);
+        }
+    }
+
+    async function addToCartReal(maSP) {
+        try {
+            const res = await fetch('@Url.Action("Them", "GioHang")?maSP=' + maSP, {
+                method: 'GET',
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                await updateCartBadge();
+                await reloadCartOffcanvas();
+
+                // toast thông báo
+                const toast = document.createElement('div');
+                toast.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3 show';
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">✅ Đã thêm sản phẩm vào giỏ hàng!</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2500);
+            }
+        } catch (err) {
+            alert('Không thể thêm sản phẩm vào giỏ.');
+            console.error(err);
+        }
+    }
+
+    /* ================== SLIDERS ================== */
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            new Swiper('#promoSwiper', {
+                loop: true, speed: 600,
+                autoplay: { delay: 3500, disableOnInteraction: false },
+                spaceBetween: 24, slidesPerView: 1,
+                breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
+                navigation: { nextEl: '#promoNext', prevEl: '#promoPrev' }
+            });
+        } catch(e){/* no promoSwiper present */ }
+
+        try {
+            new Swiper('#testiSwiper', {
+                loop: true, speed: 580,
+                autoplay: { delay: 3200, disableOnInteraction: false },
+                spaceBetween: 24, slidesPerView: 1,
+                breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
+                navigation: { nextEl: '#testiNext', prevEl: '#testiPrev' }
+            });
+        } catch(e){}
+
+        try {
+            new Swiper('#topCarousel', {
+                loop: true, speed: 600,
+                autoplay: { delay: 3000, disableOnInteraction: false },
+                slidesPerView: 1.25, centeredSlides: true, spaceBetween: 22,
+                breakpoints: { 768: { slidesPerView: 1.6, spaceBetween: 24 }, 1200: { slidesPerView: 2.2, spaceBetween: 28 } },
+                pagination: { el: '.swiper-pagination', clickable: true }
+            });
+        } catch(e){}
+    });
+
+    /* ================== BACK-TO-TOP ================== */
+    const backTop = document.getElementById('backTop');
+    window.addEventListener('scroll', () => { backTop.style.display = window.scrollY > 400 ? 'flex' : 'none'; });
+    backTop && backTop.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    /* ================== KHỞI TẠO ================== */
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCartBadge();
+    });
+
+    /* ================== NAVBAR HIDE-ON-SCROLL (DUY NHẤT) ==================
+       Yêu cầu: ẩn khi cuộn xuống, hiện khi dừng hoặc cuộn lên. Hoạt động toàn trang.
+       Target: phần header (partial) có id="appHeader" — đảm bảo trong _HeaderPartial có id này.
+    ================================================================ */
+    (function(){
+        const header = document.getElementById('appHeader');
+        if (!header) return; // nếu header partial không có id, không làm gì
+
+        let lastY = window.scrollY;
+        let timer = null;
+        const HIDE_MIN_SCROLL = 30; // tối thiểu px chuyển hướng để ẩn
+
+        window.addEventListener('scroll', function() {
+            const y = window.scrollY;
+            const goingDown = y > lastY && (y - lastY) > 0;
+
+            // nếu scroll xuống nhiều hơn threshold → ẩn
+            if (goingDown && y > HIDE_MIN_SCROLL) {
+                header.classList.add('nav-hidden');
+                header.classList.remove('nav-compact');
+            }
+
+            // cập nhật lastY
+            lastY = y;
+
+            // clear timeout và đặt lại: khi dừng cuộn => hiện lên ở trạng thái compact
+            clearTimeout(timer);
+            timer = setTimeout(function(){
+                header.classList.remove('nav-hidden');
+                header.classList.add('nav-compact');
+            }, 180); // 180ms sau khi dừng cuộn
+
+        }, { passive: true });
+
+        // hover vào header → giữ hiện đầy đủ
+        header.addEventListener('mouseenter', function(){
+            header.classList.remove('nav-hidden');
+            header.classList.remove('nav-compact');
+        });
+
+        // rời chuột → nếu đang cuộn ở vị trí > threshold thì compact
+        header.addEventListener('mouseleave', function(){
+            if (window.scrollY > HIDE_MIN_SCROLL) header.classList.add('nav-compact');
+        });
+
+        // nếu trang được tải và đang ở top → đảm bảo hiển thị
+        window.addEventListener('load', function(){
+            if (window.scrollY <= HIDE_MIN_SCROLL) {
+                header.classList.remove('nav-compact');
+                header.classList.remove('nav-hidden');
+            }
+        });
+    })();
+    </script>
+
+</body>
+</html>

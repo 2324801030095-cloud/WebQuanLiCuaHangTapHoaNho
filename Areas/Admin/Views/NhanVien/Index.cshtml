@@ -1,0 +1,381 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.NhanVien>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Quản lý nhân viên - ULTRA PRO MAX";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    :root {
+        --primary:#2563eb;
+        --primary-2:#3b82f6;
+        --border:#e5e7eb;
+        --card-bg:#ffffff;
+    }
+
+    body.dark {
+        --card-bg:#0f172a;
+        --border:#1e293b;
+    }
+
+    /* PAGE TITLE */
+    .page-title {
+        font-size:1.8rem;
+        font-weight:700;
+        color:var(--primary);
+    }
+
+    /* FILTER CARD */
+    .filter-card {
+        padding:14px;
+        border-radius:14px;
+        border:1px solid var(--border);
+        background:var(--card-bg);
+        box-shadow:0 3px 12px rgba(0,0,0,0.06);
+    }
+
+    .filter-grid {
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:14px;
+    }
+
+    @@media(max-width:992px) {
+        .filter-grid {
+            grid-template-columns:repeat(2,1fr);
+        }
+    }
+
+    @@media(max-width:576px) {
+        .filter-grid {
+            grid-template-columns:1fr;
+        }
+    }
+
+    .filter-label {
+        font-weight:600;
+        color:var(--primary);
+        margin-bottom:4px;
+        font-size:0.9rem;
+    }
+
+    .filter-btn-row {
+        display:flex;
+        justify-content:center;
+        gap:14px;
+        margin-top:14px;
+    }
+
+    /* TABLE */
+    .card-pro {
+        background:var(--card-bg);
+        border-radius:14px;
+        border:1px solid var(--border);
+    }
+
+    th,td {
+        vertical-align:middle !important;
+    }
+
+    thead th {
+        background:#f1f5f9;
+        font-weight:600;
+    }
+
+    body.dark thead th {
+        background:#0f172a;
+    }
+
+    .action-group {
+        display:flex;
+        gap:8px;
+        justify-content:center;
+    }
+
+    .btn-action {
+        width:38px;
+        height:38px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        border-radius:8px;
+        transition:0.15s;
+    }
+
+    .btn-action:hover {
+        transform:translateY(-3px) scale(1.05);
+        box-shadow:0 8px 15px rgba(0,0,0,0.15);
+    }
+
+    .btn-action i {
+        font-size:16px;
+    }
+
+    /* PAGINATION — SAME AS NCC */
+    .pagination {
+        display:flex;
+        justify-content:center;
+        gap:6px;
+        padding:12px;
+    }
+
+    .pagination li a,
+    .pagination li span {
+        padding:8px 12px;
+        border-radius:8px;
+        background:#f8fafc;
+        border:1px solid var(--border);
+        text-decoration:none;
+        font-weight:500;
+        transition:0.2s;
+    }
+
+    .pagination li a:hover {
+        background:#e0f2fe;
+        transform:translateY(-2px);
+        color:#1d4ed8;
+    }
+
+    .pagination li.active a {
+        background:linear-gradient(90deg,#2563eb,#3b82f6);
+        color:white !important;
+        border-color:#2563eb;
+    }
+
+    body.dark .pagination li a {
+        background:#f8fafc !important;
+        color:#1e293b !important;
+    }
+</style>
+
+<div class="container-fluid p-4 pt-2">
+
+    <div class="text-center mb-3">
+        <h4 class="page-title"><i class="fa-solid fa-user-tie"></i> Quản Lý Nhân Viên</h4>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-card mb-3">
+        <form id="filterForm">
+
+            <div class="filter-grid">
+
+                <!-- TÊN HOẶC MÃ -->
+                <div>
+                    <label class="filter-label"><i class="fa-solid fa-id-card"></i> Mã hoặc Tên nhân viên</label>
+                    <input type="text" class="form-control"
+                           name="keyword"
+                           value="@ViewBag.Keyword"
+                           placeholder="Nhập mã hoặc tên NV...">
+                </div>
+
+                <!-- CHỨC VỤ -->
+                <div>
+                    <label class="filter-label"><i class="fa-solid fa-id-badge"></i> Chức vụ</label>
+                    <select name="chucvu" class="form-select">
+                        <option value="">— Tất cả —</option>
+                        @foreach (var cv in ViewBag.DSChucVu as List<string>)
+                        {
+                            <option value="@cv" @(ViewBag.ChucVu == cv ? "selected" : "")>@cv</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- GIỚI TÍNH -->
+                <div>
+                    <label class="filter-label"><i class="fa-solid fa-venus-mars"></i> Giới tính</label>
+                    <select name="gioitinh" class="form-select">
+                        <option value="">— Tất cả —</option>
+                        <option value="Nam" @(ViewBag.GioiTinh == "Nam" ? "selected" : "")>Nam</option>
+                        <option value="Nữ" @(ViewBag.GioiTinh == "Nữ" ? "selected" : "")>Nữ</option>
+                    </select>
+                </div>
+
+                <!-- LƯƠNG -->
+                <div>
+                    <label class="filter-label"><i class="fa-solid fa-coins"></i> Mức lương</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" name="minLuong" class="form-control" value="@ViewBag.MinLuong" placeholder="Tối thiểu">
+                        <input type="number" name="maxLuong" class="form-control" value="@ViewBag.MaxLuong" placeholder="Tối đa">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="filter-btn-row">
+                <button class="btn btn-primary px-4"><i class="fa-solid fa-filter"></i> Lọc</button>
+                <a href="/Admin/NhanVien/Index" class="btn btn-secondary px-4">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-row text-center mb-3">
+        <button class="btn btn-success px-4" onclick="openAdd()">
+            <i class="fa-solid fa-plus"></i> Thêm nhân viên
+        </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card-pro shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">Mã</th>
+                        <th>Tên</th>
+                        <th class="text-center">SĐT</th>
+                        <th>Địa chỉ</th>
+                        <th class="text-center">Chức vụ</th>
+                        <th class="text-center">Lương</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var nv in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@nv.MaNV</td>
+                            <td>@nv.TenNV</td>
+                            <td class="text-center">@nv.SoDT</td>
+                            <td>@nv.DiaChi</td>
+                            <td class="text-center">@nv.ChucVu</td>
+                            <td class="text-center">@String.Format("{0:N0} đ", nv.MucLuong)</td>
+
+                            <td class="text-center">
+                                <div class="action-group">
+
+                                    <button class="btn btn-info btn-action"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Xem vị trí"
+                                            onclick="openView('@HttpUtility.JavaScriptStringEncode(nv.DiaChi)')">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    </button>
+
+                                    <button class="btn btn-primary btn-action"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Sửa"
+                                            onclick="openEdit(@nv.MaNV)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+
+                                    <button class="btn btn-danger btn-action"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Xóa"
+                                            onclick="openDelete(@nv.MaNV)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- pagination -->
+        <div class="card-footer bg-white text-center">
+            @Html.PagedListPager(
+                Model,
+                page => Url.Action("Index", new
+                     {
+                    page,
+                    keyword = Request["keyword"],
+                    chucvu = Request["chucvu"],
+                    gioitinh = Request["gioitinh"],
+                    minLuong = Request["minLuong"],
+                    maxLuong = Request["maxLuong"]
+                }),
+                new PagedListRenderOptions
+                     {
+                    UlElementClasses = new[] { "pagination" },
+                    MaximumPageNumbersToDisplay = 7,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always
+                })
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONTAINER -->
+<div id="modalContainer"></div>
+
+<!-- MINI MAP modal -->
+<div class="modal fade" id="miniMapModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vị trí nhân viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="miniMapLarge" style="height:520px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* TOOLTIP */
+    document.addEventListener("DOMContentLoaded", () =>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(
+            el => new bootstrap.Tooltip(el)
+        )
+    );
+
+    /* VIEW MAP */
+    async function openView(addr) {
+        if (!addr) return alert("Không có địa chỉ");
+
+        const modal = new bootstrap.Modal(document.getElementById("miniMapModal"));
+        modal.show();
+
+        const res = await fetch("https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(addr));
+        const j = await res.json();
+
+        const mapDiv = document.getElementById("miniMapLarge");
+        mapDiv.innerHTML = "";
+
+        const lat = j.length ? parseFloat(j[0].lat) : 10.76;
+        const lon = j.length ? parseFloat(j[0].lon) : 106.66;
+
+        const map = L.map(mapDiv).setView([lat, lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        if (j.length) {
+            L.marker([lat, lon]).addTo(map).bindPopup(addr).openPopup();
+        }
+
+        setTimeout(() => map.invalidateSize(), 200);
+    }
+
+    /* AJAX MODALS */
+    async function loadModal(url, modalId) {
+        const html = await (await fetch(url)).text();
+        const box = document.getElementById("modalContainer");
+        box.innerHTML = html;
+
+        box.querySelectorAll("script").forEach(s => {
+            const t = document.createElement("script");
+            t.text = s.text;
+            document.body.appendChild(t);
+        });
+
+        new bootstrap.Modal(document.getElementById(modalId)).show();
+    }
+
+    function openAdd() { loadModal('/Admin/NhanVien/Them', 'modalNV'); }
+    function openEdit(id) { loadModal(`/Admin/NhanVien/Sua/${id}`, 'modalNV'); }
+    function openDelete(id) { loadModal(`/Admin/NhanVien/Xoa/${id}`, 'modalNV'); }
+</script>

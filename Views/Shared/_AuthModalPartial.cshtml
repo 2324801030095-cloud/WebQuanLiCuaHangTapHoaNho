@@ -1,0 +1,52 @@
+﻿@* _AuthModalPartial.cshtml – Modal đăng nhập/đăng ký (UI demo) *@
+
+<div class="modal fade" id="authModal" tabindex="-1">
+    @* Modal trung tâm màn hình *@
+    <div class="modal-dialog modal-dialog-centered">
+        @* Căn giữa dọc *@
+        <div class="modal-content">
+            @* Khung nội dung modal *@
+
+            <div class="modal-header border-0">
+                @* Header modal *@
+                <h5 class="modal-title">Tai khoan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                @* Thân modal *@
+                <ul class="nav nav-tabs" role="tablist">
+                    @* Tab Login/Register *@
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#loginTab" type="button">Dang nhap</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#registerTab" type="button">Dang ky</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-3">
+                    @* Nội dung từng tab *@
+                    <div class="tab-pane fade show active" id="loginTab">
+                        <form>
+                            <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" required></div>
+                            <div class="mb-3"><label class="form-label">Mat khau</label><input class="form-control" type="password" required></div>
+                            <button class="btn btn-success w-100" type="submit"><i class="bi bi-box-arrow-in-right me-1"></i> Dang nhap</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="registerTab">
+                        <form>
+                            <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" required></div>
+                            <div class="mb-3"><label class="form-label">Mat khau</label><input class="form-control" type="password" required></div>
+                            <div class="mb-3"><label class="form-label">Xac nhan mat khau</label><input class="form-control" type="password" required></div>
+                            <button class="btn btn-brand w-100" type="submit"><i class="bi bi-person-plus me-1"></i> Tao tai khoan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,816 @@
+﻿@{
+    Layout = null;
+    var returnUrl = ViewBag.ReturnUrl ?? Url.Action("Index", "Admin", new { area = "Admin" });
+    var showSuccess = ViewBag.ShowSuccess != null && (bool)ViewBag.ShowSuccess;
+    var loginError = ViewBag.Error ?? ViewBag.LoginError;
+    var regError = ViewBag.RegError;
+    var regSuccess = ViewBag.RegSuccess;
+    var forgotError = ViewBag.ForgotError;
+    var forgotSuccess = ViewBag.ForgotSuccess;
+}
+
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đăng nhập — VisionOS Login R2.2 (M3 + L3)</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+        }
+
+            .overlay.show {
+                display: flex;
+            }
+
+        /* ================= ROOT ================= */
+        :root {
+            --accent: #6b5ce7;
+            --accent2: #06b6d4;
+            --accent3: #ff6bb5;
+            --bg-light: #eef6ff;
+            --text-dark: #0f172a;
+            --glass: rgba(255,255,255,0.78);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, system-ui;
+        }
+
+        body {
+            background: radial-gradient(circle at 18% 15%, #f8fbff 0%, #eef6ff 38%, #e8eff8 75%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Particle canvas under everything */
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* PAGE wrapper centered */
+        .page-shell {
+            position: relative;
+            z-index: 5;
+            width: 1100px;
+            max-width: 96vw;
+        }
+
+        .card-shell {
+            display: flex;
+            border-radius: 22px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.86));
+            box-shadow: 0 30px 90px rgba(15,23,42,0.08);
+            backdrop-filter: blur(12px) saturate(120%);
+        }
+
+        /* =============== LEFT: POS + SHELF 3D (CSS) =============== */
+        .left-panel {
+            flex: 1;
+            min-width: 420px;
+            padding: 36px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.78));
+            border-right: 1px solid rgba(15,23,42,0.04);
+        }
+
+        /* 3D scene container */
+        .scene {
+            width: 320px;
+            height: 280px;
+            perspective: 1200px;
+            position: relative;
+        }
+
+        /* base floor */
+        .floor {
+            position: absolute;
+            left: 50%;
+            bottom: 4px;
+            transform: translateX(-50%);
+            width: 360px;
+            height: 18px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.18));
+            border-radius: 10px;
+            filter: blur(0.6px);
+            box-shadow: 0 12px 30px rgba(2,6,23,0.08);
+        }
+
+        /* POS group: screen, stand, base */
+        .pos {
+            position: absolute;
+            left: 50%;
+            top: 22px;
+            transform-style: preserve-3d;
+            transform: translateX(-50%) translateZ(0);
+            width: 280px;
+            height: 220px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+        }
+
+        /* Use nested elements to simulate a 3D POS + shelf behind using transforms */
+        .pos-card {
+            transform-style: preserve-3d;
+            width: 220px;
+            height: 150px;
+            background: linear-gradient(135deg,#0f172a,#1f2937);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(2,6,23,0.28), inset 0 4px 18px rgba(255,255,255,0.02);
+            transform: translateZ(56px) rotateY(-8deg);
+        }
+
+        .pos-screen {
+            width: 160px;
+            height: 100px;
+            margin: 20px auto 0;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #0b1220, #08111b);
+            box-shadow: inset 0 10px 40px rgba(255,255,255,0.02);
+            transform: translateZ(30px) translateY(-6px);
+            overflow: hidden;
+        }
+
+        /* simulated content inside screen (subtle neon) */
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dbeafe;
+            background: radial-gradient(circle at 10% 10%, rgba(107,92,231,0.06), transparent 30%);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: .6px;
+        }
+
+        .pos-stand {
+            width: 70px;
+            height: 60px;
+            margin: 10px auto 0;
+            border-radius: 8px;
+            background: linear-gradient(180deg,#111217,#0a0b0d);
+            transform: translateZ(18px);
+            box-shadow: 0 10px 26px rgba(2,6,23,0.22);
+        }
+
+        .pos-base {
+            width: 140px;
+            height: 12px;
+            margin: 8px auto 0;
+            border-radius: 8px;
+            background: #0b0b0d;
+            transform: translateZ(12px);
+            box-shadow: 0 10px 24px rgba(2,6,23,0.18);
+        }
+
+        /* shelf behind POS (3 tiers) */
+        .shelf {
+            position: absolute;
+            right: 6px;
+            top: 6px;
+            width: 140px;
+            height: 180px;
+            transform: translateZ(-10px) rotateY(14deg);
+            transform-origin: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+            .shelf .tier {
+                width: 140px;
+                height: 34px;
+                background: linear-gradient(180deg,#f6f8ff,#eef6ff);
+                border-radius: 6px;
+                box-shadow: 0 8px 18px rgba(2,6,23,0.06);
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                padding: 6px 8px;
+            }
+
+            .shelf .box {
+                width: 34px;
+                height: 22px;
+                border-radius: 6px;
+                background: linear-gradient(180deg,#fff,#f0f6ff);
+                box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+            }
+
+        /* small subtle ambient glow behind scene */
+        .ambient-glow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-30%);
+            width: 420px;
+            height: 220px;
+            background: radial-gradient(circle at 50% 50%, rgba(107,92,231,0.12), rgba(6,182,212,0.06) 40%, transparent 70%);
+            filter: blur(28px);
+            z-index: -1;
+        }
+
+        /* pos and shelf animation (slow spin Y) */
+        @@keyframes sceneSpin {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            50% {
+                transform: rotateY(6deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+
+        .scene-inner {
+            animation: sceneSpin 8s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        /* =============== RIGHT: FORM ================= */
+        .right-panel {
+            flex: 1;
+            padding: 48px 56px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            text-shadow: 0 14px 40px rgba(107,92,231,0.08);
+        }
+
+        .form-sub {
+            text-align: center;
+            color: rgba(15,23,42,0.6);
+            margin-bottom: 6px;
+        }
+
+        /* labels above inputs (big, white on input backgrounds) */
+        .field {
+            margin-bottom: 18px;
+        }
+
+            .field label {
+                display: block;
+                font-weight: 800;
+                color: var(--text-dark);
+                margin-bottom: 6px;
+                font-size: 15px;
+            }
+
+            .field input {
+                width: 100%;
+                padding: 14px 16px;
+                border-radius: 12px;
+                border: 1px solid rgba(15,23,42,0.06);
+                background: rgba(255,255,255,0.96);
+                font-size: 15px;
+                color: var(--text-dark);
+                transition: box-shadow .15s, border-color .12s;
+            }
+
+                .field input:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                    box-shadow: 0 12px 36px rgba(107,92,231,0.08);
+                }
+
+        /* password toggle */
+        .pwd-btn {
+            position: absolute;
+            right: 16px;
+            top: 40px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            color: #555;
+        }
+
+        /* Meta line */
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+            .meta a {
+                color: var(--accent2);
+                font-weight: 800;
+                text-decoration: none;
+            }
+
+        /* ================ BUTTON: enhanced hover (glow + ripple) ================ */
+        .btn-login {
+            position: relative;
+            overflow: hidden;
+            border: 0;
+            cursor: pointer;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+            background: linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+            box-shadow: 0 14px 40px rgba(107,92,231,0.18);
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+            .btn-login:focus {
+                outline: none;
+                box-shadow: 0 20px 60px rgba(107,92,231,0.22);
+                transform: translateY(-2px);
+            }
+
+            /* glow rim animated on hover */
+            .btn-login::after {
+                content: "";
+                position: absolute;
+                inset: -2px;
+                pointer-events: none;
+                border-radius: 14px;
+                background: linear-gradient(90deg, rgba(107,92,231,0.18), rgba(6,182,212,0.12), rgba(255,107,181,0.10));
+                opacity: 0;
+                transition: opacity .25s;
+                filter: blur(10px);
+            }
+
+            .btn-login:hover::after {
+                opacity: 1;
+            }
+
+        /* ripple element (created by JS) */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0.6;
+            pointer-events: none;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85), rgba(255,255,255,0.12));
+            transition: transform .6s cubic-bezier(.2,.9,.3,1), opacity .6s ease;
+        }
+
+        /* disable tilt on links/buttons — only glow remains (user requested) */
+
+        /* ============== FOOTER (centered outside form) ============== */
+        footer {
+            position: fixed;
+            bottom: 18px;
+            width: 100%;
+            text-align: center;
+            z-index: 6;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        /* ============== Success loader (Aurora L3) ============== */
+        .aurora-bar {
+            position: relative;
+        }
+
+        .loader-text {
+            position: absolute !important;
+            right: -48px !important;
+            top: -1px !important;
+            font-weight: 900;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .loader-wrap {
+            width: 640px;
+            max-width: 92vw;
+            padding: 18px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 30px 90px rgba(15,23,42,0.12);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .aurora-bar {
+            flex: 1;
+            height: 14px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(90deg,#eee,#f7fbff);
+            border: 1px solid rgba(15,23,42,0.04);
+            position: relative;
+        }
+
+        .aurora-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(107,92,231,1), rgba(6,182,212,1), rgba(255,107,181,1));
+            box-shadow: 0 10px 40px rgba(107,92,231,0.16);
+            transition: width .12s linear;
+        }
+
+        .aurora-glow {
+            position: absolute;
+            left: 0;
+            top: -12px;
+            height: 34px;
+            width: 120px;
+            filter: blur(12px); /* giảm từ 22px -> 12px */
+            background: linear-gradient(90deg, rgba(107,92,231,0.55), rgba(6,182,212,0.45), rgba(255,107,181,0.35) );
+            transform: translateX(-60px);
+            opacity: 0.9; /* tăng nhẹ giúp sắc nét */
+            transition: transform .08s linear;
+        }
+
+        .loader-text {
+            font-weight: 800;
+            color: var(--text-dark);
+            min-width: 160px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        /* responsive */
+        @@media (max-width:920px) {
+            .card-shell {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                display: none;
+            }
+
+            .page-shell {
+                width: 96vw;
+            }
+
+            .loader-wrap {
+                width: 92vw;
+            }
+        }
+
+        /* ======================================================================
+   BTN LOGIN — ELECTRIC PURPLE (VISIONOS EDITION)
+====================================================================== */
+
+        .btn-login {
+            background: linear-gradient(90deg, #7d5fff, #6b5ce7, #8f81ff) !important;
+            box-shadow: 0 12px 34px rgba(123, 97, 255, 0.28) !important;
+            color: white !important;
+        }
+
+            /* Hover: sáng tím nhẹ + nâng nút lên */
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 18px 48px rgba(123, 97, 255, 0.34) !important;
+            }
+
+            /* Focus: ánh tím sâu hơn */
+            .btn-login:focus {
+                box-shadow: 0 22px 60px rgba(123, 97, 255, 0.38) !important;
+            }
+
+            /* Ripple tím sáng mềm VisionOS */
+            .btn-login .ripple {
+                background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85), rgba(150,130,255,0.25)) !important;
+            }
+
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+    <div class="page-shell">
+        <div class="card-shell" role="main" aria-label="Login card">
+
+            <!-- LEFT: Scene (POS + shelf 3D) -->
+            <div class="left-panel" aria-hidden="false">
+                <div class="ambient-glow" aria-hidden="true"></div>
+
+                <div class="scene" aria-hidden="true">
+                    <div class="scene-inner">
+                        <div class="pos">
+                            <div class="pos-card">
+                                <div class="pos-screen">
+                                    <div class="screen-content">POS • ULTRA PRO</div>
+                                </div>
+                                <div class="pos-stand"></div>
+                                <div class="pos-base"></div>
+                            </div>
+
+                            <div class="shelf" aria-hidden="true">
+                                <div class="tier">
+                                    <div class="box"></div><div class="box"></div><div class="box"></div>
+                                </div>
+                                <div class="tier">
+                                    <div class="box"></div><div class="box"></div><div class="box"></div>
+                                </div>
+                                <div class="tier">
+                                    <div class="box"></div><div class="box"></div><div class="box"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="floor" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Form -->
+            <div class="right-panel">
+                @* Notices *@
+                @if (loginError != null)
+                {
+                    <div class="notice notice-danger" role="alert">@loginError</div>
+                }
+                @if (regError != null)
+                {
+                    <div class="notice notice-danger" role="alert">@regError</div>
+                }
+                @if (regSuccess != null)
+                {
+                    <div class="notice notice-success" role="status">@regSuccess</div>
+                }
+                @if (forgotError != null)
+                {
+                    <div class="notice notice-danger" role="alert">@forgotError</div>
+                }
+                @if (forgotSuccess != null)
+                {
+                    <div class="notice notice-success" role="status">@forgotSuccess</div>
+                }
+
+                <div class="form-title">ĐĂNG NHẬP</div>
+                <div class="form-sub">Nhập tài khoản để truy cập trang quản trị</div>
+
+                @using (Html.BeginForm("Login", "AdminAuth", FormMethod.Post, new { area = "Admin", id = "loginForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div class="field">
+                        <label for="user">Tên đăng nhập hoặc mã</label>
+                        <input id="user" name="tenDangNhap" type="text" required autocomplete="username" />
+                    </div>
+
+                    <div class="field" style="position:relative;">
+                        <label for="pwd">Mật khẩu</label>
+                        <input id="pwdField" name="matKhau" type="password" required autocomplete="current-password" />
+                        <button type="button" class="pwd-btn" id="pwdToggle" aria-label="Hiện/ẩn mật khẩu"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+
+                    <div class="meta">
+                        <label style="font-weight:800;"><input type="checkbox" class="form-check-input me-2" name="remember" /> Ghi nhớ</label>
+                        <a href="@Url.Action("ForgotPassword","AdminAuth", new { area="Admin" })" class="tiny-link">Quên mật khẩu?</a>
+                    </div>
+
+                    <div style="margin-top:14px; position:relative;">
+                        <button class="btn-login" type="submit" id="btnLogin">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i> Đăng nhập
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3" style="color:rgba(15,23,42,0.6); font-weight:700;">
+                        Chưa có tài khoản?
+                        <a href="@Url.Action("Register","AdminAuth", new { area="Admin" })" style="color:var(--accent2); font-weight:900;"> Đăng ký</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTERED FOOTER OUTSIDE FORM -->
+    <footer>
+        © @DateTime.Now.Year - Hệ thống quản lý cửa hàng tạp hóa |
+        <span class="text-primary fw-semibold">Apollo Dev</span>
+    </footer>
+
+    <!-- SUCCESS LOADER (Aurora L3) — hidden until submit -->
+    <div id="loaderOverlay" class="overlay" aria-hidden="true" style="z-index:2000;">
+        <div class="loader-wrap" role="status" aria-live="polite">
+            <div style="flex:1;">
+                <div style="font-weight:900; margin-bottom:8px;">Đang đăng nhập — chuẩn bị chuyển hướng</div>
+                <div class="aurora-bar" aria-hidden="true">
+                    <div class="aurora-fill" id="auroraFill"></div>
+                    <div class="aurora-glow" id="auroraGlow"></div>
+
+                    <!-- Đặt % vào đây -->
+                    <div class="loader-text" id="loaderText">0%</div>
+                </div>
+
+            </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function(){
+            // Elements
+            const pwdToggle = document.getElementById('pwdToggle');
+            const pwdField = document.getElementById('pwdField');
+            const loginForm = document.getElementById('loginForm');
+            const btnLogin = document.getElementById('btnLogin');
+            const loaderOverlay = document.getElementById('loaderOverlay');
+            const auroraFill = document.getElementById('auroraFill');
+            const auroraGlow = document.getElementById('auroraGlow');
+            const loaderText = document.getElementById('loaderText');
+
+            // Password toggle
+            if(pwdToggle && pwdField){
+                pwdToggle.addEventListener('click', function(e){
+                    e.preventDefault();
+                    if(pwdField.type === 'password'){ pwdField.type='text'; this.innerHTML = '<i class="fa-solid fa-eye-slash"></i>'; }
+                    else { pwdField.type='password'; this.innerHTML = '<i class="fa-solid fa-eye"></i>'; }
+                });
+            }
+
+            // ripple helper for btn (no tilt)
+            function createRipple(e, el){
+                const rect = el.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height) * 1.2;
+                const x = e.clientX - rect.left - size/2;
+                const y = e.clientY - rect.top - size/2;
+                const ripple = document.createElement('span');
+                ripple.className = 'ripple';
+                ripple.style.width = size + 'px';
+                ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                el.appendChild(ripple);
+                requestAnimationFrame(()=> {
+                    ripple.style.transform = 'scale(1)';
+                    ripple.style.opacity = '0';
+                });
+                setTimeout(()=> ripple.remove(), 700);
+            }
+
+            // enhanced hover: add mousedown ripple & slight upward move
+            btnLogin.addEventListener('mousedown', function(e){
+                createRipple(e, this);
+                this.style.transform = 'translateY(-2px)';
+            });
+            btnLogin.addEventListener('mouseup', function(){ this.style.transform = ''; });
+            btnLogin.addEventListener('mouseleave', function(){ this.style.transform = ''; });
+
+            // Loader animation (Aurora L3) on submit: animate fill 0→100% visually, then allow server to redirect
+            function startAuroraLoader(redirectUrl){
+                loaderOverlay.classList.add('show');
+                let pct = 0;
+                const start = performance.now();
+                // animate width and glow movement
+                function step(now){
+                    const elapsed = now - start;
+                    // non-linear progress for nice feel
+                    pct = Math.min(100, Math.round(100 * (1 - Math.exp(-elapsed/600))));
+                    auroraFill.style.width = pct + '%';
+                    // move glow ahead of fill
+                    auroraGlow.style.transform = 'translateX(' + (Math.max(0, pct - 8) * (document.querySelector('.aurora-bar').offsetWidth/100)) + 'px)';
+                    loaderText.innerText = pct + '%';
+                    if(pct < 100){ requestAnimationFrame(step); }
+                    else {
+                        // small delay so user sees 100%
+                        setTimeout(function(){
+                            // if server provided redirect (on real submit server will redirect), but we fallback
+                            if(redirectUrl){
+                                window.location.href = redirectUrl;
+                            } else {
+                                // fallback: reload to admin index
+                                window.location.href = "@returnUrl";
+                            }
+                        }, 380);
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+
+            /* SUBMIT LOADING — Hiện loader 1s rồi mới submit */
+            document.getElementById("loginForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const btn = document.querySelector(".btn-login");
+                const overlay = document.getElementById("loaderOverlay");
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...';
+                overlay.classList.add("show");
+
+                const fill = document.getElementById("auroraFill");
+                const glow = document.getElementById("auroraGlow");
+                const bar = document.querySelector(".aurora-bar");
+                const text = document.getElementById("loaderText");
+
+                const barWidth = bar.offsetWidth;
+                const glowWidth = 120;
+
+                let start = performance.now();
+
+                function animate(t) {
+                    let pct = Math.min(100, Math.floor((t - start) / 10));
+
+                    fill.style.width = pct + "%";
+
+                    // glow chạy chính xác theo thanh, không nhòe
+                    const pos = (pct / 100) * barWidth - glowWidth / 2;
+                    glow.style.transform = `translateX(${pos}px)`;
+
+                    // cố định sát phải thanh load
+                    text.style.position = "absolute";
+                    text.style.right = "-56px";
+                    text.style.top = "0";
+
+                    text.innerText = pct + "%";
+
+                    if (pct < 100) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        setTimeout(() => e.target.submit(), 150);
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            });
+
+
+
+            // Particles background (lightweight)
+            (function(){
+                const c = document.getElementById('particleCanvas');
+                if(!c) return;
+                const ctx = c.getContext('2d');
+                let w = c.width = innerWidth;
+                let h = c.height = innerHeight;
+                const N = Math.max(18, Math.floor((w*h)/16000));
+                const ps = [];
+                function rand(a,b){return Math.random()*(b-a)+a;}
+                for(let i=0;i<N;i++){
+                    ps.push({x:rand(0,w), y:rand(0,h), r:rand(2,8), vx:rand(-0.15,0.15), vy:rand(-0.08,0.08), a:rand(0.06,0.28)});
+                }
+                window.addEventListener('resize', ()=> { w=c.width=innerWidth; h=c.height=innerHeight; });
+                function draw(){
+                    ctx.clearRect(0,0,w,h);
+                    for(const p of ps){
+                        p.x += p.vx + Math.sin(Date.now()*0.0001 + p.r)*0.05;
+                        p.y += p.vy + Math.cos(Date.now()*0.00012 + p.r)*0.03;
+                        if(p.x < -30) p.x = w + 30;
+                        if(p.x > w + 30) p.x = -30;
+                        if(p.y < -30) p.y = h + 30;
+                        if(p.y > h + 30) p.y = -30;
+                        const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+                        g.addColorStop(0, `rgba(107,92,231,${p.a})`);
+                        g.addColorStop(0.6, `rgba(6,182,212,${p.a*0.28})`);
+                        g.addColorStop(1, 'rgba(255,255,255,0)');
+                        ctx.beginPath(); ctx.fillStyle = g; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+                    }
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+
+            // focus first field
+            setTimeout(()=>{ const f = document.getElementById('user'); if(f) f.focus(); }, 220);
+        })();
+    </script>
+</body>
+</html>

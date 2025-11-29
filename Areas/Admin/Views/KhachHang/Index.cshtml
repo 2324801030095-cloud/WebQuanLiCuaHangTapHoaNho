@@ -1,0 +1,454 @@
+﻿@* File: Areas/Admin/Views/KhachHang/Index.cshtml *@
+@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.KhachHangVM>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Quản lý khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.6rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+    /* ===== APPLE GLASS + BRIGHT BTN + ANIMATION ===== */
+    :root{
+        --glass-bg: rgba(255,255,255,0.7);
+        --accent: #2563eb;
+        --accent-strong: #0ea5e9;
+        --success: linear-gradient(90deg,#16a34a,#34d399);
+        --soft-shadow: 0 8px 30px rgba(16,24,40,0.06);
+    }
+
+    body { -webkit-font-smoothing:antialiased; }
+
+    
+
+    /* Filter container: glass effect */
+    .filter-bar {
+        display:flex;
+        align-items:center;
+        gap:14px;
+        width:100%;
+        flex-wrap:wrap;
+        padding:14px 16px;
+        background:var(--glass-bg);
+        backdrop-filter: blur(8px) saturate(120%);
+        border-radius:14px;
+        border:1px solid rgba(226,232,240,0.8);
+        box-shadow: var(--soft-shadow);
+    }
+
+    .filter-left { display:flex; align-items:center; gap:10px; flex:1; flex-wrap:wrap; min-width:0; }
+    .filter-left input, .filter-left select {
+        height:44px;
+        border-radius:12px;
+        border:1px solid rgba(226,232,240,0.9);
+        padding:10px 12px;
+        font-size:14px;
+        min-width:150px;
+        transition: box-shadow .18s, border-color .18s, transform .08s;
+        background:rgba(255,255,255,0.9);
+    }
+    .filter-left input:focus, .filter-left select:focus {
+        outline:none;
+        border-color:var(--accent);
+        box-shadow:0 8px 18px rgba(37,99,235,0.12);
+        transform: translateY(-1px);
+    }
+
+    /* Buttons - Apple bright */
+    .btn-apple {
+        padding:8px 14px;
+        border-radius:12px;
+        font-weight:700;
+        font-size:14px;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        box-shadow:0 6px 18px rgba(16,24,40,0.06);
+        transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .btn-apple:active { transform: translateY(1px) scale(.995); }
+    .btn-apple-primary { background: linear-gradient(90deg,#2563eb,#3b82f6); color:#fff; }
+    .btn-apple-primary:hover { box-shadow:0 12px 30px rgba(37,99,235,0.18); }
+    .btn-apple-secondary { background: #f8fafc; color:#0f172a; border:1px solid rgba(226,232,240,0.9); }
+
+    .btn-add-apple {
+        background: var(--success);
+        color: #fff;
+        padding:10px 14px;
+        border-radius:12px;
+        font-weight:700;
+        box-shadow: 0 10px 28px rgba(16,185,129,0.12);
+        transition: transform .14s ease, box-shadow .14s ease, opacity .14s;
+    }
+    .btn-add-apple:hover { transform: translateY(-3px); box-shadow:0 18px 40px rgba(16,185,129,0.18); }
+
+    /* Table glass */
+    .table-container {
+        max-height:64vh;
+        overflow:auto;
+        border-radius:14px;
+        border:1px solid rgba(226,232,240,0.9);
+        background: rgba(255,255,255,0.95);
+        box-shadow: var(--soft-shadow);
+        opacity:0;
+        transform: translateY(8px);
+        transition:all .45s ease;
+    }
+    .table-container.show { opacity:1; transform: translateY(0); }
+
+    thead th { background:transparent; position:sticky; top:0; z-index:2; font-weight:700; padding:12px; color:#0b1220; }
+    tbody td { padding:11px; vertical-align:middle; }
+
+    .btn-action { width:40px; height:40px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; transition: transform .12s, box-shadow .12s; }
+    .btn-action:hover { transform: translateY(-4px); box-shadow:0 12px 30px rgba(16,24,40,0.08); }
+
+    .badge-money { background: #10b981; color:#fff; padding:6px 12px; border-radius:999px; font-weight:700; box-shadow:0 6px 20px rgba(16,185,129,0.12); }
+
+    /* ===== PHÂN TRANG KIỂU SẢN PHẨM ===== */
+    .pagination {
+        display: flex;
+        justify-content: center !important;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0;
+    }
+
+        .pagination li {
+            list-style: none;
+        }
+
+            .pagination li a,
+            .pagination li span {
+                display: block;
+                padding: 8px 12px;
+                border-radius: 10px !important;
+                color: #1e293b;
+                border: 1px solid #e2e8f0;
+                background: #f8fafc;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.25s ease;
+            }
+
+                .pagination li a:hover {
+                    background: #e0f2fe;
+                    color: #1d4ed8;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+                }
+
+            .pagination li.active a {
+                background: linear-gradient(90deg,#2563eb,#3b82f6);
+                color: white !important;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37,99,235,0.35);
+            }
+
+            .pagination li.disabled a {
+                color: #cbd5e1;
+                background: #f1f5f9;
+                pointer-events: none;
+            }
+
+    /* Loading overlay */
+    #loadingOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.78); backdrop-filter: blur(6px); z-index:2500; display:none; align-items:center; justify-content:center; }
+    .spinner-border { width:3rem; height:3rem; color:var(--accent); }
+
+    /* responsive */
+    @@media(max-width:768px){
+        .filter-left { flex-direction:column; align-items:stretch; }
+        thead th, tbody td { white-space:normal; font-size:13px; }
+    }
+</style>
+
+<div id="loadingOverlay"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>
+
+<div class="container-fluid p-4 pt-2">
+    <div class="text-center mb-3">
+        <h4 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+            <i class="fa-solid fa-users"></i>
+            Trang Quản Lý Thông Tin Khách Hàng
+        </h4>
+    </div>
+
+
+    <!-- filter + add -->
+    <div class="d-flex align-items-center justify-content-between mb-3" style="gap:12px;flex-wrap:wrap;">
+        <form id="frmSearch" method="get" class="filter-bar" onsubmit="showLoading()">
+            <div class="filter-left">
+                <input type="text" name="search" value="@Request["search"]" placeholder="Tìm theo tên hoặc số điện thoại..." />
+                <select name="filter" class="form-select">
+                    <option value="">Tất cả khách hàng</option>
+                    <option value="don1" @(Request["filter"] == "don1" ? "selected" : "")>Tổng đơn ≥ 1</option>
+                    <option value="don5" @(Request["filter"] == "don5" ? "selected" : "")>Tổng đơn ≥ 5</option>
+                    <option value="tien1" @(Request["filter"] == "tien1" ? "selected" : "")>Tổng tiền ≥ 1.000.000 ₫</option>
+                    <option value="tien5" @(Request["filter"] == "tien5" ? "selected" : "")>Tổng tiền ≥ 5.000.000 ₫</option>
+                    <option value="tien10" @(Request["filter"] == "tien10" ? "selected" : "")>Tổng tiền ≥ 10.000.000 ₫</option>
+                </select>
+
+                <select name="sort" class="form-select">
+                    <option value="">Sắp xếp mặc định</option>
+                    <option value="ma_asc" @(Request["sort"] == "ma_asc" ? "selected" : "")>Mã KH: bé → lớn</option>
+                    <option value="ma_desc" @(Request["sort"] == "ma_desc" ? "selected" : "")>Mã KH: lớn → bé</option>
+                    <option value="ten_az" @(Request["sort"] == "ten_az" ? "selected" : "")>Tên: A → Z</option>
+                </select>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button type="submit" class="btn-apple btn-apple-primary"><i class="fa-solid fa-filter me-1"></i> Lọc</button>
+                <a href="@Url.Action("Index")" class="btn-apple btn-apple-secondary" onclick="showLoading()"><i class="fa-solid fa-rotate-right me-1"></i> Làm mới</a>
+            </div>
+        </form>
+
+        <!-- nút thêm nhỏ gọn, sáng + animation nổi bật -->
+        <div>
+            <button id="btnAddKH" class="btn-add-apple" title="Thêm khách hàng">
+                <i class="fa-solid fa-user-plus"></i> Thêm khách
+            </button>
+        </div>
+    </div>
+
+    <!-- skeleton -->
+    <div id="skeletonTable" class="skeleton-table mt-3">
+        @for (int i = 0; i < 5; i++)
+        {
+            <div class="row" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; padding:10px; border-bottom:1px solid rgba(226,232,240,.9);">
+                @for (int j = 0; j < 7; j++)
+                {
+                    <div class="cell skeleton" style="height:16px; background:linear-gradient(90deg,#eef2ff25,#f8fafc,#eef2ff25); border-radius:6px;"></div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- bảng chính -->
+    <div class="card shadow-sm mt-3" id="realTable" style="display:none;">
+        <div class="table-container" id="tableContainer">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>MaKH</th>
+                        <th>Tên khách</th>
+                        <th>Số ĐT</th>
+                        <th>Địa chỉ</th>
+                        <th>Tổng đơn</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var kh in Model)
+                    {
+                        <tr>
+                            <td>@kh.MaKH</td>
+                            <td class="text-start">@kh.TenKH</td>
+                            <td>@kh.SoDT</td>
+                            <td class="text-start">@kh.DiaChi</td>
+                            <td>@kh.TongDon</td>
+                            <td><span class="badge-money">@String.Format("{0:N0} ₫", kh.TongTien)</span></td>
+                            <td>
+                                <button class="btn btn-info btn-action me-1" title="Chi tiết" onclick="viewDetail(@kh.MaKH)"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn btn-primary btn-action me-1" title="Sửa" onclick="openEdit(@kh.MaKH)"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="btn btn-danger btn-action" title="Xóa" onclick="deleteKh(@kh.MaKH)"><i class="fa-solid fa-trash-can"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white text-center">
+            @Html.PagedListPager(Model,
+                page => Url.Action("Index", new { page, search = Request["search"], filter = Request["filter"], sort = Request["sort"] }),
+                new PagedListRenderOptions
+                {
+                    Display = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                    MaximumPageNumbersToDisplay = 5,
+                    UlElementClasses = new[] { "pagination" }
+                })
+        </div>
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+
+<script>
+    // Toastr default (thời gian dài hơn + progress + nút đóng)
+    toastr.options = { positionClass: "toast-top-right", timeOut: 6000, extendedTimeOut: 2200, closeButton: true, progressBar: true };
+
+    // showToast helper
+    function showToast(msg, type) {
+        if (type === "success") toastr.success(msg);
+        else if (type === "error") toastr.error(msg);
+        else if (type === "warning") toastr.warning(msg);
+        else toastr.info(msg);
+    }
+
+    // Robot popup for update (countdown + OK)
+    function showRobotPopup(message) {
+        const robotSvg = `<svg width="96" height="96" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="7" width="18" height="11" rx="2" fill="#10B981"/>
+            <circle cx="8.5" cy="12.5" r="1.2" fill="#fff"/>
+            <circle cx="15.5" cy="12.5" r="1.2" fill="#fff"/>
+            <path d="M9 16c.5.5 1.5 1 3 1s2.5-.5 3-1" stroke="#fff" stroke-width="0.9" stroke-linecap="round"/>
+            <rect x="9" y="3" width="6" height="3" rx="1" fill="#2563EB"/>
+        </svg>`;
+
+        let timerId;
+        Swal.fire({
+            title: '<strong>Hoàn tất</strong>',
+            html: `<div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+                      ${robotSvg}
+                      <div style="font-size:15px;">${message}</div>
+                      <small id="sw-count" style="color:#6b7280;">Đóng sau <b>5</b>s</small>
+                   </div>`,
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            allowOutsideClick: false,
+            didOpen: () => {
+                let c = 5;
+                const el = document.getElementById('sw-count');
+                timerId = setInterval(() => {
+                    c--; if (el) el.innerHTML = `Đóng sau <b>${c}</b>s`;
+                    if (c <= 0) { clearInterval(timerId); Swal.close(); }
+                }, 1000);
+            },
+            willClose: () => {
+                clearInterval(timerId);
+                setTimeout(() => location.reload(), 300);
+            }
+        }).then(() => {
+            clearInterval(timerId);
+            setTimeout(() => location.reload(), 300);
+        });
+    }
+
+    // Loading helpers
+    function showLoading() { document.getElementById("loadingOverlay").style.display = "flex"; }
+    function hideLoading() { document.getElementById("loadingOverlay").style.display = "none"; }
+
+    // Insert HTML & execute scripts (used to load partials)
+    function setInnerHtmlWithScripts(container, html) {
+        const wrapper = document.createElement('div'); wrapper.innerHTML = html;
+        Array.from(wrapper.childNodes).forEach(node => {
+            if (node.tagName && node.tagName.toLowerCase() === 'script') return;
+            container.appendChild(node);
+        });
+        const scripts = wrapper.querySelectorAll('script');
+        scripts.forEach(s => {
+            const n = document.createElement('script');
+            Array.from(s.attributes).forEach(a => n.setAttribute(a.name, a.value));
+            if (s.src) { n.src = s.src; document.body.appendChild(n); }
+            else { n.text = s.innerHTML; document.body.appendChild(n); document.body.removeChild(n); }
+        });
+    }
+
+    // loadPartial helper
+    function loadPartial(url, cb) {
+        showLoading();
+        fetch(url).then(r => r.text()).then(html => {
+            const c = document.getElementById('modalContainer'); c.innerHTML = ""; setInnerHtmlWithScripts(c, html);
+            hideLoading(); if (typeof cb === 'function') cb();
+        }).catch(e => { hideLoading(); showToast('Lỗi tải form.', 'error'); console.error(e); });
+    }
+
+    // Open add modal
+    document.getElementById("btnAddKH").addEventListener("click", function () {
+        loadPartial("/Admin/KhachHang/Them", function () {
+            const el = document.getElementById("modalAddKH");
+            if (el) new bootstrap.Modal(el).show();
+        });
+    });
+
+    // Open edit modal
+    function openEdit(id) {
+        loadPartial(`/Admin/KhachHang/Sua/${id}`, function () {
+            const el = document.getElementById("modalEditKH");
+            if (el) new bootstrap.Modal(el).show();
+        });
+    }
+
+    // Open detail modal
+    function viewDetail(id) {
+        loadPartial(`/Admin/KhachHang/ChiTiet/${id}`, function () {
+            const el = document.getElementById("modalDetailKH");
+            if (el) new bootstrap.Modal(el).show();
+        });
+    }
+
+    // Delete with SweetAlert confirm
+    function deleteKh(id) {
+        Swal.fire({
+            title: 'Xác nhận xóa',
+            text: "Bạn có chắc muốn xóa khách hàng này?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#d33'
+        }).then(result => {
+            if (result.isConfirmed) {
+                showLoading();
+                const params = new URLSearchParams(); params.append('id', id);
+                fetch('/Admin/KhachHang/Xoa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    body: params.toString()
+                }).then(r => r.json()).then(data => {
+                    hideLoading();
+                    if (data.success) showToast(data.message, 'success');
+                    else showToast(data.message, 'error');
+                    if (data.success) setTimeout(() => location.reload(), 700);
+                }).catch(err => { hideLoading(); showToast('Lỗi khi xóa.', 'error'); console.error(err); });
+            }
+        });
+    }
+
+    // show table after load (skeleton)
+    window.addEventListener('load', () => setTimeout(() => {
+        const s = document.getElementById('skeletonTable'); const r = document.getElementById('realTable');
+        if (s) s.style.display = 'none'; if (r) { r.style.display = 'block'; document.getElementById('tableContainer').classList.add('show'); }
+        hideLoading();
+    }, 320));
+</script>

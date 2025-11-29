@@ -1,0 +1,63 @@
+﻿@model WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.ProductVM
+
+<div class="modal fade" id="modalSP" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-eye"></i> Chi tiết sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Tên sản phẩm:</dt>
+                    <dd class="col-sm-8">@Model.TenSP</dd>
+
+                    <dt class="col-sm-4">Giá bán:</dt>
+                    <dd class="col-sm-8">@String.Format("{0:N0} ₫", Model.GiaBan)</dd>
+
+                    <dt class="col-sm-4">Mô tả:</dt>
+                    <dd class="col-sm-8">@Model.MoTaNgan</dd>
+
+                    <dt class="col-sm-4">Danh mục:</dt>
+                    <dd class="col-sm-8">@Model.TenDanhMuc</dd>
+
+                    <dt class="col-sm-4">Đơn vị tính:</dt>
+                    <dd class="col-sm-8">@Model.TenDonViTinh</dd>
+
+                    <dt class="col-sm-4">Khuyến mãi:</dt>
+                    <dd class="col-sm-8">@Model.TenKhuyenMai</dd>
+
+                    <dt class="col-sm-4">Hình ảnh:</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                        {
+                            <img src="@Url.Content("~/Content/Images/" + Model.HinhAnh)"
+                                 width="500" class="rounded shadow-sm" />
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">Không có hình</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Trạng thái:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.HoatDong)
+                        {
+                            <span class="badge bg-success">Đang bán</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Ngưng</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

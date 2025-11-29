@@ -1,0 +1,65 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.BaoNo
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Chi tiết Báo Nợ";
+}
+
+<!-- ================= TITLE ================= -->
+<div class="text-center mb-3">
+    <h2 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+        <i class="fa-solid fa-circle-info text-info"></i> Chi tiết Báo Nợ
+    </h2>
+</div>
+
+<!-- Nút quay lại -->
+<div class="mb-3">
+    <a href="@Url.Action("Index", "BaoNo", new { area = "Admin" })"
+       class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<!-- THÔNG TIN CHI TIẾT -->
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-bold">
+        Thông tin báo nợ
+    </div>
+    <div class="card-body">
+
+        <p><strong>Khách hàng:</strong> @Model.KhachHang.TenKH</p>
+        <p><strong>Số điện thoại:</strong> @Model.KhachHang.SoDT</p>
+        <p><strong>Email:</strong> @Model.KhachHang.Email</p>
+        <p><strong>Số tiền nợ:</strong> @String.Format("{0:N0} ₫", Model.SoTien)</p>
+        <p><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</p>
+        <p><strong>Ghi chú:</strong> @Model.GhiChu</p>
+
+    </div>
+</div>
+
+<!-- LỊCH SỬ GỬI -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-bold">
+        Lịch sử gửi thông báo
+    </div>
+
+    <table class="table table-bordered mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Loại</th>
+                <th>Nội dung</th>
+                <th>Ngày gửi</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.LichSuThongBao.OrderByDescending(x => x.NgayGui))
+            {
+                <tr>
+                    <td>@item.Loai</td>
+                    <td>@item.NoiDung</td>
+                    <td>@item.NgayGui.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

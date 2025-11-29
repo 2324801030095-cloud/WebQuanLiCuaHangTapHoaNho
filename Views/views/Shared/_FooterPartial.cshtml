@@ -1,0 +1,60 @@
+﻿@* _FooterPartial.cshtml – Chân trang như giao diện bạn đang dùng *@
+
+<footer class="app-footer pt-5">
+    @* Nền xanh nhạt + viền *@
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-12 col-md-4">
+                @* Cột thương hiệu *@
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-shop me-2 fs-4 text-success"></i><h5 class="m-0">Thanh Nhan Grocery</h5>
+                </div>
+                <p class="mb-3">Tươi – Nhanh – Giá tốt. Giao hàng tận nơi, phục vụ tận tâm.</p>
+                <div class="d-flex gap-2">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-youtube"></i></a>
+                    <a href="#"><i class="bi bi-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                @* Cột liên kết nhanh *@
+                <h6 class="text-uppercase">Liên kết</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#best-sellers">Bán chạy</a></li>
+                    <li><a href="#featured">Nổi bật</a></li>
+                    <li><a href="#top-products">Top hôm nay</a></li>
+                    <li><a href="#knowledge">Kiến thức</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-3">
+                @* Cột hỗ trợ *@
+                <h6 class="text-uppercase">Hỗ trợ</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Hướng dẫn mua</a></li>
+                    <li><a href="#">Thanh toán & giao hàng</a></li>
+                    <li><a href="#">Đổi trả  & hoàn tiền</a></li>
+                </ul>
+            </div>
+
+            <div class="col-12 col-md-3">
+                @* Cột newsletter *@
+                <h6 class="text-uppercase">Nhận Ưu Đãi</h6>
+                <form class="d-flex gap-2">
+                    <input type="email" class="form-control" placeholder="Email của bạn" required />
+                    <button class="btn btn-success" type="submit"><i class="bi bi-send-fill"></i></button>
+                </form>
+                <small class="d-block mt-2">Đăng Ký để nhận giảm giá</small>
+            </div>
+        </div>
+
+        <div class="footer-bottom mt-4 py-3 d-flex flex-column flex-sm-row justify-content-between">
+            <div>© @DateTime.Now.Year Thanh Nhan Grocery</div>
+            <div>Bootstrap 5 + Swiper – Responsive</div>
+        </div>
+    </div>
+</footer>
+

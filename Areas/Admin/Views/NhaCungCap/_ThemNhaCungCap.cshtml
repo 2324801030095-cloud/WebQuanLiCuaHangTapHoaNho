@@ -1,0 +1,64 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.NhaCungCap
+
+<div class="modal fade" id="modalNCC" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Thêm Nhà Cung Cấp</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Tên Nhà cung cấp</label>
+                    <input id="TenNCC" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại</label>
+                    <input id="SoDT" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <textarea id="DiaChi" class="form-control"></textarea>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-success" onclick="submitAdd()">Thêm</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitAdd() {
+
+        const data = {
+            TenNCC: document.getElementById("TenNCC").value,
+            SoDT: document.getElementById("SoDT").value,
+            DiaChi: document.getElementById("DiaChi").value
+        };
+
+        fetch("/Admin/NhaCungCap/Them", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    alert(res.message);
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+    }
+</script>

@@ -1,0 +1,87 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.SanPham
+
+<div class="modal fade" id="modalSP" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Sửa sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                @using (Html.BeginForm("Sua", "SanPham", FormMethod.Post, new { id = "formEdit" }))
+                {
+                    @Html.HiddenFor(m => m.MaSP)
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.TenSP)
+                            @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", required = "required" })
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.GiaBan)
+                            @Html.TextBoxFor(m => m.GiaBan, new { @class = "form-control", type = "number", min = "0" })
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.Label("Danh mục")
+                            @Html.DropDownList("MaDM", (SelectList)ViewBag.MaDM, "-- Chọn --", new { @class = "form-select" })
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.Label("Đơn vị tính")
+                            @Html.DropDownList("MaDVT", (SelectList)ViewBag.MaDVT, "-- Chọn --", new { @class = "form-select" })
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.Label("Khuyến mãi")
+                            @Html.DropDownList("MaKM", (SelectList)ViewBag.MaKM, "-- Không --", new { @class = "form-select" })
+                        </div>
+
+                        <div class="col-md-12">
+                            @Html.LabelFor(m => m.HinhAnh)
+                            @Html.TextBoxFor(m => m.HinhAnh, new { @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-12">
+                            @Html.LabelFor(m => m.MoTaNgan)
+                            @Html.TextAreaFor(m => m.MoTaNgan, new { @class = "form-control", rows = 3 })
+                        </div>
+
+                        <div class="col-md-12 form-check mt-2">
+                            @Html.CheckBoxFor(m => m.HoatDong, new { @class = "form-check-input", id = "hoatdong_edit" })
+                            <label class="form-check-label" for="hoatdong_edit">Đang hoạt động</label>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnUpdate">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("btnUpdate").addEventListener("click", function () {
+        const form = document.getElementById("formEdit");
+        const fd = new FormData(form);
+
+        fetch("/Admin/SanPham/Sua", {
+            method: "POST",
+            body: fd
+        })
+            .then(res => res.json())
+            .then(d => {
+                alert(d.message);
+                if (d.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("modalSP"));
+                    modal.hide();
+                    location.reload();
+                }
+            });
+    });
+</script>

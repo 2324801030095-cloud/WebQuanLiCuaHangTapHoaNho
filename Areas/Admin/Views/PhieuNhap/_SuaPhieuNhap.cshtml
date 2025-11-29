@@ -1,0 +1,140 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.PhieuNhap
+@{
+    Layout = null;
+    var nccList = ViewBag.MaNCC as SelectList;
+    var nvList = ViewBag.MaNV as SelectList;
+}
+
+<style>
+    :root {
+        --main: #2563eb;
+        --main-light: #3b82f6;
+        --bg-soft: #f1f5f9;
+        --border: #e2e8f0;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, var(--main), var(--main-light));
+        color: white;
+        border-bottom: 0;
+    }
+
+    .modal-content {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 8px 26px rgba(0,0,0,0.12);
+    }
+
+    label {
+        font-weight: 600;
+        color: #1e293b;
+    }
+</style>
+
+
+<div class="modal fade" id="modalSuaPN" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-pen-to-square me-2"></i>
+                    Sửa phiếu nhập @Model.MaPN
+                </h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="frmSuaPN" onsubmit="return false;">
+                    <input type="hidden" id="sMaPN" value="@Model.MaPN" />
+
+                    <div class="mb-2">
+                        <label>Nhà cung cấp</label>
+                        <select id="sMaNCC" class="form-select">
+                            @foreach (var i in nccList)
+                            {
+                                <option value="@i.Value" @(i.Value == Model.MaNCC.ToString() ? "selected" : "")>
+                                    @i.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Nhân viên</label>
+                        <select id="sMaNV" class="form-select">
+                            @foreach (var i in nvList)
+                            {
+                                <option value="@i.Value" @(i.Value == Model.MaNV.ToString() ? "selected" : "")>
+                                    @i.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Ngày</label>
+                        <input id="sNgay" type="datetime-local" class="form-control"
+                               value="@Model.Ngay.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Ghi chú</label>
+                        <textarea id="sGhiChu" class="form-control">@Model.GhiChu</textarea>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnSaveSua" type="button" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu
+                </button>
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById('btnSaveSua').addEventListener('click', function () {
+
+        const payload = {
+            MaPN: parseInt(document.getElementById('sMaPN').value),
+            MaNCC: parseInt(document.getElementById('sMaNCC').value),
+            MaNV: parseInt(document.getElementById('sMaNV').value),
+            Ngay: document.getElementById('sNgay').value,
+            GhiChu: document.getElementById('sGhiChu').value
+        };
+
+        showLoading();
+
+        fetch('/Admin/PhieuNhap/SuaJson', {     // <== ĐƯỜNG DẪN ĐÚNG
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+            .then(r => r.json())
+            .then(d => {
+                hideLoading();
+
+                if (d.success) {
+                    toastr.success(d.message);
+                    bootstrap.Modal.getInstance(document.getElementById('modalSuaPN')).hide();
+                    setTimeout(() => location.reload(), 350);
+                }
+                else toastr.error(d.message);
+            })
+            .catch(() => {
+                hideLoading();
+                toastr.error("Không thể lưu dữ liệu");
+            });
+    });
+</script>

@@ -1,0 +1,69 @@
+﻿@* File: Areas/Admin/Views/KhachHang/_SuaKhachHang.cshtml *@
+@model WebQuanLiCuaHangTapHoa.Models.KhachHang
+
+<div class="modal fade" id="modalEditKH" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px; overflow:hidden;">
+            <div class="modal-header" style="background:linear-gradient(90deg,#2563eb,#60a5fa); color:white;">
+                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Sửa khách hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body" style="background:linear-gradient(180deg,#ffffff,#f8fafc);">
+                @using (Html.BeginForm("Sua", "KhachHang", FormMethod.Post, new { id = "formEditKH" }))
+                {
+                    @Html.HiddenFor(m => m.MaKH)
+                    <div class="row g-3">
+                        <div class="col-12">
+                            @Html.LabelFor(m => m.TenKH, "Tên khách hàng")
+                            @Html.TextBoxFor(m => m.TenKH, new { @class = "form-control", required = "required" })
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.SoDT, "Số điện thoại")
+                            @Html.TextBoxFor(m => m.SoDT, new { @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.DiaChi, "Địa chỉ")
+                            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control" })
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer" style="background:transparent; border-top:0;">
+                <button class="btn btn-apple btn-apple-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-apple btn-apple-primary" id="btnSaveEditKH" type="button"><i class="fa-solid fa-check me-1"></i> Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const btn = document.getElementById('btnSaveEditKH');
+        if (!btn) return;
+
+        btn.addEventListener('click', function () {
+            const form = document.getElementById('formEditKH');
+            const fd = new FormData(form); // FormData giữ nguyên tên field giống entity
+
+            showLoading();
+            fetch('/Admin/KhachHang/Sua', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditKH'));
+                    if (modal) modal.hide();
+
+                    if (data.success) {
+                        // robot popup (update animation)
+                        showRobotPopup(data.message);
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Lỗi', text: data.message });
+                    }
+                }).catch(err => { hideLoading(); Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi khi cập nhật.' }); console.error(err); });
+        });
+    })();
+</script>

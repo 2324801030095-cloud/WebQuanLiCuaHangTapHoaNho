@@ -1,0 +1,320 @@
+﻿@using WebQuanLiCuaHangTapHoa.Models.ViewModels
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    var tenDM = ViewBag.TenDM as string ?? "Sản phẩm";
+
+    // Ảnh dự phòng nếu không có ảnh trong DB
+    Func<int, string> imgById = id => $"https://picsum.photos/600/400?random={id}";
+
+    // Danh mục sidebar
+    var cats = ViewBag.Cats as IEnumerable<CatItemVM> ?? Enumerable.Empty<CatItemVM>();
+    int sel = ViewBag.Selected ?? 0;
+}
+
+<!-- ===== DANH MỤC + KẾT QUẢ ===== -->
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4 catalog-layout">
+            <!-- ===== SIDEBAR ===== -->
+            <aside class="col-12 col-lg-3">
+                <div class="cat-box">
+                    <div class="cat-header">
+                        <strong class="cat-title">Sản Phẩm</strong>
+                        <a href="@Url.Action("DanhSach","DanhMuc", new { maDM = (int?)null })"
+                           class="btn btn-sm btn-outline-secondary cat-clear">Xóa lọc</a>
+                    </div>
+
+                    @foreach (var c in cats)
+                    {
+                        var active = (sel == c.MaDM) ? "active" : "";
+                        <a class="cat-item d-flex align-items-center justify-content-between @active"
+                           href="@Url.Action("DanhSach","DanhMuc", new { maDM = c.MaDM })">
+                            <span class="d-flex align-items-center gap-2">
+                                <i class="bi bi-tag"></i>
+                                <span>@c.TenDM</span>
+                            </span>
+                            <span class="cat-count">@c.Count</span>
+                        </a>
+                    }
+
+                    <div class="p-3 border-top">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="ckDiscount">
+                            <label class="form-check-label" for="ckDiscount">Đang giảm giá</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="ckInStock" checked>
+                            <label class="form-check-label" for="ckInStock">Còn hàng</label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ===== MAIN ===== -->
+            <main class="col-12 col-lg-9">
+                <div class="toolbar d-flex align-items-center justify-content-between mb-3">
+                    <div class="small text-muted" id="resultText">
+                        Hiển thị @Model.Count() / @Model.Count() kết quả
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input id="kw" class="form-control form-control-sm" style="width:220px" placeholder="Tìm theo tên..." />
+                        <select id="sort" class="form-select form-select-sm" style="width:200px">
+                            <option value="default">Thứ tự mặc định</option>
+                            <option value="priceAsc">Giá tăng dần</option>
+                            <option value="priceDesc">Giá giảm dần</option>
+                            <option value="nameAsc">Tên A→Z</option>
+                            <option value="nameDesc">Tên Z→A</option>
+                        </select>
+                        <button id="btnApply" class="btn btn-sm btn-brand">
+                            <i class="bi bi-sliders me-1"></i> Áp dụng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lưới sản phẩm -->
+                <div id="grid" class="row g-4">
+                    @foreach (var p in Model)
+                    {
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="card h-100 shadow-sm border-0">
+                                <img class="card-img-top" src="@imgById(p.MaSP)" alt="@p.TenSP" />
+
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="fw-semibold mb-2 text-truncate" title="@p.TenSP">@p.TenSP</h6>
+
+                                    <div class="mb-2">
+                                        <span class="text-success fw-bold">
+                                            @String.Format("{0:N0} ₫", p.GiaBan)
+                                        </span>
+                                    </div>
+
+                                    <!-- ===== Thanh tồn kho ===== -->
+                                    @{
+                                        var pct = (p.Ton <= 0) ? 2 : (p.Ton > 100 ? 100 : p.Ton);
+                                    }
+                                    <div class="stock-wrap mb-3">
+                                        <div class="stock-bar">
+                                            <span style="width:@pct%"></span>
+                                        </div>
+                                        <small class="text-muted d-inline-block mt-1">Tồn: @p.Ton</small>
+                                    </div>
+                                    <!-- ===== /Thanh tồn kho ===== -->
+
+                                    <div class="mt-auto d-flex gap-2">
+                                        <a class="btn btn-outline-success btn-sm flex-fill"
+                                           href="@Url.Action("ChiTiet","SanPham", new { id = p.MaSP })">
+                                            <i class="bi bi-eye me-1"></i> Xem
+                                        </a>
+                                        <button type="button" class="btn btn-brand btn-sm flex-fill"
+                                                onclick="addToCartDemo(@p.MaSP,'@p.TenSP',@p.GiaBan,'@imgById(p.MaSP)')">
+                                            <i class="bi bi-bag-plus me-1"></i> Thêm
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <button id="btnMore" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-chevron-double-right me-1"></i> Hiện thêm
+                    </button>
+                    <button id="btnLess" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-chevron-double-left me-1"></i> Thu gọn
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+</section>
+
+@section styles{
+    <style>
+        /* ========== Container rộng sát lề ========== */
+        section.py-4 > .container {
+            max-width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 1rem !important;
+        }
+
+        /* ========== Bố cục 2 cột ========== */
+        .catalog-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin: 0 !important;
+        }
+
+        @@media (min-width: 992px) {
+            .catalog-layout {
+                grid-template-columns: 340px minmax(0, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        .catalog-layout > [class*="col-"] {
+            flex: initial !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* ========== Lưới sản phẩm ========== */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+            #grid > [class*="col-"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+        .card {
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-img-top {
+            height: 220px !important;
+            object-fit: cover;
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+        }
+
+        /* ===== Thanh tồn kho ===== */
+        .stock-bar {
+            height: 8px;
+            background: #eef2f7;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+            .stock-bar > span {
+                display: block;
+                height: 100%;
+                background: linear-gradient(90deg, #16a34a, #22c55e);
+                transition: width 0.35s ease;
+            }
+
+        /* ===== Sidebar ===== */
+        .cat-box {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(2, 6, 23, .08);
+        }
+
+        .cat-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: .75rem;
+            padding: .85rem 1rem .75rem;
+            border-bottom: 1px solid #e5e7eb;
+            min-height: 56px;
+        }
+
+        .cat-title {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .cat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: .7rem 1rem;
+            border-top: 1px dashed #e5e7eb;
+            text-decoration: none;
+            color: #0b1320;
+        }
+
+            .cat-item:first-child {
+                border-top: none;
+            }
+
+            .cat-item:hover {
+                background: #f8fff9;
+            }
+
+            .cat-item.active {
+                background: #eafff1;
+                font-weight: 600;
+            }
+
+        .cat-count {
+            color: #0a7f42;
+            font-weight: 700;
+        }
+
+        /* ===== Toolbar ===== */
+        .toolbar {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: .5rem .75rem;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-brand {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border: 0;
+            color: #fff;
+        }
+
+            .btn-brand:hover {
+                filter: brightness(.96);
+                color: #fff;
+            }
+    </style>
+}
+
+@section scripts{
+    <script>
+        (function () {
+            let show = 8;
+            const cards = Array.from(document.querySelectorAll('#grid > div.col-12'));
+            function render() {
+                cards.forEach((el, idx) => el.style.display = idx < show ? '' : 'none');
+                document.getElementById('resultText').textContent =
+                    `Hiển thị ${Math.min(show, cards.length)} / ${cards.length} kết quả`;
+            }
+            render();
+
+            document.getElementById('btnMore').addEventListener('click', () => {
+                show = Math.min(show + 8, cards.length);
+                render();
+            });
+            document.getElementById('btnLess').addEventListener('click', () => {
+                show = 8;
+                render();
+                document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            document.getElementById('btnApply').addEventListener('click', () => {
+                const kw = (document.getElementById('kw').value || '').toLowerCase().trim();
+                cards.forEach(el => {
+                    const name = (el.querySelector('h6')?.textContent || '').toLowerCase();
+                    el.style.display = name.includes(kw) ? '' : 'none';
+                });
+                const visible = cards.filter(el => el.style.display !== 'none').length;
+                document.getElementById('resultText').textContent =
+                    `Hiển thị ${visible} / ${cards.length} kết quả`;
+            });
+        })();
+
+        if (typeof window.addToCartDemo !== 'function') {
+            window.addToCartDemo = function (id, name, price, img) {
+                alert('Đã thêm: ' + name + ' (' + price.toLocaleString('vi-VN') + '₫)');
+            };
+        }
+    </script>
+}

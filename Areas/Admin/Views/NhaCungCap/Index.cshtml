@@ -1,0 +1,448 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.NhaCungCap>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Quản lý nhà cung cấp - ULTRA PRO MAX";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<!-- leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    :root{
+        --primary:#2563eb;
+        --primary-2:#3b82f6;
+        --muted:#64748b;
+        --card-bg:#fff;
+        --border:#e6eef8;
+    }
+
+    /* ---------- Page header & sticky search ---------- */
+    .page-title { color: var(--primary); font-size:1.8rem; font-weight:700; }
+    .top-bar {
+        position: sticky;
+        top: 72px; /* phù hợp layout header của bạn */
+        z-index: 1000;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+    }
+    body.dark .top-bar { background: rgba(6,10,20,0.7); border-color: rgba(255,255,255,0.04); }
+
+    .search-wrapper { display:flex; gap:10px; align-items:center; justify-content:center; padding:6px 12px; }
+    .search-wrapper .form-control { max-width:360px; }
+
+    /* ---------- Buttons centered ---------- */
+    .action-row { display:flex; justify-content:center; gap:12px; margin:12px 0; }
+
+    /* ---------- Card & table ---------- */
+    .card-pro { border-radius:12px; border:1px solid var(--border); background:var(--card-bg); overflow:hidden; }
+    .table-pro { margin-bottom:0; }
+    th, td { vertical-align: middle !important; font-size:0.95rem; }
+    thead th { background:#f8fafc; font-weight:600; position:sticky; top:0; z-index:3; }
+
+    /* column sizing */
+    th.col-id { width:90px; }
+    th.col-name { width:260px; text-align:left; padding-left:18px; }
+    th.col-phone { width:150px; }
+    th.col-address { width:auto; text-align:left; padding-left:18px; }
+    th.col-actions { width:180px; }
+
+    td.address-cell { max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+
+    /* mini map icon */
+    .mini-map-btn { color:#ef4444; margin-left:8px; cursor:pointer; transition:.15s; }
+    .mini-map-btn:hover { transform:scale(1.08); }
+
+    /* ---------- action buttons (single row) ---------- */
+    .action-group { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:nowrap; min-width:170px; }
+    .btn-action {
+        width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px;
+        transition: all .16s ease;
+    }
+    .btn-action i { font-size:16px; }
+    .btn-action:hover { transform:translateY(-3px) scale(1.06); box-shadow:0 8px 20px rgba(37,99,235,0.12); }
+    .btn-action:active { transform:scale(.98); }
+
+    /* tooltip style (bootstrap) */
+    .tooltip-inner { background:#0b1220 !important; color:#fff !important; padding:6px 10px; border-radius:6px; }
+
+    /* ---------- skeleton loading ---------- */
+    .skeleton {
+        animation: shimmer 1.4s linear infinite;
+        background: linear-gradient(90deg,#e6eef8 25%, #f5f7fb 50%, #e6eef8 75%);
+        background-size:200% 100%;
+        border-radius:6px;
+    }
+    @@keyframes shimmer { 0% { background-position:-200% 0 } 100% { background-position:200% 0 } }
+
+    .skeleton-row { display:grid; grid-template-columns: 90px 260px 150px 1fr 180px; gap:12px; padding:10px; border-bottom:1px solid #eef3fb; align-items:center; }
+
+    /* ---------- pagination (keep same in dark) ---------- */
+    .pagination { display:flex; justify-content:center; gap:6px; padding:12px 8px; flex-wrap:wrap; }
+    .pagination li { list-style:none; }
+    .pagination li a, .pagination li span {
+        display:block; padding:8px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--border); color:#1e293b; text-decoration:none; font-weight:500;
+        transition:.18s;
+    }
+    .pagination li a:hover { background:#e0f2fe; color:#1d4ed8; transform:translateY(-2px); box-shadow:0 6px 18px rgba(37,99,235,0.12); }
+    .pagination li.active a { background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff !important; border-color:#2563eb; box-shadow:0 6px 20px rgba(37,99,235,0.28); pointer-events:none; }
+    .pagination li.disabled a { opacity:.45; pointer-events:none; }
+
+    /* ensure dark doesn't override */
+    body.dark .pagination li a, body.dark .pagination li span { background:#f8fafc !important; color:#1e293b !important; border-color:var(--border) !important; }
+
+    /* ---------- mini-map popup styling ---------- */
+    .mini-map-container { width:320px; height:200px; border-radius:8px; overflow:hidden; border:1px solid #e6eef8; }
+    .mini-map-small { width:100%; height:100%; }
+    .province-badge { display:inline-flex; gap:6px; align-items:center; font-size:12px; padding:4px 8px; border-radius:999px; background:#f1f5f9; border:1px solid #e6eef8; color:#0f172a; }
+
+    /* ---------- responsive: ensure buttons stay in one row ---------- */
+    @@media (max-width:720px) {
+        .action-group { min-width:120px; gap:6px; }
+        .btn-action { width:34px; height:34px; }
+        th.col-name { width:200px; }
+    }
+
+    /* ---------- dark mode tweaks ---------- */
+    body.dark .card-pro, body.dark .mini-map-container { background:#071224; border-color:#203040; color:#cbd5e1; }
+    body.dark thead th { background:#071224; color:#cbd5e1; }
+</style>
+
+<!-- container -->
+<div class="container-fluid p-4 pt-2">
+
+    <!-- page title -->
+    <div class="text-center mb-3">
+        <h4 class="page-title"><i class="fa-solid fa-truck-field"></i> Quản Lý Nhà Cung Cấp</h4>
+    </div>
+
+    <!-- sticky top bar: search + address autocomplete + radius -->
+    <div class="top-bar mb-3">
+        <div class="search-wrapper container">
+            <form id="filterForm" class="d-flex gap-2 w-100 justify-content-center">
+                <input type="text" id="searchInput" name="search" value="@Request["search"]" class="form-control" placeholder="Tìm theo tên Nhà cung cấp..." />
+                <input type="text" id="addressInput" name="diachi" value="@Request["diachi"]" class="form-control" placeholder="Địa chỉ (gõ hoặc bấm chọn trên bản đồ)" style="max-width:420px;" />
+                <select id="radiusSelect" name="radius" class="form-select" style="max-width:140px;">
+                    <option value="">Bán kính</option>
+                    <option value="1">1 km</option>
+                    <option value="3">3 km</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                </select>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-filter"></i> Lọc</button>
+                <button type="button" id="btnMapPicker" class="btn btn-outline-primary" title="Chọn trên bản đồ"><i class="fa-solid fa-location-crosshairs"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- center action buttons -->
+    <div class="action-row">
+        <button class="btn btn-success px-4" onclick="openAdd()"><i class="fa-solid fa-plus"></i> Thêm NCC</button>
+        <button class="btn btn-secondary px-4" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>
+    </div>
+
+    <!-- main card -->
+    <div class="card-pro shadow-sm">
+        <!-- skeleton loader area -->
+        <div id="skeletonArea" style="display:none; padding:12px;">
+            @for (int i = 0; i < 6; i++)
+            {
+                <div class="skeleton-row mb-2">
+                    <div class="skeleton" style="height:18px;"></div>
+                    <div class="skeleton" style="height:18px;"></div>
+                    <div class="skeleton" style="height:18px;"></div>
+                    <div class="skeleton" style="height:18px;"></div>
+                    <div class="skeleton" style="height:18px;"></div>
+                </div>
+            }
+        </div>
+
+        <!-- real table -->
+        <div id="tableArea" style="display:block;">
+            <div class="table-responsive">
+                <table class="table table-hover table-pro mb-0">
+                    <thead>
+                        <tr>
+                            <th class="col-id">Mã NCC</th>
+                            <th class="col-name">Tên nhà cung cấp</th>
+                            <th class="col-phone">Số điện thoại</th>
+                            <th class="col-address">Địa chỉ <small class="text-muted">(click để xem)</small></th>
+                            <th class="col-actions">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ncc in Model)
+                        {
+                            <tr data-id="@ncc.MaNCC" data-address="@Html.Raw(HttpUtility.JavaScriptStringEncode(ncc.DiaChi))">
+                                <td class="text-center">@ncc.MaNCC</td>
+                                <td class="text-start">@ncc.TenNCC</td>
+                                <td class="text-center">@ncc.SoDT</td>
+                                <td class="text-start address-cell" title="@ncc.DiaChi" onclick="openMiniMapFromRow(this)">
+                                    <!-- show truncated address + province badge (inferred) -->
+                                    <span class="me-2">@ncc.DiaChi</span>
+                                    <span class="province-badge" data-addr="@Html.Raw(HttpUtility.JavaScriptStringEncode(ncc.DiaChi))">
+                                        <img src="/Content/icons/flag-placeholder.png" alt="" style="width:16px;height:16px;border-radius:3px;" />
+                                        <span class="ms-1 small text-muted">—</span>
+                                    </span>
+                                    <i class="fa-solid fa-map-location mini-map-btn" onclick="event.stopPropagation(); openMiniMap('@Html.Raw(HttpUtility.JavaScriptStringEncode(ncc.DiaChi))')" title="Xem bản đồ"></i>
+                                </td>
+                                <td>
+                                    <div class="action-group">
+                                        <button class="btn btn-info btn-action" data-bs-toggle="tooltip" data-bs-title="Xem" onclick="openView(@ncc.MaNCC)"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="btn btn-primary btn-action" data-bs-toggle="tooltip" data-bs-title="Sửa" onclick="openEdit(@ncc.MaNCC)"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="btn btn-danger btn-action" data-bs-toggle="tooltip" data-bs-title="Xóa" onclick="openDelete(@ncc.MaNCC)"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- pagination footer (dính liền với bảng) -->
+            <div class="card-footer bg-white text-center">
+                @Html.PagedListPager(
+                    Model,
+                    page => Url.Action("Index", new { page, search = Request["search"], diachi = Request["diachi"], radius = Request["radius"] }),
+                    new PagedListRenderOptions
+                    {
+                        UlElementClasses = new[] { "pagination" },
+                        MaximumPageNumbersToDisplay = 7,
+                        DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                        DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                        DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                        DisplayLinkToLastPage = PagedListDisplayMode.Always
+                    }
+                )
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: mini map (larger) -->
+<div class="modal fade" id="miniMapModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xem địa chỉ trên bản đồ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="miniMapLarge" style="height:520px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: map picker for adding coordinates -->
+<div class="modal fade" id="mapPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn vị trí trên bản đồ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="mapPicker" style="height:620px;"></div>
+                <div class="mt-2 d-flex justify-content-end gap-2">
+                    <button id="btnUseCoord" class="btn btn-primary">Sử dụng tọa độ này</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal container for add/edit/view/delete partials -->
+<div id="modalContainer"></div>
+
+<!-- loading overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; inset:0; z-index:2000; background: rgba(255,255,255,0.8); align-items:center; justify-content:center;">
+    <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
+</div>
+
+<script>
+    // ---------- Utilities ----------
+    const NOMINATIM = "https://nominatim.openstreetmap.org/search?format=json&q=";
+    const REVERSE = "https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}";
+    const geocodeCache = {};
+
+    function showLoading() { document.getElementById("loadingOverlay").style.display = "flex"; }
+    function hideLoading() { document.getElementById("loadingOverlay").style.display = "none"; }
+
+    // init bootstrap tooltips
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    });
+
+    // ---------- Skeleton fallback (simulate quick load) ----------
+    (function skeletonFallback() {
+        const skeleton = document.getElementById("skeletonArea");
+        const table = document.getElementById("tableArea");
+        skeleton.style.display = "block";
+        table.style.display = "none";
+        // simulate slight delay, but if server rendered fast, hide immediately
+        window.addEventListener("load", () => {
+            setTimeout(() => { skeleton.style.display = "none"; table.style.display = "block"; }, 350);
+        });
+        // safety timeout
+        setTimeout(() => { skeleton.style.display = "none"; table.style.display = "block"; }, 2500);
+    })();
+
+    // ---------- Geocode helper ----------
+    async function geocode(query) {
+        if (!query) return null;
+        if (geocodeCache[query]) return geocodeCache[query];
+        try {
+            const r = await fetch(NOMINATIM + encodeURIComponent(query));
+            const j = await r.json();
+            if (j && j.length) { geocodeCache[query] = j[0]; return j[0]; }
+        } catch (e) { console.warn("geocode error", e); }
+        return null;
+    }
+
+    // ---------- MINI MAP (large modal) ----------
+    async function openMiniMap(address) {
+        if (!address) return alert("Không có địa chỉ.");
+        showLoading();
+        const modalEl = document.getElementById("miniMapModal");
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        setTimeout(async () => {
+            try {
+                const geo = await geocode(address);
+                const mapDiv = document.getElementById("miniMapLarge");
+                mapDiv.innerHTML = "";
+                const lat = geo ? parseFloat(geo.lat) : 10.776530;
+                const lon = geo ? parseFloat(geo.lon) : 106.700981;
+                const m = L.map(mapDiv).setView([lat, lon], geo ? 15 : 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+                if (geo) { L.marker([lat, lon]).addTo(m).bindPopup(address).openPopup(); }
+            } catch (e) { console.warn(e); }
+            hideLoading();
+        }, 200);
+    }
+
+    // open mini map from row (click cell)
+    function openMiniMapFromRow(el) {
+        const row = el.closest("tr");
+        const addr = row.dataset.address || el.innerText;
+        openMiniMap(addr);
+    }
+
+    // ---------- province badge inference (very simple heuristic) ----------
+    function inferProvinceFromAddress(addr) {
+        // crude heuristic: lấy từ cuối sau dấu phẩy, trim; nếu ko có trả "N/A"
+        if (!addr) return "—";
+        const parts = addr.split(",").map(p => p.trim()).filter(Boolean);
+        if (parts.length === 0) return "—";
+        return parts[parts.length - 1];
+    }
+
+    // set province badges after DOM ready
+    window.addEventListener("load", () => {
+        document.querySelectorAll(".province-badge").forEach(b => {
+            const a = b.dataset.addr || "";
+            const prov = inferProvinceFromAddress(a);
+            b.querySelector("span.ms-1").innerText = prov;
+            // optionally set country flag / icon if matching known provinces (left as placeholder)
+        });
+    });
+
+    // ---------- map picker (for address selection) ----------
+    let pickerMap, pickerMarker;
+    document.getElementById("btnMapPicker").addEventListener("click", async () => {
+        const modalEl = document.getElementById("mapPickerModal");
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        setTimeout(() => {
+            if (!pickerMap) {
+                pickerMap = L.map("mapPicker").setView([10.776530, 106.700981], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickerMap);
+                pickerMap.on('click', async function (e) {
+                    if (pickerMarker) pickerMap.removeLayer(pickerMarker);
+                    pickerMarker = L.marker(e.latlng, { draggable: true }).addTo(pickerMap).bindPopup("Vị trí chọn").openPopup();
+                    // reverse geocode & fill addressInput
+                    try {
+                        const url = REVERSE.replace("{lat}", e.latlng.lat).replace("{lon}", e.latlng.lng);
+                        const res = await fetch(url); const j = await res.json();
+                        if (j && j.display_name) document.getElementById("addressInput").value = j.display_name;
+                    } catch (err) { console.warn(err); }
+                });
+            } else {
+                pickerMap.invalidateSize();
+            }
+        }, 220);
+    });
+
+    // use coordinate button (fill input & close)
+    document.getElementById("btnUseCoord")?.addEventListener("click", () => {
+        if (!pickerMarker) return alert("Chưa chọn điểm trên bản đồ.");
+        const latlng = pickerMarker.getLatLng();
+        // reverse geocode to get address
+        (async () => {
+            try {
+                showLoading();
+                const url = REVERSE.replace("{lat}", latlng.lat).replace("{lon}", latlng.lng);
+                const res = await fetch(url); const j = await res.json();
+                if (j && j.display_name) document.getElementById("addressInput").value = j.display_name;
+                hideLoading();
+                bootstrap.Modal.getInstance(document.getElementById("mapPickerModal")).hide();
+            } catch (err) { hideLoading(); console.warn(err); }
+        })();
+    });
+
+    // ---------- filter submit (navigate with params) ----------
+    document.getElementById("filterForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const q = document.getElementById("searchInput").value || "";
+        const addr = document.getElementById("addressInput").value || "";
+        const radius = document.getElementById("radiusSelect").value || "";
+        const url = new URL(window.location.href);
+        url.searchParams.set("search", q);
+        url.searchParams.set("diachi", addr);
+        url.searchParams.set("radius", radius);
+        showLoading();
+        window.location.href = url.toString();
+    });
+
+    // pagination click => show loading
+    document.addEventListener("click", function (e) {
+        if (e.target.closest(".pagination a")) showLoading();
+    });
+
+    // ---------- AJAX modals for Add/Edit/View/Delete ----------
+
+    async function loadModal(url, modalId) {
+        showLoading();
+        const html = await (await fetch(url)).text();
+        document.getElementById("modalContainer").innerHTML = html;
+        // execute inline scripts in returned html
+        document.getElementById("modalContainer").querySelectorAll("script").forEach(s => {
+            const n = document.createElement("script"); n.text = s.text; document.body.appendChild(n);
+        });
+        hideLoading();
+        const el = document.getElementById(modalId);
+        if (el) new bootstrap.Modal(el).show();
+    }
+
+    function openAdd() { loadModal('/Admin/NhaCungCap/Them', 'modalNCC'); }
+    function openEdit(id) { loadModal(`/Admin/NhaCungCap/Sua/${id}`, 'modalNCC'); }
+    function openView(id) { loadModal(`/Admin/NhaCungCap/ChiTiet/${id}`, 'modalNCC'); }
+    function openDelete(id) { loadModal(`/Admin/NhaCungCap/Xoa/${id}`, 'modalNCC'); }
+
+    // ---------- ensure tooltips live after AJAX modals ----------
+    document.addEventListener("click", function (e) {
+        const tt = document.querySelectorAll('[data-bs-toggle="tooltip"]'); tt.forEach(t => new bootstrap.Tooltip(t));
+    });
+
+    // optional: auto scroll to top on change page
+    if (window.location.search.includes("page=")) {
+        window.scrollTo({ top: 200, behavior: 'smooth' });
+    }
+</script>

@@ -1,0 +1,38 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.LichSuThongBao
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Sửa nội dung thông báo";
+}
+
+<div class="text-center mb-3">
+    <h2 class="page-title fw-bold"><i class="fa-solid fa-pen-to-square"></i> Sửa nội dung</h2>
+</div>
+
+<div class="mb-3">
+    <a href="@Url.Action("LichSuThongBao", "BaoNo", new { area = "Admin" })" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @using (Html.BeginForm("SuaTinNhan", "BaoNo", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Loại</label>
+                <input class="form-control" value="@Model.Loai" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nội dung</label>
+                @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-control", rows = 5 })
+            </div>
+
+            <button class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu</button>
+        }
+    </div>
+</div>

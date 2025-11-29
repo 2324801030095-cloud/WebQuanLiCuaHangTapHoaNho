@@ -1,0 +1,236 @@
+﻿@* ============================================
+    Views/Home/Index.cshtml
+    KHÔNG dùng @model — dữ liệu nạp qua Html.Action
+    Hai khối sản phẩm:
+    - Bán chạy: @Html.Action("TopSelling","Home", new { take = 9 })
+    - Mới nhất: @Html.Action("NewProducts","Home", new { kw = ViewBag.Keyword, maDM = ViewBag.MaDM, take = 12 })
+    ============================================ *@
+
+@{
+    ViewBag.Title = "Trang Chu";   // Tiêu đề hiển thị ở <title>
+}
+
+<!-- ========= HERO ========= -->
+<section class="hero">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <span class="badge text-bg-success mb-2" style="background:linear-gradient(135deg,var(--g1),var(--g2));">Tươi mỗi ngày</span>
+                <!-- Trước: dùng inline style có background-clip:text gây cảnh báo -->
+                <!-- <h1>Chọn thực phẩm <span style="background:linear-gradient(...);-webkit-background-clip:text;background-clip:text;color:transparent;">xanh & an toàn</span></h1> -->
+                <!-- Sau: dùng class .gtext, không còn thuộc tính bị cảnh báo -->
+                <h1 class="fw-bold">
+                    Chọn thực phẩm
+                    <span class="gtext">xanh &amp; an toàn</span> <!-- WHAT: áp class; WHY: tránh cảnh báo, tái sử dụng -->
+                </h1>
+                <p class="lead mt-3">Sản phẩm hữu cơ, nguồn gốc rõ ràng. Giao nhanh trong ngày.</p>
+                <div class="mt-4 d-flex gap-2">
+                    <a class="btn btn-brand btn-lg" href="#best-sellers"><i class="bi bi-lightning-charge-fill me-1"></i> Mua ngay</a>
+                    <a class="btn btn-outline-success btn-lg" href="#top-products"><i class="bi bi-box-seam me-1"></i> Top hôm nay</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img class="img-fluid rounded-4 shadow-sm" src="https://picsum.photos/800/460?random=900" alt="Hero">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========= USP ========= -->
+<section>
+    <div class="container">
+        <div class="row g-4 usp">
+            <div class="col-12 col-md-3 d-flex"><div class="icon me-3"><i class="bi bi-flower3"></i></div><div><strong>100% Hữu cơ</strong><div class="text-muted small">Tốt cho sức khỏe & môi trường.</div></div></div>
+            <div class="col-12 col-md-3 d-flex"><div class="icon me-3"><i class="bi bi-basket3"></i></div><div><strong>Tiêu dùng xanh</strong><div class="text-muted small">Địa phương, tươi tự nhiên.</div></div></div>
+            <div class="col-12 col-md-3 d-flex"><div class="icon me-3"><i class="bi bi-truck"></i></div><div><strong>Miễn phí vận chuyển*</strong><div class="text-muted small">Cho đơn hữu cơ.</div></div></div>
+            <div class="col-12 col-md-3 d-flex"><div class="icon me-3"><i class="bi bi-arrow-repeat"></i></div><div><strong>Đổi trả dễ</strong><div class="text-muted small">Nhanh & tiện.</div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ========= PROMO SLIDER ========= -->
+<section>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 m-0">Khuyến mãi theo danh mục</h2>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-success btn-sm" id="promoPrev"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-outline-success btn-sm" id="promoNext"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="swiper" id="promoSwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><div class="promo-slide p-4"><div class="mb-2 text-danger fw-bold">KHUYẾN MÃI 50%</div><h3 class="mb-3">Nước ép hữu cơ</h3><a class="btn btn-success mb-3" href="#">Xem ngay</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=601" alt=""></div></div>
+                <div class="swiper-slide"><div class="promo-slide p-4" style="background:#f3fff2;"><div class="mb-2 text-success fw-bold">GIẢM 30%</div><h3 class="mb-3">Rau củ tươi</h3><a class="btn btn-success mb-3" href="#">Xem ngay</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=602" alt=""></div></div>
+                <div class="swiper-slide"><div class="promo-slide p-4" style="background:#ffeef3;"><div class="mb-2 text-danger fw-bold">GIẢM 30%</div><h3 class="mb-3">Thảo mộc tự nhiên</h3><a class="btn btn-success mb-3" href="#">Xem ngay</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=603" alt=""></div></div>
+                <div class="swiper-slide"><div class="promo-slide p-4" style="background:#eefcf5;"><div class="mb-2 text-success fw-bold">HOT</div><h3 class="mb-3">Đồ uống giải khát</h3><a class="btn btn-success mb-3" href="#">Khám phá</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=604" alt=""></div></div>
+                <div class="swiper-slide"><div class="promo-slide p-4" style="background:#f1fff9;"><div class="mb-2 text-success fw-bold">TOP</div><h3 class="mb-3">Bánh kẹo</h3><a class="btn btn-success mb-3" href="#">Xem ngay</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=605" alt=""></div></div>
+                <div class="swiper-slide"><div class="promo-slide p-4" style="background:#effbf4;"><div class="mb-2 text-success fw-bold">MỚI</div><h3 class="mb-3">Hóa phẩm gia dụng</h3><a class="btn btn-success mb-3" href="#">Mua liền</a><img class="img-fluid promo-cover" src="https://picsum.photos/1000/420?random=606" alt=""></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========= TOP SẢN PHẨM (CAROUSEL DEMO) ========= -->
+<section id="top-products">
+    <div class="container">
+        <h2 class="h4 mb-3">Top sản phẩm hôm nay</h2>
+
+        <!-- Swiper carousel: nhìn thấy mép hai bên -->
+        <div class="swiper" id="topCarousel">
+            <div class="swiper-wrapper">
+                <!-- TOP 1 -->
+                <div class="swiper-slide top-slide">
+                    <div class="flip" data-desc="Rau sạch Đà Lạt – tươi trong ngày, giàu xơ. Giá 25.000₫/bó.">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/960/640?random=1001" alt="Top 1">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật để xem</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-danger mb-2">🔥 TOP 1</span>
+                                <h6>Rau sạch Đà Lạt</h6>
+                                <p>Rau sạch Đà Lạt – tươi trong ngày, giàu xơ. Giá 25.000₫/bó.</p>
+                                <button class="btn btn-brand btn-sm mt-2"><i class="bi bi-bag-plus me-1"></i> Thêm giỏ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TOP 2 -->
+                <div class="swiper-slide top-slide">
+                    <div class="flip" data-desc="Sữa hạt – không đường, giàu protein. Giá 35.000₫/chai.">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/960/640?random=1002" alt="Top 2">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật để xem</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-warning text-dark mb-2">⭐ TOP 2</span>
+                                <h6>Sữa hạt</h6>
+                                <p>Sữa hạt – không đường, giàu protein. Giá 35.000₫/chai.</p>
+                                <button class="btn btn-brand btn-sm mt-2"><i class="bi bi-bag-plus me-1"></i> Thêm giỏ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TOP 3 -->
+                <div class="swiper-slide top-slide">
+                    <div class="flip" data-desc="Khoai tây sạch – ruột vàng, dẻo bở. Giá 16.000₫/kg.">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/960/640?random=1003" alt="Top 3">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật để xem</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-success mb-2">TOP 3</span>
+                                <h6>Khoai tây sạch</h6>
+                                <p>Khoai tây sạch – ruột vàng, dẻo bở. Giá 16.000₫/kg.</p>
+                                <button class="btn btn-brand btn-sm mt-2"><i class="bi bi-bag-plus me-1"></i> Thêm giỏ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- TOP 4 -->
+                <div class="swiper-slide top-slide">
+                    <div class="flip" data-desc="Dầu ô liu – ép lạnh, nguyên chất. Giá 120.000₫/chai.">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/960/640?random=1004" alt="Top 4">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật để xem</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-secondary mb-2">TOP 4</span>
+                                <h6>Dầu ô liu</h6>
+                                <p>Dầu ô liu – ép lạnh, nguyên chất. Giá 120.000₫/chai.</p>
+                                <button class="btn btn-brand btn-sm mt-2"><i class="bi bi-bag-plus me-1"></i> Thêm giỏ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Chấm pagination -->
+            <div class="swiper-pagination"></div>
+        </div>
+
+        <!-- Nút dưới đáy khối -->
+        <div class="section-actions">
+            <button class="btn btn-outline-success btn-sm" id="btnMoreTop"><i class="bi bi-chevron-double-right me-1"></i> Hiện thêm</button>
+            <button class="btn btn-outline-secondary btn-sm" id="btnLessTop" style="display:none"><i class="bi bi-chevron-double-left me-1"></i> Thu gọn</button>
+        </div>
+    </div>
+</section>
+
+<!-- ========= BÁN CHẠY (ĐỔ TỪ SERVER) ========= -->
+<section id="best-sellers">
+    <div class="container">
+        <h2 class="h4 mb-3">Sản phẩm bán chạy</h2>
+
+        @* GỌI CHILD ACTION: /Home/TopSelling -> trả về _ProductGridPartial *@
+        @Html.Action("TopSelling", "Home", new { take = 9 })   @* 9 sản phẩm *@
+        <div class="d-flex justify-content-center mt-3 gap-2">
+            <button id="btnMoreBest" class="btn btn-outline-success btn-sm"><i class="bi bi-chevron-double-right me-1"></i> Hiện thêm</button>
+            <button id="btnLessBest" class="btn btn-outline-secondary btn-sm" style="display:none;"><i class="bi bi-chevron-double-left me-1"></i> Thu gọn</button>
+        </div>
+    </div>
+
+</section>
+
+<!-- ========= MỚI NHẤT (ĐỔ TỪ SERVER) ========= -->
+<section id="featured">
+    <div class="container">
+        <h2 class="h4 mb-3">Sản phẩm mới</h2>
+
+        @* GỌI CHILD ACTION: /Home/NewProducts -> trả về _ProductGridPartial
+        - kw: giữ từ khóa đang tìm (nếu có)
+        - maDM: giữ bộ lọc danh mục (nếu có)
+        - take: số sản phẩm muốn lấy *@
+        @Html.Action("NewProducts", "Home", new { kw = ViewBag.Keyword as string, maDM = (int?)ViewBag.MaDM, take = 12 })
+        <div class="d-flex justify-content-center mt-3 gap-2">
+            <button id="btnMoreBest" class="btn btn-outline-success btn-sm"><i class="bi bi-chevron-double-right me-1"></i> Hiện thêm</button>
+            <button id="btnLessBest" class="btn btn-outline-secondary btn-sm" style="display:none;"><i class="bi bi-chevron-double-left me-1"></i> Thu gọn</button>
+        </div>
+    </div>
+</section>
+
+<!-- ========= TESTIMONIALS (GIỮ NGUYÊN) ========= -->
+<section class="section-alt">
+    <div class="container">
+        <h2 class="text-center mb-4" style="color:#0a4b2f;">Khách hàng nói gì về chúng tôi</h2>
+        <div class="swiper" id="testiSwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><div class="card card-soft p-4 h-100"><div class="d-flex align-items-start gap-3"><img src="https://i.pravatar.cc/96?img=31" class="rounded-circle" width="72" height="72"><div><div class="text-warning mb-1"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div><div class="fw-semibold text-success">Tươi & đúng hẹn</div><p class="mb-2">Ship nhanh, đóng gói kỹ.</p><div class="small fw-semibold">LAN ANH</div><div class="small text-muted">Marketing</div></div></div></div></div>
+                <div class="swiper-slide"><div class="card card-soft p-4 h-100"><div class="d-flex align-items-start gap-3"><img src="https://i.pravatar.cc/96?img=32" class="rounded-circle" width="72" height="72"><div><div class="text-warning mb-1"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i><i class="bi bi-star"></i></div><div class="fw-semibold text-success">Đáng tiền</div><p class="mb-2">Nguồn gốc rõ, giá tốt.</p><div class="small fw-semibold">VĂN HẢI</div><div class="small text-muted">Kỹ sư</div></div></div></div></div>
+                <div class="swiper-slide"><div class="card card-soft p-4 h-100"><div class="d-flex align-items-start gap-3"><img src="https://i.pravatar.cc/96?img=33" class="rounded-circle" width="72" height="72"><div><div class="text-warning mb-1"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div><div class="fw-semibold text-success">Hài lòng</div><p class="mb-2">Rau rất tươi.</p><div class="small fw-semibold">BÌNH</div><div class="small text-muted">Bác sĩ</div></div></div></div></div>
+                <div class="swiper-slide"><div class="card card-soft p-4 h-100"><div class="d-flex align-items-start gap-3"><img src="https://i.pravatar.cc/96?img=34" class="rounded-circle" width="72" height="72"><div><div class="text-warning mb-1"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i></div><div class="fw-semibold text-success">Dịch vụ tốt</div><p class="mb-2">CSKH nhiệt tình.</p><div class="small fw-semibold">KIÊN</div><div class="small text-muted">NVVP</div></div></div></div></div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center mt-3 gap-2">
+            <button class="btn btn-outline-success btn-sm" id="testiPrev"><i class="bi bi-arrow-left"></i></button>
+            <button class="btn btn-outline-success btn-sm" id="testiNext"><i class="bi bi-arrow-right"></i></button>
+        </div>
+    </div>
+</section>
+
+<!-- ========= BLOG (GIỮ NGUYÊN) ========= -->
+<section id="knowledge">
+    <div class="container">
+        <h2 class="mb-4" style="color:#0a4b2f;">Kiến thức về nông trại</h2>
+        <div class="row g-5">
+            <div class="col-12 col-lg-3"><div class="card card-soft h-100 overflow-hidden"><img class="w-100" src="https://picsum.photos/600/360?random=911" alt=""><div class="p-3"><div class="small text-muted mb-1"><i class="bi bi-person me-1"></i> TN Team — <i class="bi bi-tags ms-2 me-1"></i>Healthy</div><h5 class="mb-2">Rau lâu năm</h5><p class="text-muted">Bí quyết chọn rau bền…</p><a href="#" class="btn btn-success btn-sm">Xem thêm</a></div></div></div>
+            <div class="col-12 col-lg-3"><div class="card card-soft h-100 overflow-hidden"><img class="w-100" src="https://picsum.photos/600/360?random=912" alt=""><div class="p-3"><div class="small text-muted mb-1"><i class="bi bi-person me-1"></i> TN Team — <i class="bi bi-tags ms-2 me-1"></i>Lifestyle</div><h5 class="mb-2">Đa dạng trái cây</h5><p class="text-muted">Lý do nên ăn đa dạng…</p><a href="#" class="btn btn-success btn-sm">Xem thêm</a></div></div></div>
+            <div class="col-12 col-lg-3"><div class="card card-soft h-100 overflow-hidden"><img class="w-100" src="https://picsum.photos/600/360?random=913" alt=""><div class="p-3"><div class="small text-muted mb-1"><i class="bi bi-person me-1"></i> TN Team — <i class="bi bi-tags ms-2 me-1"></i>Tips</div><h5 class="mb-2">Bảo quản thịt</h5><p class="text-muted">Giữ thịt tươi lâu…</p><a href="#" class="btn btn-success btn-sm">Xem thêm</a></div></div></div>
+            <div class="col-12 col-lg-3"><div class="card card-soft h-100 overflow-hidden"><img class="w-100" src="https://picsum.photos/600/360?random=914" alt=""><div class="p-3"><div class="small text-muted mb-1"><i class="bi bi-person me-1"></i> TN Team — <i class="bi bi-tags ms-2 me-1"></i>Tips</div><h5 class="mb-2">Rửa rau đúng</h5><p class="text-muted">Loại bỏ dư lượng…</p><a href="#" class="btn btn-success btn-sm">Xem thêm</a></div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ========= NEWSLETTER (GIỮ NGUYÊN) ========= -->
+<section id="newsletter" class="section-alt">
+    <div class="container">
+        <h2 class="text-center mb-4" style="color:#0a4b2f;">Đăng ký nhận tin tức mới nhất hàng tuần</h2>
+        <form class="d-flex gap-3 justify-content-center" style="max-width:860px;margin:0 auto;">
+            <input type="email" class="form-control form-control-lg" placeholder="Nhập email..." required>
+            <button class="btn btn-lg btn-brand" type="submit">Đăng ký</button>
+        </form>
+    </div>
+</section>

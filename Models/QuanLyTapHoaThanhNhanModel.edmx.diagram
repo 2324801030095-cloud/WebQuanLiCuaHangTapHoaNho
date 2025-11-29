@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="cb9eea41ea804920b07711693f48797c" Name="Diagram1">
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.ChiTietHoaDon" Width="1.5" PointX="5.25" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.ChiTietPhieuNhap" Width="1.5" PointX="8.25" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.DanhMuc" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.DonViTinh" Width="1.5" PointX="0.75" PointY="2.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.HoaDon" Width="1.5" PointX="3" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.KhachHang" Width="1.5" PointX="0.75" PointY="11.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.Kho" Width="1.5" PointX="5.25" PointY="11.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.KhuyenMai" Width="1.5" PointX="0.75" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.NhaCungCap" Width="1.5" PointX="3.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.NhanVien" Width="1.5" PointX="0.5" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.PhieuNhap" Width="1.5" PointX="6" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.SanPham" Width="1.5" PointX="3" PointY="4.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.TaiKhoan" Width="1.5" PointX="3" PointY="16.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.ThuChi" Width="1.5" PointX="2.75" PointY="8.5" IsExpanded="true" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_CTHD_HD" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_CTHD_SP" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_CTPN_PN" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_CTPN_SP" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_SP_DM" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_SP_DVT" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_HD_KH" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_HD_NV" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_Kho_SP" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_SP_KM" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_PN_NCC" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_PN_NV" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_TK_NV" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.sysdiagrams" Width="1.5" PointX="8.375" PointY="0.75" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.TaiKhoanKH" Width="1.5" PointX="3" PointY="19.375" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK__TaiKhoanKH__MaKH__7D439ABD" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.BaoNo" Width="1.5" PointX="3" PointY="22.625" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK__BaoNo__MaKH__17036CC0" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.LichSuThongBao" Width="1.5" PointX="5.25" PointY="22.75" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_LichSuThongBao_BaoNo" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

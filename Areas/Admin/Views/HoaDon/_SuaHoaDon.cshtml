@@ -1,0 +1,86 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.HoaDon
+
+<div class="modal fade" id="modalEditHD" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> Sửa hóa đơn
+                </h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="formEditHD">
+
+                    @Html.HiddenFor(m => m.MaHD)
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ngày lập</label>
+                        <input type="datetime-local"
+                               name="Ngay"
+                               class="form-control"
+                               value="@Model.Ngay.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Khách hàng</label>
+                        @Html.DropDownList("MaKH", (SelectList)ViewBag.KhachHang,
+                            "--Chọn khách hàng--",
+                            new { @class = "form-select" })
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nhân viên</label>
+                        @Html.DropDownList("MaNV", (SelectList)ViewBag.NhanVien,
+                            "--Chọn nhân viên--",
+                            new { @class = "form-select" })
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-warning text-dark" id="btnSaveEditHD">
+                    <i class="fa-solid fa-check me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.getElementById("btnSaveEditHD").onclick = () => {
+
+        let fd = new FormData(document.getElementById("formEditHD"));
+
+        showOverlay();
+
+        fetch("/Admin/HoaDon/Sua", {
+            method: "POST",
+            body: fd
+        })
+            .then(r => r.json())
+            .then(d => {
+                hideOverlay();
+
+                if (!d.success) {
+                    alert(d.message);
+                    return;
+                }
+
+                alert("Cập nhật hóa đơn thành công!");
+
+                bootstrap.Modal.getInstance(document.getElementById("modalEditHD")).hide();
+
+                location.reload();
+            });
+    };
+
+</script>

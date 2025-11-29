@@ -1,0 +1,34 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>
+@{
+    Layout = null; // Không dùng layout vì đang test độc lập
+    ViewBag.Title = "Kiểm Tra Kết Nối EDMX";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <h2>@ViewBag.Title</h2>
+
+    <h3>Thống kê nhanh</h3>
+    <ul>
+        <li>Số danh mục: <strong>@ViewBag.SoDanhMuc</strong></li>
+        <li>Số sản phẩm: <strong>@ViewBag.SoSanPham</strong></li>
+        <li>Số khách hàng: <strong>@ViewBag.SoKhach</strong></li>
+    </ul>
+
+    <h3>Top 5 danh mục đầu tiên</h3>
+    <ol>
+        @foreach (var dm in Model)
+        {
+            <li>@dm.TenDM</li>
+        }
+    </ol>
+
+    <p>Nếu bạn thấy được danh sách danh mục và số liệu trên, kết nối CSDL qua EDMX đã hoạt động chính xác.</p>
+    <p><i>URL kiểm tra: /TestKetNoi/Ping</i></p>
+</body>
+</html>

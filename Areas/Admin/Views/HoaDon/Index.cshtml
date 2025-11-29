@@ -1,0 +1,471 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.HoaDon>
+@using PagedList.Mvc;
+
+@{
+    // -----------------------------
+    // Thiết lập title và layout
+    // -----------------------------
+    ViewBag.Title = "Quản lý hóa đơn";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+
+    // -----------------------------
+    // Lấy lại query hiện tại (phục vụ filter + phân trang)
+    // -----------------------------
+    var qSearch = Request["search"] ?? "";
+    var qFrom = Request["from"] ?? "";
+    var qTo = Request["to"] ?? "";
+    var qSort = Request["sort"] ?? "";
+}
+
+<!-- ========================== CSS =========================== -->
+<style>
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.6rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        background: #fff;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #e6eef9;
+        margin-bottom: 16px;
+    }
+
+    .table-container {
+        border-radius: 10px;
+        border: 1px solid #eef2ff;
+        background: #fff;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all .45s ease;
+    }
+
+        .table-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        border: none;
+    }
+
+    .btn-view {
+        background: #0ea5e9;
+    }
+
+    .btn-edit {
+        background: #3b82f6;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+    }
+
+    .badge-money {
+        background: linear-gradient(90deg,#34d399,#10b981);
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    /* PHÂN TRANG */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+
+        .pagination li a,
+        .pagination li span {
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .pagination li.active span {
+            background: #3b82f6 !important;
+            color: white !important;
+            border-color: #3b82f6;
+        }
+
+        .pagination li.disabled span {
+            opacity: 0.35;
+            pointer-events: none;
+            background: #f1f5f9;
+        }
+
+    #loadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,.82);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+</style>
+
+<!-- ========================== OVERLAY =========================== -->
+<div id="loadingOverlay">
+    <div class="spinner-border text-primary"></div>
+</div>
+
+<!-- ========================== NỘI DUNG CHÍNH =========================== -->
+<div class="container-fluid p-4">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="text-center mb-3">
+        <h4 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+            <i class="fa-solid fa-file-invoice"></i>
+            Trang Quản Lí Hóa Đơn
+        </h4>
+    </div>
+
+
+    <!-- NÚT THÊM + LÀM MỚI -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button id="btnAddHD" class="btn btn-success btn-sm">
+            <i class="fa-solid fa-plus"></i> Thêm hóa đơn
+        </button>
+
+        <a href="@Url.Action("Index","HoaDon")"
+           class="btn btn-secondary btn-sm"
+           onclick="showOverlay()">
+            <i class="fa-solid fa-rotate-right me-1"></i> Làm mới
+        </a>
+    </div>
+
+    <!-- FORM FILTER -->
+    <form method="get" class="filter-bar" onsubmit="showOverlay()">
+
+        <!-- LEFT -->
+        <div class="d-flex gap-2">
+
+            <!-- Input tìm kiếm -->
+            <input type="text" name="search" value="@qSearch"
+                   class="form-control" style="width:260px"
+                   placeholder="Tìm MaHD / MaKH / tên NV">
+
+            <!-- Sort -->
+            <select name="sort" class="form-select" style="width:180px;">
+                <option value="">Mặc định (MaHD ↑)</option>
+                <option value="mahd_asc" @(qSort == "mahd_asc" ? "selected" : "")>Mã HĐ tăng</option>
+                <option value="mahd_desc" @(qSort == "mahd_desc" ? "selected" : "")>Mã HĐ giảm</option>
+                <option value="ngay_asc" @(qSort == "ngay_asc" ? "selected" : "")>Ngày cũ → mới</option>
+                <option value="ngay_desc" @(qSort == "ngay_desc" ? "selected" : "")>Ngày mới → cũ</option>
+            </select>
+
+            <!-- Ngày -->
+            <input type="date" name="from" value="@qFrom" class="form-control" />
+            <input type="date" name="to" value="@qTo" class="form-control" />
+        </div>
+
+        <!-- RIGHT -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-filter me-1"></i> Áp dụng
+            </button>
+            <a href="@Url.Action("Index","HoaDon")"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-eraser me-1"></i> Xóa bộ lọc
+            </a>
+        </div>
+
+    </form>
+
+    <!-- BẢNG -->
+    <div class="card shadow-sm">
+        <div id="tableContainer" class="table-container">
+
+            <table class="table table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th width="90">Mã HĐ</th>
+                        <th width="150">Ngày</th>
+                        <th width="110">Mã KH</th>
+                        <th>Nhân viên</th>
+                        <th width="150">Tổng tiền</th>
+                        <th width="160">Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.TotalItemCount == 0)
+                    {
+                        <!-- Nếu không có hóa đơn -->
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Không có hóa đơn nào.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <!-- Loop hóa đơn -->
+                        foreach (var hd in Model)
+                        {
+                            var tong = hd.ChiTietHoaDon?.Sum(ct => ct.SoLuong * ct.DonGia) ?? 0;
+
+                            <tr>
+                                <td class="text-center align-middle">@hd.MaHD</td>
+                                <td class="text-center align-middle">@hd.Ngay.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-center align-middle">@hd.MaKH</td>
+
+                                <!-- FIX NULL NHÂN VIÊN -->
+                                <td class="align-middle">@((hd.NhanVien != null) ? hd.NhanVien.TenNV : "-")</td>
+
+                                <td class="text-center align-middle">
+                                    <span class="badge-money">
+                                        @String.Format("{0:N0} ₫", tong)
+                                    </span>
+                                </td>
+
+                                <td class="text-center align-middle">
+                                    <button class="btn-action btn-view me-1"
+                                            onclick="viewDetail(@hd.MaHD)">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+
+                                    <button class="btn-action btn-edit me-1"
+                                            onclick="openEdit(@hd.MaHD)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+
+                                    <button class="btn-action btn-delete"
+                                            onclick="deleteHD(@hd.MaHD)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- ========================== PHÂN TRANG ĐÃ FIX =========================== -->
+        <div class="card-footer bg-white text-center">
+
+            @{
+                bool isFirstPage = Model.PageNumber == 1;
+                bool isLastPage = Model.PageNumber == Model.PageCount;
+                bool onlyOnePage = Model.PageCount <= 1;
+            }
+
+            <ul class="pagination">
+
+                <!-- << -->
+                @if (onlyOnePage || isFirstPage)
+                {
+                    <li class="disabled"><span>&laquo;</span></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Index", new { page = 1, search = qSearch, from = qFrom, to = qTo, sort = qSort })">&laquo;</a></li>
+                }
+
+                <!-- < -->
+                @if (onlyOnePage || isFirstPage)
+                {
+                    <li class="disabled"><span>&lsaquo;</span></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Index", new { page = Model.PageNumber - 1, search = qSearch, from = qFrom, to = qTo, sort = qSort })">&lsaquo;</a></li>
+                }
+
+                <!-- PAGE NUMBERS -->
+                @foreach (var p in Enumerable.Range(1, Model.PageCount))
+                {
+                    if (p == Model.PageNumber)
+                    {
+                        <li class="active"><span>@p</span></li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a href="@Url.Action("Index", new { page = p, search = qSearch, from = qFrom, to = qTo, sort = qSort })">@p</a>
+                        </li>
+                    }
+                }
+
+                <!-- > -->
+                @if (onlyOnePage || isLastPage)
+                {
+                    <li class="disabled"><span>&rsaquo;</span></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Index", new { page = Model.PageNumber + 1, search = qSearch, from = qFrom, to = qTo, sort = qSort })">&rsaquo;</a></li>
+                }
+
+                <!-- >> -->
+                @if (onlyOnePage || isLastPage)
+                {
+                    <li class="disabled"><span>&raquo;</span></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Index", new { page = Model.PageCount, search = qSearch, from = qFrom, to = qTo, sort = qSort })">&raquo;</a></li>
+                }
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================== MODAL CONTAINER =========================== -->
+<div id="modalContainer"></div>
+
+<script>
+
+    // --- Fix quan trọng ---
+    const modalContainer = document.getElementById("modalContainer");
+
+    function showOverlay() {
+        document.getElementById("loadingOverlay").style.display = "flex";
+    }
+
+    function hideOverlay() {
+        document.getElementById("loadingOverlay").style.display = "none";
+    }
+
+    // Hiệu ứng khi load xong
+    window.onload = () => {
+        hideOverlay();
+        setTimeout(() => document.getElementById("tableContainer").classList.add("show"), 120);
+    };
+
+    // ============================
+    // MỞ MODAL THÊM
+    // ============================
+    document.getElementById("btnAddHD").onclick = () => {
+        showOverlay();
+        fetch("/Admin/HoaDon/Them")
+            .then(r => r.text())
+            .then(html => {
+                hideOverlay();
+                modalContainer.innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalAddHD")).show();
+            })
+            .catch(err => {
+                hideOverlay();
+                alert("Lỗi tải form thêm: " + err);
+            });
+    };
+
+    // ============================
+    // MỞ MODAL SỬA
+    // ============================
+    function openEdit(id) {
+        showOverlay();
+        fetch(`/Admin/HoaDon/Sua/${id}`)
+            .then(r => r.text())
+            .then(html => {
+                hideOverlay();
+                modalContainer.innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalEditHD")).show();
+            })
+            .catch(err => {
+                hideOverlay();
+                alert("Lỗi tải form sửa: " + err);
+            });
+    }
+
+    // ============================
+    // MỞ MODAL CHI TIẾT
+    // ============================
+    function viewDetail(id) {
+        showOverlay();
+        fetch(`/Admin/HoaDon/ChiTiet/${id}`)
+            .then(r => r.text())
+            .then(html => {
+                hideOverlay();
+                modalContainer.innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalDetailHD")).show();
+            })
+            .catch(err => {
+                hideOverlay();
+                alert("Lỗi tải chi tiết: " + err);
+            });
+    }
+
+    // ============================
+    // XOÁ HÓA ĐƠN
+    // ============================
+    function deleteHD(id) {
+        if (!confirm("Xác nhận xóa hóa đơn này?")) return;
+
+        showOverlay();
+
+        fetch("/Admin/HoaDon/Xoa", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        })
+            .then(r => r.json())
+            .then(d => {
+                hideOverlay();
+                alert(d.message);
+                if (d.success) location.reload();
+            })
+            .catch(err => {
+                hideOverlay();
+                alert("Lỗi xóa hóa đơn: " + err);
+            });
+    }
+</script>

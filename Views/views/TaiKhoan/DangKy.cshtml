@@ -1,0 +1,91 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.ViewModels.Auth.DangKyVM
+
+@{
+    ViewBag.Title = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";   // hoặc Layout Login riêng nếu bạn có
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4 text-success">
+                        <i class="bi bi-person-plus-fill me-2"></i> Đăng ký tài khoản
+                    </h3>
+
+                    @using (Html.BeginForm("DangKy", "TaiKhoan", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- Tên đăng nhập -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.TenDangNhap, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", placeholder = "Tên đăng nhập" })
+                            @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.Email, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Địa chỉ email" })
+                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.MatKhau, new { @class = "form-label fw-semibold" })
+                            @Html.PasswordFor(m => m.MatKhau, new { @class = "form-control", placeholder = "Mật khẩu" })
+                            @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Nhập lại mật khẩu -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.XacNhanMatKhau, new { @class = "form-label fw-semibold" })
+                            @Html.PasswordFor(m => m.XacNhanMatKhau, new { @class = "form-control", placeholder = "Nhập lại mật khẩu" })
+                            @Html.ValidationMessageFor(m => m.XacNhanMatKhau, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Tên khách hàng -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.TenKH, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.TenKH, new { @class = "form-control", placeholder = "Họ và tên (nếu có)" })
+                            @Html.ValidationMessageFor(m => m.TenKH, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- ✅ Số điện thoại -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.SoDT, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.SoDT, new { @class = "form-control", placeholder = "Ví dụ: 0901234567" })
+                            @Html.ValidationMessageFor(m => m.SoDT, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- ✅ Địa chỉ -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.DiaChi, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control", placeholder = "Địa chỉ liên hệ (tùy chọn)" })
+                            @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Nút đăng ký -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-brand btn-lg">
+                                <i class="bi bi-person-check-fill me-2"></i> Đăng ký
+                            </button>
+                        </div>
+
+                        <!-- Link đăng nhập -->
+                        <div class="text-center mt-3">
+                            <span>Đã có tài khoản? </span>
+                            <a href="@Url.Action("DangNhap", "TaiKhoan")" class="text-success fw-semibold">Đăng nhập</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

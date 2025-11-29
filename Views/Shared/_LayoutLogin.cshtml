@@ -1,0 +1,83 @@
+﻿@{
+    Layout = null;
+    var title = ViewBag.Title as string ?? "Đăng nhập hệ thống";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Thanh Nhàn Grocery</title>
+
+    <!-- CSS thư viện -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+
+    <style>
+        /* Nền mờ nhẹ */
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 460px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+            .brand i {
+                font-size: 2rem;
+                color: #28a745;
+            }
+
+            .brand span {
+                font-weight: 600;
+                font-size: 1.3rem;
+                color: #1b5e20;
+            }
+
+        footer {
+            text-align: center;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-box">
+            <div class="brand">
+                <i class="bi bi-shop me-2"></i><span>Thanh Nhàn Grocery</span>
+            </div>
+            @RenderBody()
+        </div>
+    </div>
+
+    <footer>
+        © @DateTime.Now.Year - Thanh Nhàn Grocery
+    </footer>
+
+    <!-- JS thư viện -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

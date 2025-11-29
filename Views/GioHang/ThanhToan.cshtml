@@ -1,0 +1,216 @@
+﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    decimal tongTien = ViewBag.TongTien ?? 0;
+}
+
+<section class="py-4">
+    <div class="container">
+        <h2 class="fw-bold text-success mb-4">
+            <i class="bi bi-wallet2"></i> Chọn phương thức thanh toán
+        </h2>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card p-3">
+                    <h5 class="mb-3">Các sản phẩm trong giỏ</h5>
+                    <ul class="list-group mb-3">
+                        @foreach (var it in Model)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@it.TenSP</strong><br />
+                                    <small>Số lượng: @it.SoLuong</small>
+                                </div>
+                                <div class="text-end">
+                                    <div>@String.Format("{0:N0} ₫", it.DonGia)</div>
+                                    <div class="fw-bold text-success">@String.Format("{0:N0} ₫", it.ThanhTien)</div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>Tổng tiền</div>
+                        <div class="fw-bold text-success">@String.Format("{0:N0} ₫", tongTien)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card p-3">
+                    <h5>Chọn phương thức</h5>
+
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-outline-success payment-btn" data-type="qr">
+                            <i class="bi bi-qr-code"></i> Thanh toán bằng QR (Techcombank)
+                        </button>
+                        <button class="btn btn-outline-primary payment-btn" data-type="bank">
+                            <i class="bi bi-bank"></i> Chuyển khoản ngân hàng
+                        </button>
+                        <button class="btn btn-outline-warning payment-btn" data-type="momo">
+                            <img src="/Content/momo.png" style="height:20px;" /> Thanh toán MoMo
+                        </button>
+                        <button class="btn btn-outline-secondary payment-btn" data-type="cod">
+                            <i class="bi bi-cash-stack"></i> Tiền mặt khi nhận hàng (COD)
+                        </button>
+                    </div>
+
+                    <div id="paymentArea" class="mt-4">
+                        <div class="alert alert-info">Chọn phương thức để hiển thị hướng dẫn thanh toán.</div>
+                    </div>
+
+                    <hr />
+
+                    <form id="formCheckout" method="post" action="@Url.Action("DatHang","GioHang")">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="paymentMethod" id="paymentMethod" value="" />
+                        <input type="hidden" name="paymentNote" id="paymentNote" value="" />
+
+                        <div class="mb-2">
+                            <label>Họ tên</label>
+                            <input name="tenKH" class="form-control" required />
+                        </div>
+                        <div class="mb-2">
+                            <label>Số điện thoại</label>
+                            <input name="sdt" class="form-control" required />
+                        </div>
+                        <div class="mb-2">
+                            <label>Địa chỉ</label>
+                            <textarea name="diaChi" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-success btn-lg" id="btnPlaceOrder">Xác nhận và Lưu đơn</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- QR modal / area -->
+<div id="qrBox" class="text-center p-3" style="display:none;">
+    <h5 class="mb-3">Quét mã QR để chuyển vào tài khoản Techcombank</h5>
+    <div>
+        <img id="qrImg" src="#" alt="QR Code" style="width:260px;height:260px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.15)" />
+    </div>
+    <div class="mt-2">
+        <small><strong>Ngân hàng:</strong> Techcombank</small><br />
+        <small><strong>Số TK:</strong> 3398329567</small><br />
+        <small><strong>Chủ TK:</strong> Thanh Nhàn</small>
+    </div>
+    <div class="mt-3">
+        <button id="btnIHavePaid" class="btn btn-primary">Tôi đã thanh toán (Xác nhận)</button>
+    </div>
+</div>
+
+<!-- Robot popup -->
+<div id="robotPopup" class="robot-popup hidden">
+    <img src="/Content/robot.gif" style="height:120px" />
+    <p class="mt-2 fw-bold" id="robotMsg">Đã xử lý thao tác!</p>
+</div>
+
+@section scripts{
+    <script>
+    var selectedMethod = null;
+    var amount = @tongTien;
+
+    $(".payment-btn").click(function(){
+        $(".payment-btn").removeClass("active");
+        $(this).addClass("active");
+        selectedMethod = $(this).data("type");
+        $("#paymentMethod").val(selectedMethod);
+
+        // Reset area
+        $("#paymentArea").html("");
+        $("#qrBox").hide();
+
+        if(selectedMethod === "qr"){
+            // Show QR image generated from server
+            $("#paymentArea").html($("#qrBox"));
+            $("#qrBox").show();
+            $("#qrImg").attr("src", "/GioHang/QrCode?amount=" + amount + "&_=" + new Date().getTime());
+            $("#paymentNote").val("QR chuyển khoản Techcombank 3398329567");
+        }
+        else if(selectedMethod === "bank"){
+            var bankHtml = `<div class="p-2 border rounded">
+                                <p><strong>Chuyển khoản tới:</strong></p>
+                                <p>Techcombank - TK: <strong>3398329567</strong><br/>Chủ TK: <strong>Thanh Nhàn</strong></p>
+                                <p>Ghi chú: Vui lòng nhập Mã đơn (sau khi tạo đơn) hoặc SĐT để chúng tôi đối soát.</p>
+                            </div>`;
+            $("#paymentArea").html(bankHtml);
+            $("#paymentNote").val("Chuyển khoản Techcombank 3398329567");
+        }
+        else if(selectedMethod === "momo"){
+            var momoHtml = `<div class="p-2 border rounded">
+                                <p>Quét MoMo hoặc chuyển khoản tới: <strong>3398329567 (Techcombank)</strong> - hoặc dùng ví MoMo chuyển tiền</p>
+                            </div>`;
+            $("#paymentArea").html(momoHtml);
+            $("#paymentNote").val("Thanh toán qua MoMo (tham chiếu: sđt)");
+        }
+        else if(selectedMethod === "cod"){
+            var codHtml = `<div class="p-2 border rounded">
+                                <p>Thanh toán khi nhận hàng (COD). Vui lòng chuẩn bị tiền mặt đủ số tiền.</p>
+                           </div>`;
+            $("#paymentArea").html(codHtml);
+            $("#paymentNote").val("Thanh toán COD");
+        }
+    });
+
+    // Xác nhận đã thanh toán (nếu dùng QR) - gọi ajax để mark, hoặc khách bấm xác nhận rồi submit form
+    $("#btnIHavePaid").click(function(){
+        // Hiển thị robot popup
+        $("#robotMsg").text("Đang xác nhận thanh toán...");
+        $("#robotPopup").removeClass("hidden");
+
+        // Thực tế: bạn có thể kiểm tra giao dịch ngân hàng ở đây.
+        setTimeout(function(){
+            $("#robotMsg").text("Thanh toán đã được ghi nhận (giả lập).");
+            setTimeout(function(){
+                $("#robotPopup").addClass("hidden");
+                // Sau khi xác nhận, submit form để lưu đơn (chúng ta có thông tin khách)
+                $("#btnPlaceOrder").click();
+            }, 900);
+        }, 1000);
+    });
+
+    // Khi submit form, đảm bảo đã chọn phương thức
+    $("#formCheckout").submit(function(e){
+        if(!$("#paymentMethod").val()){
+            e.preventDefault();
+            alert("Vui lòng chọn phương thức thanh toán trước khi xác nhận.");
+            return false;
+        }
+        // form sẽ gửi về Action DatHang với fields: tenKH, sdt, diaChi, paymentMethod, paymentNote
+    });
+
+    </script>
+
+    <style>
+        .payment-btn.active {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .robot-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 99999;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+}

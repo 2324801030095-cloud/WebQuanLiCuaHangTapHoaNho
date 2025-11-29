@@ -1,0 +1,279 @@
+﻿@{
+    ViewBag.Title = "Giới thiệu - Thanh Nhàn";
+}
+
+<style>
+    /* HERO */
+    .tn-hero {
+        height: 480px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .tn-hero-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=1920');
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        filter: brightness(0.35);
+    }
+
+    .tn-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* CORE VALUES */
+    .tn-values {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    .tn-value-box {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* COMMIT SECTION */
+    /* Ảnh background */
+    .commit-section .commit-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.pexels.com/photos/4198023/pexels-photo-4198023.jpeg');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        filter: brightness(0.45);
+        z-index: 1;
+    }
+
+
+    /* Hộp cam kết */
+    .commit-box {
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+    }
+
+        .commit-box ul li {
+            margin-bottom: 8px;
+        }
+
+    .tn-commit {
+        background-image: url('https://images.unsplash.com/photo-1540206276207-3af25c08df2f?q=80&w=1920');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-blend-mode: multiply;
+    }
+
+
+
+
+    .gallery-card:hover img {
+        transform: scale(1.08);
+    }
+
+    .gallery-card img {
+        height: 300px; /* Chiều cao đồng nhất */
+        object-fit: cover; /* Cắt ảnh cho đẹp */
+        width: 100%; /* Đảm bảo full card */
+        transition: transform .35s ease;
+    }
+    /* Desktop: Không cho tách dòng */
+.contact-address {
+    white-space: nowrap;
+}
+
+/* Mobile: Cho phép tự xuống dòng */
+@@media (max-width: 576px) {
+    .contact-address {
+        white-space: normal;
+        line-break: anywhere;
+    }
+}
+
+</style>
+
+<!-- ================= HERO ================= -->
+<section class="tn-hero position-relative text-white">
+    <div class="tn-hero-bg"></div>
+    <div class="tn-hero-content text-center">
+        <h1 class="fw-bold display-4">Tạp Hóa Thanh Nhàn</h1>
+        <p class="lead mt-3">Tươi – Sạch – Giá tốt – Phục vụ tận tâm hơn 15 năm</p>
+    </div>
+</section>
+
+<!-- ================= INTRO ================= -->
+<section class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-4">
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200"
+                 class="img-fluid rounded-4 shadow" alt="Thanh Nhan Store" />
+        </div>
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-3 text-success">Về chúng tôi</h2>
+            <p class="text-secondary fs-5">
+                Tạp Hóa <strong>Thanh Nhàn</strong> chuyên cung cấp các mặt hàng thiết yếu:
+                thực phẩm tươi – khô, gia vị, đồ gia dụng, đồ dùng cá nhân, hàng tiêu dùng hằng ngày.
+            </p>
+            <p class="text-secondary fs-5">
+                Chúng tôi đặt mục tiêu mang đến sản phẩm sạch – chất lượng – rõ nguồn gốc cùng
+                trải nghiệm mua sắm tiện lợi và thân thiện nhất cho mọi gia đình.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CORE VALUES ================= -->
+<section class="tn-values py-5 text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Giá trị cốt lõi</h2>
+        <div class="row g-4">
+
+            <div class="col-lg-4">
+                <div class="tn-value-box p-4 rounded-4 shadow">
+                    <i class="bi bi-bag-check display-5 mb-3"></i>
+                    <h5 class="fw-bold">Sản phẩm sạch</h5>
+                    <p>Rau củ – thịt – cá – hàng tiêu dùng được chọn lọc kỹ, đảm bảo chất lượng.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="tn-value-box p-4 rounded-4 shadow">
+                    <i class="bi bi-heart display-5 mb-3"></i>
+                    <h5 class="fw-bold">Phục vụ tận tâm</h5>
+                    <p>Không chỉ bán hàng, chúng tôi đồng hành để tạo giá trị tốt cho khách hàng.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="tn-value-box p-4 rounded-4 shadow">
+                    <i class="bi bi-truck display-5 mb-3"></i>
+                    <h5 class="fw-bold">Nhanh – Tiện – Gần</h5>
+                    <p>Giao hàng nhanh – đặt hàng dễ – luôn có sẵn sản phẩm cần thiết.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section class="container py-5">
+    <h2 class="fw-bold text-center text-success mb-4">Hình ảnh cửa hàng</h2>
+
+    <div class="row g-4">
+
+        <!-- ẢNH 1 -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden gallery-card">
+                <img src="https://images.pexels.com/photos/5632371/pexels-photo-5632371.jpeg"
+                     class="card-img-top" alt="Kệ hàng tạp hóa – rau củ sạch" />
+                <div class="card-body text-center">
+                    <h6 class="fw-bold text-success mb-2">Kệ hàng tạp hóa Thanh Nhàn</h6>
+                    <p class="text-muted small">Đầy đủ hàng thiết yếu, sắp xếp gọn gàng – sạch sẽ.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ẢNH 2 -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden gallery-card">
+                <img src="https://images.pexels.com/photos/4198023/pexels-photo-4198023.jpeg"
+                     class="card-img-top" alt="Rau củ sạch – nhiều màu" />
+                <div class="card-body text-center">
+                    <h6 class="fw-bold text-success mb-2">Rau củ tươi – đảm bảo an toàn</h6>
+                    <p class="text-muted small">Nhập hàng mỗi ngày, luôn giữ độ tươi và chất lượng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ẢNH 3 -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden gallery-card">
+                <img src="https://images.pexels.com/photos/1093038/pexels-photo-1093038.jpeg"
+                     class="card-img-top" alt="Trái cây tươi ngon" />
+                <div class="card-body text-center">
+                    <h6 class="fw-bold text-success mb-2">Trái cây chất lượng cao</h6>
+                    <p class="text-muted small">Được lựa kỹ từng loại, độ chín – độ ngọt tự nhiên.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= COMMITMENTS ================= -->
+<section class="py-5 position-relative commit-section text-white">
+
+    <div class="commit-bg"></div>
+
+    <div class="container position-relative" style="z-index:2;">
+        <h2 class="fw-bold text-center mb-4 text-white">Cam kết của Thanh Nhàn</h2>
+
+        <div class="commit-box mx-auto p-4 rounded-4" style="max-width: 720px;">
+            <ul class="fs-5">
+                <li>✔ Rau củ – thực phẩm tươi mới mỗi ngày</li>
+                <li>✔ Mặt hàng rõ nguồn gốc – thương hiệu uy tín</li>
+                <li>✔ Giá tốt – minh bạch – cạnh tranh</li>
+                <li>✔ Dịch vụ thân thiện – hỗ trợ nhanh chóng</li>
+            </ul>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ================= CONTACT ================= -->
+<section class="container py-5">
+    <h2 class="fw-bold text-success text-center mb-4">Thông tin liên hệ</h2>
+
+    <div class="row align-items-center g-4">
+
+        <!-- CỘT TRÁI: ẢNH 3D CLAY VEGETABLES -->
+        <div class="col-lg-6 text-center">
+            <img src="https://cdn.pixabay.com/photo/2022/08/09/03/10/call-center-7374023_1280.png"
+                 class="img-fluid rounded-4 shadow-sm"
+                 style="max-width: 380px;"
+                 alt="Staff Contact" />
+        </div>
+
+
+
+
+
+        <!-- CỘT PHẢI: THÔNG TIN LIÊN HỆ -->
+        <div class="col-lg-6">
+            <div class="p-4 rounded-4 shadow-sm bg-white">
+
+                <p class="fs-5 mb-3 contact-address">
+                    <i class="bi bi-geo-alt me-2 text-success"></i>
+                    <strong>Địa chỉ:</strong> Thôn Minh Lý – Quảng Minh – Ba Vì – Hà Nội
+                </p>
+
+
+                <p class="fs-5 mb-3">
+                    <i class="bi bi-telephone me-2 text-success"></i>
+                    <strong>Điện thoại:</strong> 0987 654 321
+                </p>
+
+                <p class="fs-5 mb-3">
+                    <i class="bi bi-envelope me-2 text-success"></i>
+                    <strong>Email:</strong> thanhnhan.store@gmail.com
+                </p>
+
+                <p class="fs-5 mb-0">
+                    <i class="bi bi-clock me-2 text-success"></i>
+                    <strong>Giờ mở cửa:</strong> 6:00 – 22:00 hằng ngày
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+

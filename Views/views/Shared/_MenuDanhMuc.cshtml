@@ -1,0 +1,12 @@
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>  
+
+@* Menu danh muc: click -> DanhMuc/DanhSach?maDM=... *@
+@if (Model != null)
+{
+    foreach (var dm in Model)
+    {
+        <a href="@Url.Action("DanhSach","DanhMuc", new { maDM = dm.MaDM })" title="@dm.MoTa">
+            @dm.TenDM
+        </a>
+    }
+}

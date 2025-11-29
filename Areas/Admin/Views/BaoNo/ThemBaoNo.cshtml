@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Thêm Báo Nợ";
+
+    var khach = ViewBag.KhachHang as IEnumerable<WebQuanLiCuaHangTapHoa.Models.KhachHang>;
+}
+
+<div class="mb-3">
+    <a href="@Url.Action("Index", "BaoNo", new { area = "Admin" })" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        @using (Html.BeginForm("ThemBaoNo", "BaoNo", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label>Khách hàng *</label>
+                <select name="MaKH" class="form-control" required>
+                    <option value="">--- Chọn ---</option>
+                    @foreach (var k in khach)
+                    {
+                        <option value="@k.MaKH">@k.TenKH — @k.SoDT</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label>Số tiền nợ *</label>
+                <input name="SoTien" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label>Ghi chú</label>
+                <textarea name="GhiChu" class="form-control"></textarea>
+            </div>
+
+            <button class="btn btn-success">
+                <i class="fa fa-check"></i> Lưu
+            </button>
+        }
+    </div>
+</div>

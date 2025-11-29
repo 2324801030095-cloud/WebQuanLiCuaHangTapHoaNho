@@ -1,0 +1,42 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.NhaCungCap
+
+<div class="modal fade" id="modalNCC" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Xóa Nhà Cung Cấp</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Bạn có chắc muốn xóa nhà cung cấp:
+                <strong>@Model.TenNCC</strong> ?
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" onclick="submitDelete(@Model.MaNCC)">Xóa</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitDelete(id) {
+
+        fetch("/Admin/NhaCungCap/XoaConfirmed/" + id, {
+            method: "POST"
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    alert(res.message);
+                    location.reload();
+                } else {
+                    alert(res.message);
+                }
+            });
+    }
+</script>

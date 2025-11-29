@@ -1,0 +1,63 @@
+﻿@* File: Areas/Admin/Views/KhachHang/_ChiTietKhachHang.cshtml *@
+@model WebQuanLiCuaHangTapHoa.Models.KhachHang
+
+<div class="modal fade" id="modalDetailKH" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content customer-card" style="border-radius:14px; overflow:hidden;">
+            <div class="modal-header border-0" style="padding:18px 20px;">
+                <h5 class="modal-title"><i class="fa-solid fa-id-card-clip me-2 text-info"></i>Thông tin khách hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body" style="padding:18px 20px;">
+                <div style="display:flex;gap:14px;align-items:center;">
+                    <div style="width:84px;height:84px;border-radius:12px;background:linear-gradient(90deg,#60a5fa,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;">
+                        @(
+                            string.IsNullOrEmpty(Model.TenKH) ? "?" :
+                            (Model.TenKH.Length >= 2 ? Model.TenKH.Substring(0,2).ToUpper() : Model.TenKH.Substring(0,1).ToUpper())
+                        )
+                    </div>
+                    <div style="flex:1;">
+                        <h5 class="mb-1">@Model.TenKH</h5>
+                        <div class="small-muted">SĐT: @Model.SoDT</div>
+                        <div class="small-muted">Địa chỉ: @Model.DiaChi</div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex gap-3">
+                    <div style="flex:1;">
+                        <div class="small-muted">Tổng đơn</div>
+                        <h4>@(ViewBag.TongDon ?? 0)</h4>
+                    </div>
+                    <div style="flex:1; text-align:right;">
+                        <div class="small-muted">Tổng tiền</div>
+                        <div class="badge-money">@String.Format("{0:N0} ₫", ViewBag.TongTien ?? 0M)</div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <h6 class="small-muted">Hoạt động gần đây</h6>
+                    <div class="small-muted">Không có dữ liệu chi tiết trong demo này.</div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0" style="padding:12px 20px;">
+                <button class="btn btn-apple btn-apple-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-apple btn-apple-primary" onclick="openEdit(@Model.MaKH)"><i class="fa-solid fa-pen-to-square me-1"></i> Sửa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const md = document.getElementById('modalDetailKH');
+        if (!md) return;
+        md.addEventListener('show.bs.modal', function () {
+            const card = md.querySelector('.modal-content');
+            if (card) { card.style.transform = 'translateY(12px)'; card.style.opacity = '0'; setTimeout(() => { card.style.transition = 'all .32s ease'; card.style.transform = 'translateY(0)'; card.style.opacity = '1'; }, 8); }
+        });
+    })();
+</script>

@@ -1,0 +1,232 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers.DanhMucVM>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Quản lý danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    /* ===== TIÊU ĐỀ TRANG (CHẾ ĐỘ SÁNG) ===== */
+    .page-title {
+        color: #2563eb; /* xanh primary */
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9; /* xanh icon */
+        font-size: 1.6rem;
+        transition: .25s ease;
+    }
+
+    /* ===== DARK MODE NEON GLOW ===== */
+    body.dark .page-title {
+        color: transparent !important;
+        background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
+        -webkit-background-clip: text;
+        text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(147,197,253,0.5);
+    }
+
+    body.dark .page-title-icon {
+        background: linear-gradient(90deg, #60a5fa, #34d399);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 20px rgba(147,197,253,0.4);
+        transition: .25s ease;
+    }
+
+        body.dark .page-title-icon:hover {
+            transform: scale(1.12);
+            text-shadow: 0 0 12px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 30px rgba(147,197,253,0.7);
+        }
+    th, td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    th:nth-child(1) {
+        width: 100px;
+    }
+    /* Mã DM */
+    th:nth-child(2) {
+        width: 220px;
+    }
+    /* Tên danh mục */
+    th:nth-child(3) {
+        width: 100px;
+    }
+    /* Số SP */
+    th:nth-child(4) {
+        width: auto;
+    }
+    /* Mô tả */
+    th:nth-child(5) {
+        width: 220px;
+    }
+    /* Thao tác */
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+        .pagination li {
+            list-style: none;
+        }
+
+            .pagination li a, .pagination li span {
+                display: block;
+                padding: 8px 12px;
+                border-radius: 8px;
+                color: #1e293b;
+                border: 1px solid #e2e8f0;
+                background: #f8fafc;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.25s ease;
+            }
+
+                .pagination li a:hover {
+                    background: #e0f2fe;
+                    color: #1d4ed8;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(37,99,235,0.2);
+                }
+
+            .pagination li.active a {
+                background: linear-gradient(90deg, #2563eb, #3b82f6);
+                color: white !important;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37,99,235,0.35);
+            }
+
+            .pagination li.disabled a {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+</style>
+
+<div class="container-fluid p-4 pt-2">
+    <div class="text-center mb-3">
+        <h4 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+            <i class="fa-solid fa-tags"></i>
+            Trang Quản Lý Danh Mục
+        </h4>
+    </div>
+
+
+    <div class="text-end mb-3">
+        <button class="btn btn-success btn-sm" id="btnAdd">
+            <i class="fa-solid fa-plus"></i> Thêm danh mục
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-bordered table-hover mb-0">
+            <thead class="table-light text-center">
+                <tr>
+                    <th>Mã DM</th>
+                    <th>Tên danh mục</th>
+                    <th>Số SP</th>
+                    <th>Mô tả</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dm in Model)
+                {
+                    <tr>
+                        <td>@dm.MaDM</td>
+                        <td>@dm.TenDM</td>
+                        <td>@dm.SoSP</td>
+                        <td>@dm.MoTa</td>
+                        <td>
+                            <button class="btn btn-info btn-sm me-1 btn-view-dm" data-id="@dm.MaDM">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button class="btn btn-primary btn-sm me-1 btn-edit-dm" data-id="@dm.MaDM">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm btn-del-dm" data-id="@dm.MaDM">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card-footer bg-white text-center">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page }),
+            new PagedListRenderOptions
+            {
+                UlElementClasses = new[] { "pagination" },
+                MaximumPageNumbersToDisplay = 5,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always
+            })
+        </div>
+    </div>
+</div>
+
+<!-- Container chứa các modal load qua AJAX -->
+<div id="modalContainer"></div>
+
+<script>
+    async function loadModal(url, modalId) {
+        // đóng toàn bộ modal đang mở
+        closeAllModals();
+
+        const html = await (await fetch(url)).text();
+        const container = document.getElementById("modalContainer");
+        container.innerHTML = html;
+
+        // kích hoạt script trong modal
+        container.querySelectorAll("script").forEach(s => {
+            const n = document.createElement("script"); n.text = s.text; document.body.appendChild(n);
+        });
+
+        // mở modal
+        const modal = document.getElementById(modalId);
+        if (modal) new bootstrap.Modal(modal).show();
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll(".modal.show").forEach(m => {
+            const inst = bootstrap.Modal.getInstance(m);
+            if (inst) inst.hide();
+        });
+        document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("padding-right");
+    }
+
+    // CLICK EVENT
+    document.addEventListener("click", e => {
+        const add = e.target.closest("#btnAdd");
+        const edit = e.target.closest(".btn-edit-dm");
+        const view = e.target.closest(".btn-view-dm");
+        const del = e.target.closest(".btn-del-dm");
+
+        if (add) loadModal("/Admin/DanhMuc/Them", "modalDM");
+        if (edit) loadModal(`/Admin/DanhMuc/Sua/${edit.dataset.id}`, "modalDM");
+        if (view) loadModal(`/Admin/DanhMuc/ChiTietDanhMuc/${view.dataset.id}`, "modalDMCT");
+        if (del) {
+            if (!confirm("Xóa danh mục này?")) return;
+            fetch("/Admin/DanhMuc/Xoa", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: del.dataset.id })
+            }).then(r => r.json()).then(d => { alert(d.message); if (d.success) location.reload(); });
+        }
+    });
+</script>

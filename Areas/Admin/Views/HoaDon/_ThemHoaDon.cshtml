@@ -1,0 +1,190 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.HoaDon
+
+<!-- Modal thêm hóa đơn -->
+<div class="modal fade" id="modalAddHD" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-file-circle-plus me-2"></i> Thêm hóa đơn
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- Form thêm hóa đơn -->
+                <form id="formAddHD">
+
+                    <!-- Ngày lập -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ngày lập</label>
+                        <input type="datetime-local"
+                               name="Ngay"
+                               class="form-control"
+                               value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                               required />
+                    </div>
+
+                    <!-- KHÁCH HÀNG AUTOCOMPLETE -->
+                    <div class="mb-3 position-relative">
+                        <label class="form-label fw-bold">Khách hàng</label>
+
+                        <!-- Ô nhập tên khách -->
+                        <input type="text"
+                               id="khachInput"
+                               class="form-control"
+                               placeholder="Nhập tên khách hàng..."
+                               autocomplete="off" />
+
+                        <!-- Input ẩn gửi MaKH -->
+                        <input type="hidden" name="MaKH" id="maKH-hidden" />
+
+                        <!-- Danh sách gợi ý -->
+                        <ul id="suggestKH"
+                            class="list-group position-absolute w-100"
+                            style="z-index:1000; display:none;"></ul>
+
+                        <!-- Nút mở modal thêm khách -->
+                        <button type="button"
+                                class="btn btn-outline-success btn-sm mt-2"
+                                onclick="openAddKH()">
+                            <i class="fa-solid fa-user-plus me-1"></i> Thêm khách hàng mới
+                        </button>
+                    </div>
+
+                    <!-- Nhân viên -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nhân viên</label>
+                        @Html.DropDownList(
+                            "MaNV",
+                            (SelectList)ViewBag.NhanVien,
+                            "--Chọn nhân viên--",
+                            new { @class = "form-select", required = "required" }
+                        )
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" id="btnSaveHD">
+                    <i class="fa-solid fa-check me-1"></i> Lưu hóa đơn
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const txtKH = document.getElementById("khachInput");
+    const hiddenMaKH = document.getElementById("maKH-hidden");
+    const listKH = document.getElementById("suggestKH");
+
+    // ======================
+    // AUTOCOMPLETE KHÁCH HÀNG
+    // ======================
+    txtKH.addEventListener("input", function () {
+
+        let keyword = this.value.trim();
+
+        if (keyword.length < 1) {
+            listKH.style.display = "none";
+            hiddenMaKH.value = "";
+            return;
+        }
+
+        fetch(`/Admin/KhachHang/Tim?keyword=${keyword}`)
+            .then(r => r.json())
+            .then(list => {
+                listKH.innerHTML = "";
+
+                if (list.length === 0) {
+                    listKH.style.display = "none";
+                    hiddenMaKH.value = "";
+                    return;
+                }
+
+                list.forEach(item => {
+                    let li = document.createElement("li");
+                    li.className = "list-group-item list-group-item-action";
+                    li.innerText = item.TenKH;
+
+                    li.onclick = () => {
+                        txtKH.value = item.TenKH;
+                        hiddenMaKH.value = item.MaKH;
+                        listKH.style.display = "none";
+                    };
+
+                    listKH.appendChild(li);
+                });
+
+                listKH.style.display = "block";
+            });
+    });
+
+    // ======================
+    // MỞ MODAL THÊM KH MỚI
+    // ======================
+    function openAddKH() {
+        showOverlay();
+        fetch("/Admin/KhachHang/Them")
+            .then(r => r.text())
+            .then(html => {
+                hideOverlay();
+                modalContainer.innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalAddKH")).show();
+            });
+    }
+
+    // ======================
+    // HÀM NHẬN KHÁCH HÀNG MỚI TỪ MODAL THÊM KHÁCH
+    // ======================
+    window.returnNewKH = function (maKH, tenKH) {
+        txtKH.value = tenKH;
+        hiddenMaKH.value = maKH;
+    };
+
+    // ======================
+    // LƯU HÓA ĐƠN
+    // ======================
+    document.getElementById("btnSaveHD").onclick = () => {
+
+        if (!hiddenMaKH.value) {
+            alert("Vui lòng chọn khách hàng.");
+            txtKH.focus();
+            return;
+        }
+
+        let fd = new FormData(document.getElementById("formAddHD"));
+
+        showOverlay();
+
+        fetch("/Admin/HoaDon/Them", {
+            method: "POST",
+            body: fd
+        })
+            .then(r => r.json())
+            .then(d => {
+                hideOverlay();
+
+                if (!d.success) {
+                    alert(d.message);
+                    return;
+                }
+
+                alert("Thêm hóa đơn thành công!");
+
+                bootstrap.Modal.getInstance(document.getElementById("modalAddHD")).hide();
+
+                location.reload();
+            });
+    };
+
+</script>

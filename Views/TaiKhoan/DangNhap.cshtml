@@ -1,0 +1,64 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.ViewModels.Auth.DangNhapVM
+
+@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";   // hoặc Layout_Login nếu bạn có riêng
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4 text-success">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập tài khoản
+                    </h3>
+
+                    @using (Html.BeginForm("DangNhap", "TaiKhoan", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <!-- Tên đăng nhập -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.TenDangNhap, new { @class = "form-label fw-semibold" })
+                            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", placeholder = "Nhập tên đăng nhập" })
+                            @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            @Html.LabelFor(m => m.MatKhau, new { @class = "form-label fw-semibold" })
+                            @Html.PasswordFor(m => m.MatKhau, new { @class = "form-control", placeholder = "Nhập mật khẩu" })
+                            @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
+                        </div>
+
+                        <!-- Lỗi đăng nhập -->
+                         if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger small mt-2">
+                                @Html.ValidationSummary(true)
+                            </div>
+                        }
+
+                        <!-- Nút đăng nhập -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-brand btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập
+                            </button>
+                        </div>
+
+                        <!-- Liên kết -->
+                        <div class="text-center mt-3">
+                            <span>Chưa có tài khoản?</span>
+                            <a href="@Url.Action("DangKy", "TaiKhoan")" class="text-success fw-semibold">Đăng ký ngay</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

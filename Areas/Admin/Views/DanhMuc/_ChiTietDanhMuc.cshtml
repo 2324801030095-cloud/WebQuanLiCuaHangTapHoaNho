@@ -1,0 +1,141 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.ProductInCategoryVM>
+
+<div class="modal fade" id="modalDMCT" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-eye"></i>
+                    Danh mục: @ViewBag.TenDM (@Model.Count() sản phẩm)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Nút thêm -->
+                <div class="text-end mb-3">
+                    <button class="btn btn-success btn-sm" onclick="openAddInCategory(@ViewBag.MaDM)">
+                        <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+                    </button>
+                </div>
+
+                <!-- Bảng sản phẩm -->
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Hình ảnh</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="6" class="text-center text-muted fst-italic">Không có sản phẩm nào</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var sp in Model)
+                            {
+                                <tr>
+                                    <td>@sp.MaSP</td>
+                                    <td class="text-start">@sp.TenSP</td>
+                                    <td>@String.Format("{0:N0} ₫", sp.GiaBan)</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(sp.HinhAnh))
+                                        {<img src="@Url.Content("~/Content/Images/" + sp.HinhAnh)"
+                                              width="100" class="rounded shadow-sm" />
+                                        }
+                                        else
+                                        {<span class="text-muted fst-italic">Không có Hình Ảnh</span>}
+                                    </td>
+                                    <td>@(sp.HoatDong ? "Đang bán" : "Ngưng")</td>
+
+                                    <td class="text-center">
+                                        <button class="btn btn-info btn-sm me-1" onclick="viewProduct(@sp.MaSP)">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-primary btn-sm me-1" onclick="editProduct(@sp.MaSP)">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(@sp.MaSP, @ViewBag.MaDM)">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // ========== MỞ MODAL THÊM ==========
+    function openAddInCategory(maDM) {
+        fetch(`/Admin/SanPham/Them?maDM=${maDM}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    }
+
+    // ========== MỞ MODAL SỬA ==========
+    function editProduct(id) {
+        fetch(`/Admin/SanPham/Sua/${id}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    }
+
+    // ========== MỞ MODAL CHI TIẾT ==========
+    function viewProduct(id) {
+        fetch(`/Admin/SanPham/ChiTiet/${id}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalSP")).show();
+            });
+    }
+
+    // ========== XÓA SẢN PHẨM ==========
+    function deleteProduct(id, maDM) {
+        if (!confirm("Bạn có chắc muốn xóa sản phẩm này không?")) return;
+
+        fetch("/Admin/SanPham/Xoa", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        })
+            .then(res => res.json())
+            .then(d => {
+                alert(d.message);
+                if (d.success) reloadProductsInCategory(maDM);
+            });
+    }
+
+    // ========== RELOAD LẠI DANH SÁCH TRONG MODAL ==========
+    function reloadProductsInCategory(maDM) {
+        fetch(`/Admin/DanhMuc/ChiTietDanhMuc/${maDM}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("modalContainer").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("modalDMCT")).show();
+            });
+    }
+
+</script>

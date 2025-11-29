@@ -1,0 +1,869 @@
+﻿@{
+    ViewBag.Title = "Trang Chủ - Tạp Hóa Thanh Nhàn";
+}
+
+<style>
+    /* --- BIẾN MÀU SẮC --- */
+    :root {
+        --primary: #16a34a;
+        --primary-dark: #14532d;
+        --primary-light: #dcfce7;
+        --text-dark: #1f2937;
+        --g1: #16a34a;
+        --g2: #ca8a04;
+        --radius: 12px;
+        --shadow-soft: 0 4px 20px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+    }
+
+    /* --- UTILITIES CHUNG --- */
+    body {
+        color: var(--text-dark);
+    }
+
+    section {
+        padding: 60px 0;
+    }
+
+    .section-alt {
+        background-color: #f9fafb;
+    }
+
+    /* Gradient Text */
+    .gtext {
+        background: linear-gradient(135deg, var(--g1), var(--g2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+    }
+
+    /* Button Brand */
+    .btn-brand {
+        background: var(--primary);
+        color: white;
+        border: none;
+        transition: var(--transition);
+        box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+    }
+
+        .btn-brand:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    /* Card Soft */
+    .card-soft {
+        border: none;
+        border-radius: var(--radius);
+        background: white;
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+    }
+
+        .card-soft:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+    /* --- HERO SECTION --- */
+    .tn-hero {
+        height: 530px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .tn-hero-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=1920');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        filter: brightness(0.35);
+        z-index: 1;
+    }
+
+    .tn-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* --- USP SECTION --- */
+    .usp .icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        transition: var(--transition);
+    }
+
+    .usp .col-12:hover .icon {
+        background: var(--primary);
+        color: white;
+        transform: rotateY(180deg);
+    }
+
+    /* --- PROMO SLIDER --- */
+    .promo-slide {
+        border-radius: var(--radius);
+        background: #fff;
+        border: 1px solid #eee;
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+    }
+
+    .promo-cover {
+        border-radius: 8px;
+        height: 180px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    /* --- TOP PRODUCTS (FLIP CARD 3D) --- */
+    .top-slide {
+        height: 320px;
+        perspective: 1000px;
+    }
+
+    .flip {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .flip-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .flip:hover .flip-inner {
+        transform: rotateY(180deg);
+    }
+
+    .flip-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .flip-front {
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+        .flip-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .flip-hint {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .flip-back {
+        background-color: #fff;
+        color: var(--text-dark);
+        transform: rotateY(180deg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        border: 2px solid var(--primary);
+    }
+
+        .flip-back h6 {
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+    /* --- FIRE ANIMATION (Sản phẩm bán chạy) --- */
+    @@keyframes flame {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .icon-fire {
+        color: #dc2626; /* Màu đỏ */
+        display: inline-block;
+        animation: flame 1.5s infinite ease-in-out;
+        margin-right: 8px;
+        font-size: 1.5rem;
+        vertical-align: middle;
+    }
+
+    /* --- FOOTER OLD COLOR --- */
+    /* Màu tối cổ điển thay vì gradient xanh */
+    .footer-classic {
+        background-color: #1f2937; /* Dark Grey */
+        color: white;
+    }
+    /* --- FOOTER MỚI (THEO ẢNH) --- */
+    /* 1. Phần Newsletter */
+    .footer-newsletter {
+        background-color: var(--bg-cream);
+        padding: 60px 0;
+        text-align: center;
+    }
+
+        .footer-newsletter h3 {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+    .newsletter-form {
+        max-width: 500px;
+        margin: 0 auto;
+        display: flex;
+        gap: 10px;
+    }
+
+        .newsletter-form input {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            padding: 12px 20px;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .newsletter-form button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+            .newsletter-form button:hover {
+                background-color: var(--primary-dark);
+            }
+
+
+    /* 2. Phần Links: Tăng độ tươi của màu xanh */
+    .footer-links {
+        /* CÁCH 1: Dùng màu xanh đậm nhưng tươi hơn màu cũ */
+        /* background-color: #15803d; */
+        /* CÁCH 2 (Khuyên dùng): Dùng Gradient để màu sắc sâu và sang hơn */
+        background: linear-gradient(180deg, #166534 0%, #14532d 100%);
+        padding: 60px 0 30px;
+        color: #ffffff;
+        font-size: 0.95rem;
+    }
+
+    .footer-title {
+        color: #ffffff;
+        font-weight: 800; /* Tăng độ dày chữ để nổi trên nền xanh tươi */
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Thêm bóng chữ nhẹ */
+    }
+
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .footer-list li {
+            margin-bottom: 12px;
+        }
+
+        .footer-list a {
+            color: rgba(255, 255, 255, 0.9); /* Tăng độ sáng của chữ link lên 0.9 */
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+            .footer-list a:hover {
+                color: #ffffff;
+                padding-left: 8px; /* Đẩy mạnh hơn chút */
+                text-shadow: 0 0 10px rgba(255,255,255,0.5); /* Hiệu ứng phát sáng khi hover */
+            }
+
+    /* Ghi đè màu muted: Tăng độ sáng cho chữ mô tả */
+    .footer-links .text-muted {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Social Icons: Làm nổi bật hơn */
+    .social-icons a {
+        color: #ffffff;
+        font-size: 1.2rem;
+        margin-right: 16px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px; /* Tăng kích thước nút */
+        height: 42px;
+        background: rgba(255,255,255,0.15); /* Nền nút sáng hơn chút */
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+        .social-icons a:hover {
+            background-color: #ffffff; /* Hover nền trắng */
+            color: #16a34a; /* Icon chuyển sang màu xanh thương hiệu */
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    .copyright {
+        border-top: 1px solid rgba(255, 255, 255, 0.2); /* Viền sáng hơn */
+        margin-top: 50px;
+        padding-top: 20px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7); /* Chữ bản quyền sáng hơn */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .swiper-button-next, .swiper-button-prev {
+        color: var(--primary);
+    }
+
+    .swiper-pagination-bullet-active {
+        background: var(--primary);
+    }
+
+
+
+    /* --- HERO SECTION MODIFIED --- */
+    .tn-hero {
+        height: 550px;
+        display: flex;
+        justify-content: flex-end; /* Vẫn giữ căn phải */
+        align-items: center;
+        position: relative;
+    }
+
+    .tn-hero-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=1920');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        filter: brightness(0.65);
+        z-index: 1;
+    }
+
+    .tn-hero-content {
+        position: relative;
+        z-index: 2;
+        /* --- THAY ĐỔI VỊ TRÍ --- */
+        /* Tăng padding-right từ 80px lên 180px để dịch nội dung sang trái nhiều hơn */
+        padding-right: 300px;
+        /* --- THAY ĐỔI CĂN CHỈNH NỘI DUNG BÊN TRONG --- */
+        text-align: center; /* Căn giữa các dòng chữ */
+        /* Flexbox để căn giữa hoàn hảo nếu có nhiều phần tử con */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+    }
+    .tn-hero-content {
+        position: relative;
+        z-index: 2;
+        padding-right: 300px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+    }
+
+    /* --- THANH DỌC TRANG TRÍ (Mới thêm) --- */
+    .tn-hero-content::after {
+        content: '';
+        position: absolute;
+
+        /* Vị trí: nằm bên phải nội dung */
+        right: 225px; /* Cách mép phải của khối content 40px */
+
+        /* Kích thước thanh */
+        width: 20px;   /* Độ dày thanh */
+        height: 100%;  /* Chiều cao thanh (80% so với khối chữ) */
+
+        /* Màu sắc & Kiểu dáng */
+        background-color: white; /* Màu xanh lá chủ đạo (hoặc màu vàng cam: #ca8a04) */
+        border-radius: 10px;       /* Bo tròn 2 đầu */
+        box-shadow: 0 0 15px rgba(22, 163, 74, 0.6); /* Hiệu ứng phát sáng nhẹ */
+    }
+
+    /* Ẩn thanh dọc trên mobile để đỡ chật */
+    @@media (max-width: 992px) {
+        .tn-hero-content::after {
+            display: none;
+        }
+    }
+    /* --- THAY ĐỔI CHỮ ĐẸP HƠN --- */
+    .tn-hero-title {
+        /* Sử dụng font Montserrat mới */
+        font-family: 'Montserrat', sans-serif;
+        font-size: 4.8rem; /* Tăng nhẹ kích thước */
+        font-weight: 900; /* Dùng nét siêu đậm */
+        text-transform: uppercase;
+        letter-spacing: 3px; /* Tăng khoảng cách chữ cho sang trọng */
+        /* Bóng chữ mềm và sâu hơn */
+        text-shadow: 0 5px 25px rgba(0,0,0,0.7);
+        line-height: 1.15;
+        margin-bottom: 25px;
+    }
+
+    .tn-hero-desc {
+        /* Sử dụng font Roboto dễ đọc */
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 500;
+        /* Bóng chữ mềm hơn */
+        text-shadow: 0 3px 15px rgba(0,0,0,0.6);
+        line-height: 1.5; /* Tăng khoảng cách dòng cho dễ đọc */
+        opacity: 0.95; /* Màu trắng hơi trong suốt nhẹ */
+    }
+
+    /* Responsive cho màn hình nhỏ */
+    @@media (max-width: 992px) {
+        /* Trên tablet/mobile thì cho về giữa và reset padding */
+        .tn-hero {
+            justify-content: center;
+        }
+
+        .tn-hero-content {
+            padding-right: 20px;
+            padding-left: 20px;
+            text-align: center;
+        }
+
+        .tn-hero-title {
+            font-size: 3rem;
+        }
+
+        .tn-hero-desc {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+
+<section class="hero p-0">
+    <section class="tn-hero position-relative text-white">
+        <div class="tn-hero-bg"></div>
+        <div class="tn-hero-content">
+            <h1 class="tn-hero-title">Tạp Hóa <br /> Thanh Nhàn</h1>
+            <p class="tn-hero-desc">Tươi – Sạch – Giá tốt <br /> Phục vụ tận tâm hơn 15 năm</p>
+        </div>
+    </section>
+</section>
+<div class="container py-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+            <span class="badge text-bg-success mb-2" style="background:linear-gradient(135deg,var(--g1),var(--g2));">Tươi mỗi ngày</span>
+            <h1 class="fw-bold display-5">
+                Chọn thực phẩm <br />
+                <span class="gtext">xanh &amp; an toàn</span>
+            </h1>
+            <p class="lead mt-3 text-muted">Sản phẩm hữu cơ, nguồn gốc rõ ràng. Cam kết giao hàng nhanh trong ngày.</p>
+            <div class="mt-4 d-flex gap-3">
+                <a class="btn btn-brand btn-lg px-4" href="@Url.Action("TatCa", "DanhMuc")">
+                    <i class="bi bi-cart-plus me-1"></i> Mua ngay
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img class="img-fluid rounded-4 shadow-lg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200" alt="Hero Image">
+        </div>
+    </div>
+</div>
+</section>
+
+<section class="section-alt">
+    <div class="container">
+        <div class="row g-4 usp">
+            <div class="col-12 col-md-3 d-flex align-items-center">
+                <div class="icon me-3"><i class="bi bi-flower3"></i></div>
+                <div><strong class="h6 d-block mb-1">100% Hữu cơ</strong><div class="text-muted small">An toàn cho sức khỏe</div></div>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-center">
+                <div class="icon me-3"><i class="bi bi-basket3"></i></div>
+                <div><strong class="h6 d-block mb-1">Tiêu dùng xanh</strong><div class="text-muted small">Tươi ngon tự nhiên</div></div>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-center">
+                <div class="icon me-3"><i class="bi bi-truck"></i></div>
+                <div><strong class="h6 d-block mb-1">FreeShip 0đ</strong><div class="text-muted small">Cho đơn từ 300k</div></div>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-center">
+                <div class="icon me-3"><i class="bi bi-arrow-repeat"></i></div>
+                <div><strong class="h6 d-block mb-1">Đổi trả 24h</strong><div class="text-muted small">Nếu không hài lòng</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 fw-bold m-0 text-success">Ưu đãi hấp dẫn</h2>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-success btn-sm rounded-circle" id="promoPrev" style="width:36px;height:36px"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-outline-success btn-sm rounded-circle" id="promoNext" style="width:36px;height:36px"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="swiper" id="promoSwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="promo-slide p-4 d-flex flex-column" style="background:#fff7ed;">
+                        <div class="mb-auto">
+                            <div class="badge bg-danger mb-2">GIẢM 50%</div>
+                            <h3 class="h4 mb-3 fw-bold">Nước ép trái cây</h3>
+                        </div>
+                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=601" alt="">
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="promo-slide p-4 d-flex flex-column" style="background:#f0fdf4;">
+                        <div class="mb-auto">
+                            <div class="badge bg-success mb-2">COMBO</div>
+                            <h3 class="h4 mb-3 fw-bold">Rau củ VietGap</h3>
+                        </div>
+                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=602" alt="">
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="promo-slide p-4 d-flex flex-column" style="background:#eff6ff;">
+                        <div class="mb-auto">
+                            <div class="badge bg-primary mb-2">MỚI</div>
+                            <h3 class="h4 mb-3 fw-bold">Hải sản tươi sống</h3>
+                        </div>
+                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=603" alt="">
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="promo-slide p-4 d-flex flex-column" style="background:#faf5ff;">
+                        <div class="mb-auto">
+                            <div class="badge bg-warning text-dark mb-2">HOT</div>
+                            <h3 class="h4 mb-3 fw-bold">Trái cây nhập khẩu</h3>
+                        </div>
+                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=604" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="top-products" class="section-alt">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="text-success fw-bold text-uppercase ls-1">Tiêu điểm</span>
+            <h2 class="h3 fw-bold">Top sản phẩm hôm nay</h2>
+            <div class="mx-auto bg-success mt-2" style="width: 60px; height: 3px;"></div>
+        </div>
+
+        <div class="swiper pb-5" id="topCarousel">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide top-slide">
+                    <div class="flip">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/600/800?random=1001" alt="Top 1">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-danger mb-3">🔥 TOP 1 SELLING</span>
+                                <h6>Cải Kale Hữu Cơ</h6>
+                                <p class="text-center px-2">Giàu chất xơ.<br><strong>35.000₫ / 500g</strong></p>
+                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide top-slide">
+                    <div class="flip">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/600/800?random=1002" alt="Top 2">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-warning text-dark mb-3">⭐ YÊU THÍCH</span>
+                                <h6>Sữa Hạt Óc Chó</h6>
+                                <p class="text-center px-2">Tốt cho tim mạch.<br><strong>135.000₫ / Lốc</strong></p>
+                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide top-slide">
+                    <div class="flip">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/600/800?random=1003" alt="Top 3">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-success mb-3">FREESHIP</span>
+                                <h6>Khoai Tây Đà Lạt</h6>
+                                <p class="text-center px-2">Dẻo, vàng ươm.<br><strong>25.000₫ / kg</strong></p>
+                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide top-slide">
+                    <div class="flip">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/600/800?random=1004" alt="Top 4">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-info text-dark mb-3">NHẬP KHẨU</span>
+                                <h6>Dầu Oliu Extra</h6>
+                                <p class="text-center px-2">Nguyên chất ép lạnh.<br><strong>210.000₫ / chai</strong></p>
+                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide top-slide">
+                    <div class="flip">
+                        <div class="flip-inner">
+                            <div class="flip-face flip-front">
+                                <img src="https://picsum.photos/600/800?random=1005" alt="Top 5">
+                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
+                            </div>
+                            <div class="flip-face flip-back">
+                                <span class="badge bg-primary mb-3">MỚI</span>
+                                <h6>Táo Envy Mỹ</h6>
+                                <p class="text-center px-2">Giòn ngọt.<br><strong>180.000₫ / kg</strong></p>
+                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+
+<section id="best-sellers">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="h3 fw-bold mb-1 d-flex align-items-center">
+                    <i class="bi bi-fire icon-fire"></i>
+                    Sản phẩm bán chạy
+                </h2>
+                <p class="text-muted m-0 ms-1">Được khách hàng tin dùng nhất tuần qua</p>
+            </div>
+            <a href="@Url.Action("TatCa","DanhMuc")" class="text-success text-decoration-none fw-semibold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        @Html.Action("TopSelling", "Home", new { take = 9 })
+
+        <div class="text-center mt-4">
+            <button id="btnMoreBest" class="btn btn-outline-success px-4 rounded-pill">
+                <i class="bi bi-chevron-down me-1"></i> Xem thêm sản phẩm
+            </button>
+        </div>
+    </div>
+</section>
+
+<section id="featured" class="section-alt">
+    <div class="container">
+        <h2 class="h3 fw-bold mb-4 text-center">Hàng mới về <span class="text-success">tháng này</span></h2>
+        @Html.Action("NewProducts", "Home", new { kw = ViewBag.Keyword as string, maDM = (int?)ViewBag.MaDM, take = 12 })
+        <div class="text-center mt-4">
+            <button class="btn btn-brand px-5 rounded-pill shadow-sm">
+                Khám phá kho hàng mới
+            </button>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold" style="color:#0a4b2f;">Khách hàng nói gì về chúng tôi?</h2>
+        <div class="swiper p-1" id="testiSwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="card card-soft p-4 h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="https://i.pravatar.cc/150?img=31" class="rounded-circle" width="60" height="60">
+                            <div><div class="fw-bold">Chị Lan Anh</div><div class="small text-muted">Nội trợ</div></div>
+                        </div>
+                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                        <p class="text-muted fst-italic">"Rau củ ở đây tươi hơn siêu thị nhiều. Đặt sáng là chiều có ngay."</p>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="card card-soft p-4 h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="https://i.pravatar.cc/150?img=12" class="rounded-circle" width="60" height="60">
+                            <div><div class="fw-bold">Anh Minh Tuấn</div><div class="small text-muted">Kỹ sư</div></div>
+                        </div>
+                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+                        <p class="text-muted fst-italic">"Thịt cá luôn tươi, không bị đông đá lâu ngày. Rất hài lòng."</p>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="card card-soft p-4 h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="https://i.pravatar.cc/150?img=44" class="rounded-circle" width="60" height="60">
+                            <div><div class="fw-bold">Bạn Ngọc Mai</div><div class="small text-muted">Sinh viên</div></div>
+                        </div>
+                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div>
+                        <p class="text-muted fst-italic">"Đổi trả nhanh gọn lẹ. Nhân viên tư vấn nhiệt tình."</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination mt-4 position-relative"></div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="@Url.Action("DanhGia", "Home")" class="btn btn-outline-dark rounded-pill px-4">
+                Xem thêm đánh giá <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="newsletter" class="py-5 footer-classic">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-3 text-center d-none d-lg-block">
+                <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png"
+                     alt="Mailbox" class="img-fluid" style="max-width: 150px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+            </div>
+            <div class="col-lg-9">
+                <h2 class="fw-bold mb-2">Đăng ký nhận tin</h2>
+                <p class="mb-4 opacity-75">Nhận ngay mã giảm giá 10% cho đơn hàng đầu tiên & thông tin khuyến mãi hàng tuần.</p>
+
+                <form class="d-flex gap-2 flex-column flex-sm-row" style="max-width: 600px;">
+                    <input type="email" class="form-control form-control-lg border-0 rounded-pill px-4"
+                           placeholder="Nhập địa chỉ email của bạn..." required>
+                    <button class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-dark" type="submit">Đăng ký ngay</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Promo Slider
+        new Swiper('#promoSwiper', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            loop: true,
+            breakpoints: {
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            },
+            navigation: {
+                nextEl: '#promoNext',
+                prevEl: '#promoPrev',
+            },
+        });
+
+        // 2. Top Product Carousel (AUTO LOOP MƯỢT MÀ)
+        new Swiper('#topCarousel', {
+            effect: 'coverflow', // Giữ hiệu ứng 3D
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto', // Tự động tính toán số lượng slide
+            loop: true,           // BẬT VÒNG LẶP VÔ HẠN
+            speed: 800,           // Tốc độ chuyển cảnh mượt hơn (800ms)
+            autoplay: {
+                delay: 2000,      // Tự chạy sau 2 giây
+                disableOnInteraction: false, // Vẫn chạy tiếp khi chạm vào
+            },
+            coverflowEffect: {
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            },
+            // initialSlide: 1 // Không cần thiết khi đã loop
+        });
+
+        // 3. Testimonial Slider
+        new Swiper('#testiSwiper', {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            breakpoints: {
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            }
+        });
+    });
+</script>

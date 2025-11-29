@@ -1,0 +1,213 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.PhieuNhap
+
+@{
+    Layout = null;
+    var spList = ViewBag.SanPhamList as SelectList;
+    var nccList = ViewBag.MaNCC as SelectList;
+    var nvList = ViewBag.MaNV as SelectList;
+}
+
+<div class="modal fade" id="modalThemPN" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm phiếu nhập mới</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="frmThemPN" onsubmit="return false;">
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label>Nhà cung cấp</label>
+                            <select id="selectNCC" class="form-select">
+                                <option value="">-- Chọn NCC --</option>
+                                @foreach (var i in nccList)
+                                {
+                                    <option value="@i.Value">@i.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Nhân viên</label>
+                            <select id="selectNV" class="form-select">
+                                <option value="">-- Chọn NV --</option>
+                                @foreach (var i in nvList)
+                                {
+                                    <option value="@i.Value">@i.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Ngày</label>
+                            <input id="inputNgay" type="datetime-local" class="form-control"
+                                   value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Ghi chú</label>
+                            <textarea id="inputGhiChu" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- khu vực thêm dòng chi tiết -->
+                    <div>
+                        <div class="d-flex mb-2 gap-2">
+                            <select id="selectSP" class="form-select" style="max-width:420px;">
+                                <option value="">-- Chọn sản phẩm --</option>
+                                @foreach (var s in spList)
+                                {
+                                    <option value="@s.Value">@s.Text</option>
+                                }
+                            </select>
+
+                            <input id="inputSL" type="number" min="1" value="1" class="form-control" style="max-width:120px;" />
+                            <input id="inputDonGia" type="number" min="0" value="0" class="form-control" style="max-width:160px;" />
+
+                            <button id="btnAddRow" class="btn btn-success">Thêm dòng</button>
+                        </div>
+
+                        <table class="table table-sm" id="tblChiTiet">
+                            <thead>
+                                <tr>
+                                    <th>SP</th>
+                                    <th>SL</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                        <div class="text-end">
+                            <strong>Tổng: <span id="spanTotal">0</span></strong>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnSavePN" class="btn btn-primary">Lưu phiếu nhập</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function getOptionText(select, val) {
+        const opt = select.querySelector('option[value="' + val + '"]');
+        return opt ? opt.text : '';
+    }
+
+    document.getElementById('btnAddRow').addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const sp = document.getElementById('selectSP').value;
+        const sl = parseInt(document.getElementById('inputSL').value || 0);
+        const dg = parseInt(document.getElementById('inputDonGia').value || 0);
+
+        if (!sp) { toastr.error("Chọn sản phẩm"); return; }
+        if (sl <= 0) { toastr.error("Số lượng phải > 0"); return; }
+
+        const name = getOptionText(document.getElementById('selectSP'), sp);
+
+        const tbody = document.querySelector('#tblChiTiet tbody');
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td data-masp="${sp}">${name}</td>
+            <td class="text-center">${sl}</td>
+            <td class="text-end">${dg}</td>
+            <td class="text-end">${sl * dg}</td>
+            <td><button class="btn btn-danger btn-sm btn-remove">X</button></td>
+        `;
+
+        tbody.appendChild(row);
+        recalcTotal();
+
+        document.getElementById('selectSP').value = '';
+        document.getElementById('inputSL').value = 1;
+        document.getElementById('inputDonGia').value = 0;
+    });
+
+    document.querySelector('#tblChiTiet tbody').addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-remove')) {
+            e.target.closest('tr').remove();
+            recalcTotal();
+        }
+    });
+
+    function recalcTotal() {
+        let total = 0;
+        document.querySelectorAll('#tblChiTiet tbody tr').forEach(tr => {
+            total += parseInt(tr.cells[3].innerText || 0);
+        });
+        document.getElementById('spanTotal').innerText = new Intl.NumberFormat().format(total);
+    }
+
+    // ===== SUBMIT =====
+    document.getElementById('btnSavePN').addEventListener('click', function () {
+
+        const maNCC = document.getElementById('selectNCC').value;
+        const maNV = document.getElementById('selectNV').value;
+        const ngay = document.getElementById('inputNgay').value;
+        const ghiChu = document.getElementById('inputGhiChu').value;
+
+        if (!maNCC) return toastr.error("Chưa chọn nhà cung cấp");
+        if (!maNV) return toastr.error("Chưa chọn nhân viên");
+
+        const list = [];
+        document.querySelectorAll('#tblChiTiet tbody tr').forEach(tr => {
+            list.push({
+                MaSP: parseInt(tr.cells[0].dataset.masp),
+                SoLuong: parseInt(tr.cells[1].innerText),
+                DonGia: parseInt(tr.cells[2].innerText)
+            });
+        });
+
+        if (list.length === 0) return toastr.error("Chưa có chi tiết");
+
+        const payload = {
+            Phieu: {
+                MaNCC: parseInt(maNCC),
+                MaNV: parseInt(maNV),
+                Ngay: ngay ? new Date(ngay).toISOString() : null,
+                GhiChu: ghiChu
+            },
+            ChiTiet: list
+        };
+
+        showLoading();
+
+        fetch('/Admin/PhieuNhap/Them', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+            .then(r => r.json())
+            .then(d => {
+                hideLoading();
+
+                if (d.success) {
+                    toastr.success(d.message);
+                    bootstrap.Modal.getInstance(document.getElementById('modalThemPN')).hide();
+                    setTimeout(() => location.reload(), 400);
+                } else toastr.error(d.message);
+            })
+            .catch(() => { hideLoading(); toastr.error("Lỗi khi gửi dữ liệu"); });
+    });
+
+</script>

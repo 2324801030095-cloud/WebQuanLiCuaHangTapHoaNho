@@ -1,0 +1,29 @@
+﻿@* ----------------------------------------------
+       _ProductGridPartial.cshtml
+       Vị trí: Views/Shared/_ProductGridPartial.cshtml
+       Nhiệm vụ: hiển thị nhiều sản phẩm dưới dạng lưới.
+       Mỗi sản phẩm gọi lại partial "_ProductCardPartial.cshtml"
+    ---------------------------------------------- *@
+
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView> 
+
+@* Kiểm tra nếu không có sản phẩm nào *@
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        Chưa có sản phẩm để hiển thị.
+    </div>
+}
+else
+{
+    @* Khung lưới sản phẩm dùng Bootstrap grid *@
+    <div class="row g-4">
+        @foreach (var sp in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                @* Gọi partial "_ProductCardPartial" cho từng sản phẩm *@
+                @Html.Partial("_ProductCardPartial", sp)
+            </div>
+        }
+    </div>
+}

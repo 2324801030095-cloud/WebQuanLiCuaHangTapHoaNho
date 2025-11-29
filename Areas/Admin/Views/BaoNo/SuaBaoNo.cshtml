@@ -1,0 +1,52 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.BaoNo
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Sửa Báo Nợ";
+}
+
+<!-- ================= TITLE ================= -->
+<div class="text-center mb-3">
+    <h2 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+        <i class="fa-solid fa-pen-to-square text-primary"></i> Sửa Báo Nợ
+    </h2>
+</div>
+
+<!-- Nút quay lại -->
+<div class="mb-3">
+    <a href="@Url.Action("Index", "BaoNo", new { area = "Admin" })"
+       class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        @using (Html.BeginForm("Sua", "BaoNo", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Khách hàng</label>
+                <input class="form-control" value="@Model.KhachHang.TenKH" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Số tiền nợ</label>
+                <input name="SoTien" class="form-control" value="@Model.SoTien" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Ghi chú</label>
+                <textarea name="GhiChu" class="form-control">@Model.GhiChu</textarea>
+            </div>
+
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Lưu thay đổi
+            </button>
+        }
+
+    </div>
+</div>

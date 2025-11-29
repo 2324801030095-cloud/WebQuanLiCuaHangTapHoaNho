@@ -1,0 +1,115 @@
+﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+
+@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<section class="py-4">
+    <div class="container">
+        <h2 class="mb-4 text-success fw-bold">
+            <i class="bi bi-bag"></i> Giỏ hàng của bạn
+        </h2>
+
+        @if (!Model.Any())
+        {
+            <!-- Khi giỏ trống -->
+            <div class="alert alert-warning">
+                Giỏ hàng đang trống. <a href="@Url.Action("Index", "Home")">Tiếp tục mua hàng</a>.
+            </div>
+        }
+        else
+        {
+            <!-- Bảng hiển thị giỏ hàng -->
+            <table class="table table-bordered align-middle">
+                <thead class="table-success">
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <!-- Cột ảnh -->
+                            <td style="width:120px">
+                                <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://picsum.photos/120/100?random=" + item.MaSP : item.HinhAnh)"
+                                     class="img-thumbnail" style="width:100px; height:100px; object-fit:cover;" />
+                            </td>
+
+                            <!-- Cột tên -->
+                            <td>@item.TenSP</td>
+
+                            <!-- Cột đơn giá -->
+                            <td>@String.Format("{0:N0} ₫", item.DonGia)</td>
+
+                            <!-- Cột số lượng (form cập nhật) -->
+                            <td style="width:160px;">
+                                <form action="@Url.Action("CapNhat","GioHang")" method="post" class="d-flex">
+                                    <input type="hidden" name="maSP" value="@item.MaSP" />
+                                    <input type="number" name="soLuong" value="@item.SoLuong" min="1" class="form-control form-control-sm text-center" />
+                                    <button class="btn btn-sm btn-outline-success ms-2" type="submit">
+                                        <i class="bi bi-check2"></i>
+                                    </button>
+                                </form>
+                            </td>
+
+                            <!-- Cột thành tiền -->
+                            <td class="fw-bold text-success">@String.Format("{0:N0} ₫", item.ThanhTien)</td>
+
+                            <!-- Cột xóa -->
+                            <td style="width:80px;">
+                                <a href="@Url.Action("Xoa", "GioHang", new { maSP = item.MaSP })"
+                                   class="btn btn-sm btn-outline-danger" onclick="return confirm('Xóa sản phẩm này?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-light fw-bold">
+                        <td colspan="4" class="text-end">Tổng cộng:</td>
+                        <td class="text-success">@String.Format("{0:N0} ₫", ViewBag.TongTien)</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Nút thao tác -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="@Url.Action("Index", "DanhMuc")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Tiếp tục mua hàng
+                </a>
+
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("XoaTatCa", "GioHang")" class="btn btn-outline-danger"
+                       onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng không?');">
+                        <i class="bi bi-x-circle"></i> Xóa tất cả
+                    </a>
+
+                    <a href="@Url.Action("DatHang", "GioHang")" class="btn btn-success">
+                        <i class="bi bi-cash-coin"></i> Đặt hàng
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section styles{
+    <style>
+        .table img {
+            border-radius: 10px;
+        }
+
+        .table td, .table th {
+            vertical-align: middle !important;
+        }
+    </style>
+}

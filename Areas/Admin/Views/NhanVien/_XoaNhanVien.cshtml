@@ -1,0 +1,41 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.NhanVien
+
+<div class="modal fade" id="modalNV" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-trash"></i> Xóa Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p>Bạn có chắc chắn muốn xóa nhân viên:</p>
+                <h5 class="fw-bold text-danger">@Model.TenNV</h5>
+                <p>Mã: @Model.MaNV</p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-danger" onclick="confirmDelNV(@Model.MaNV)">
+                    <i class="fa-solid fa-check"></i> Xóa
+                </button>
+
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelNV(id) {
+        fetch("/Admin/NhanVien/XoaConfirmed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        }).then(r => r.json()).then(d => {
+            alert(d.message);
+            if (d.success) location.reload();
+        });
+    }
+</script>

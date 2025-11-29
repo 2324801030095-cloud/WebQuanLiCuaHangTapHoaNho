@@ -1,0 +1,43 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.SanPhamView
+
+<!-- 1 thẻ card sản phẩm, chỉ vẽ nội dung card. Cột grid sẽ do partial Grid bao. -->
+<div class="card card-soft h-100">
+    <!-- Thân card với shadow -->
+    <img class="card-img-top product-img"
+         src="https://picsum.photos/600/400?random=@Model.MaSP"
+         alt="@Model.TenSP"><!-- Ảnh: demo theo MaSP -->
+
+    <div class="p-3">
+        <!-- Nội dung card -->
+        <h5 class="mb-1">@Model.TenSP</h5><!-- Tên sp -->
+
+        <div class="price mb-2">
+            <!-- Giá in đậm, màu xanh -->
+            @String.Format("{0:N0}₫", Model.GiaBan)
+        </div>
+
+        <div class="stock-wrap mb-3">
+            <!-- Thanh tồn kho + số -->
+            @{
+                var pct = Model.Ton <= 0 ? 2 : (Model.Ton > 100 ? 100 : Model.Ton); // % hiển thị (0->2 để nhìn thấy)
+            }
+            <div class="stock-bar"><span style="width:@pct%"></span></div><!-- Vạch tiến độ -->
+            <small class="text-muted">Tồn: @Model.Ton</small><!-- Số tồn -->
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- Nút hành động -->
+            <a class="btn btn-outline-success flex-fill"
+               href="@Url.Action("ChiTiet", "SanPham", new { id = Model.MaSP })">
+                <!-- Xem chi tiết sản phẩm -->
+                <i class="bi bi-eye me-1"></i> Xem
+            </a>
+
+            <!-- ✅ Nút thêm vào giỏ hàng thật -->
+            <a class="btn btn-brand flex-fill"
+               href="@Url.Action("Them", "GioHang", new { maSP = Model.MaSP, returnUrl = Request.RawUrl })">
+                <i class="bi bi-bag-plus me-1"></i> Thêm
+            </a>
+        </div>
+    </div>
+</div>

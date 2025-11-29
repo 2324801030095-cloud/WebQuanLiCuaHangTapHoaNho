@@ -1,0 +1,97 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.SanPham
+
+<div class="modal fade" id="modalSP" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-plus"></i> Thêm sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                @using (Html.BeginForm("Them", "SanPham", FormMethod.Post, new { id = "formAdd" }))
+                {
+                    if (ViewBag.SelectedDM != null)
+                    {
+                        @Html.Hidden("MaDM", (int?)ViewBag.SelectedDM)
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.TenSP, "Tên sản phẩm")
+                            @Html.TextBoxFor(m => m.TenSP, new { @class = "form-control", required = "required" })
+                        </div>
+                        <div class="col-md-6">
+                            @Html.LabelFor(m => m.GiaBan, "Giá bán")
+                            @Html.TextBoxFor(m => m.GiaBan, new { @class = "form-control", type = "number", min = "0" })
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.Label("Danh mục")
+                            @Html.DropDownList("MaDM", (SelectList)ViewBag.MaDM, "-- Chọn --", new { @class = "form-select" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.Label("Đơn vị tính")
+                            @Html.DropDownList("MaDVT", (SelectList)ViewBag.MaDVT, "-- Chọn --", new { @class = "form-select" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.Label("Khuyến mãi")
+                            @Html.DropDownList("MaKM", (SelectList)ViewBag.MaKM, "-- Không --", new { @class = "form-select" })
+                        </div>
+
+                        <div class="col-md-12">
+                            @Html.Label("Link hình ảnh")
+                            @Html.TextBoxFor(m => m.HinhAnh, new { @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-12">
+                            @Html.Label("Mô tả ngắn")
+                            @Html.TextAreaFor(m => m.MoTaNgan, new { @class = "form-control", rows = 3 })
+                        </div>
+
+                        <div class="col-md-12 form-check mt-2">
+                            @Html.CheckBoxFor(m => m.HoatDong, new { @class = "form-check-input", id = "hoatdong_check" })
+                            <label class="form-check-label" for="hoatdong_check">Đang hoạt động</label>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-success" id="btnSaveSP" type="button">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("btnSaveSP").addEventListener("click", function () {
+        const form = document.getElementById("formAdd");
+        const fd = new FormData(form);
+        const obj = {};
+        fd.forEach((v, k) => obj[k] = v);
+        obj.HoatDong = !!form.querySelector("[name='HoatDong']").checked;
+
+        fetch("/Admin/SanPham/Them", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(obj)
+        })
+            .then(res => res.json())
+            .then(d => {
+                alert(d.message);
+                if (d.success) {
+                    const maDM = obj.MaDM;
+                    const modal = bootstrap.Modal.getInstance(document.getElementById("modalSP"));
+                    modal.hide();
+
+                    if (typeof reloadProductsInCategory === "function") {
+                        reloadProductsInCategory(maDM);
+                    } else {
+                        location.reload();
+                    }
+                }
+            });
+    });
+</script>

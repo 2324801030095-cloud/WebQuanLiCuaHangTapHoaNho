@@ -1,0 +1,245 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.ViewModels.BaoNoVM>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Danh sách nợ";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    string filter = ViewBag.Filter as string ?? "all";
+}
+
+<!-- render anti-forgery hidden token for AJAX -->
+@using (Html.BeginForm())
+{@Html.AntiForgeryToken();
+}
+
+<style>
+    /* (CSS giữ nguyên như bạn đã thiết kế) */
+    .page-title {
+        color: #2563eb;
+        font-size: 1.8rem;
+    }
+
+    .page-title-icon {
+        color: #0ea5e9;
+        font-size: 1.6rem;
+    }
+
+    th, td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+        .pagination li {
+            list-style: none;
+        }
+
+            .pagination li a, .pagination li span {
+                display: block;
+                padding: 8px 12px;
+                border-radius: 8px;
+                color: #1e293b;
+                border: 1px solid #e2e8f0;
+                background: #f8fafc;
+                font-weight: 500;
+                text-decoration: none;
+                transition: all .25s ease;
+            }
+
+                .pagination li a:hover {
+                    background: #e0f2fe;
+                    color: #1d4ed8;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(37,99,235,.2);
+                }
+
+            .pagination li.active a {
+                background: linear-gradient(90deg,#2563eb,#3b82f6);
+                color: white !important;
+                border-color: #2563eb;
+                box-shadow: 0 2px 8px rgba(37,99,235,.35);
+            }
+
+            .pagination li.disabled a {
+                opacity: .5;
+                pointer-events: none;
+            }
+
+    .action-small {
+        padding: .35rem .5rem;
+        font-size: .85rem;
+    }
+
+    .status-actions {
+        display: flex;
+        gap: .35rem;
+        justify-content: center;
+        margin-top: .35rem;
+    }
+
+
+
+</style>
+
+<div class="text-center mb-3">
+    <h2 class="page-title fw-bold d-inline-flex align-items-center gap-2 m-0">
+        <i class="fa-solid fa-book page-title-icon"></i> Danh sách Báo Nợ
+    </h2>
+</div>
+
+<div class="d-flex justify-content-between mb-3">
+    <a href="@Url.Action("ThemBaoNo", "BaoNo", new { area = "Admin" })" class="btn btn-success">
+        <i class="fa-solid fa-plus"></i> Thêm Báo Nợ
+    </a>
+
+    <div class="btn-group">
+        <a class="btn @(filter=="all"?"btn-primary":"btn-outline-secondary")" href="@Url.Action("Index", new { filter="all" })">Tất cả</a>
+        <a class="btn @(filter=="due7"?"btn-primary":"btn-outline-secondary")" href="@Url.Action("Index", new { filter="due7" })">Nhắc 7 ngày</a>
+        <a class="btn @(filter=="due15"?"btn-primary":"btn-outline-secondary")" href="@Url.Action("Index", new { filter="due15" })">Nhắc 15 ngày</a>
+        <a class="btn @(filter=="due30"?"btn-primary":"btn-outline-secondary")" href="@Url.Action("Index", new { filter="due30" })">Cảnh báo 30 ngày</a>
+    </div>
+
+    <a href="@Url.Action("LichSuThongBao", "BaoNo", new { area = "Admin" })" class="btn btn-warning">
+        <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử thông báo
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <table class="table table-bordered table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Khách hàng</th>
+                <th>Số tiền nợ</th>
+                <th>Ghi chú</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var n in Model)
+            {
+                string badge =
+                    n.Stage == 3 ? "<span class='badge bg-danger'>Cảnh báo 30 ngày</span>" :
+                    n.Stage == 2 ? "<span class='badge bg-warning text-dark'>Nhắc 15 ngày</span>" :
+                    n.Stage == 1 ? "<span class='badge bg-info text-dark'>Nhắc 7 ngày</span>" :
+                                   "<span class='badge bg-secondary'>Không quá hạn</span>";
+
+                <tr>
+                    <td class="align-middle">@n.BaoNo.KhachHang.TenKH</td>
+                    <td class="text-danger fw-bold align-middle">@String.Format("{0:N0} ₫", n.BaoNo.SoTien)</td>
+                    <td class="align-middle">@n.BaoNo.GhiChu</td>
+                    <td class="align-middle">@n.BaoNo.NgayTao.ToString("dd/MM/yyyy")</td>
+                    <td class="align-middle">
+                        @Html.Raw(badge)
+                        <div class="small text-muted">@n.Days ngày</div>
+                        <div class="status-actions">
+                            <button class="btn btn-sm btn-outline-primary action-small btn-send-email" data-id="@n.BaoNo.Id" title="Gửi Email">
+                                <i class="fa-solid fa-envelope"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success action-small btn-send-sms" data-id="@n.BaoNo.Id" title="Gửi SMS">
+                                <i class="fa-solid fa-sms"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        <a href="@Url.Action("ChiTietBaoNo", "BaoNo", new { area = "Admin", id = n.BaoNo.Id })" class="btn btn-info btn-sm action-small me-1" title="Chi tiết">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a href="@Url.Action("SuaBaoNo", "BaoNo", new { area = "Admin", id = n.BaoNo.Id })" class="btn btn-primary btn-sm action-small me-1" title="Sửa">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="@Url.Action("Xoa", "BaoNo", new { area = "Admin", id = n.BaoNo.Id })" class="btn btn-danger btn-sm action-small" onclick="return confirm('Xóa báo nợ này?');" title="Xóa">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="card-footer bg-white text-center">
+
+        <ul class="pagination">
+
+            @{
+                bool onlyOne = Model.PageCount == 1;
+                bool isFirst = Model.PageNumber == 1;
+                bool isLast = Model.PageNumber == Model.PageCount;
+            }
+
+            <!-- << -->
+            <li class="@(isFirst ? "disabled" : "")">
+                <a href="@(isFirst ? "#" : Url.Action("LichSuThongBao", new { page = 1 }))">&laquo;&laquo;</a>
+            </li>
+
+            <!-- < -->
+            <li class="@(isFirst ? "disabled" : "")">
+                <a href="@(isFirst ? "#" : Url.Action("LichSuThongBao", new { page = Model.PageNumber - 1 }))">&laquo;</a>
+            </li>
+
+            <!-- trang số -->
+            @for (int i = 1; i <= Model.PageCount; i++)
+            {
+                <li class="@(Model.PageNumber == i ? "active" : "")">
+                    <a href="@Url.Action("LichSuThongBao", new { page = i })">@i</a>
+                </li>
+            }
+
+            <!-- > -->
+            <li class="@(isLast ? "disabled" : "")">
+                <a href="@(isLast ? "#" : Url.Action("LichSuThongBao", new { page = Model.PageNumber + 1 }))">&raquo;</a>
+            </li>
+
+            <!-- >> -->
+            <li class="@(isLast ? "disabled" : "")">
+                <a href="@(isLast ? "#" : Url.Action("LichSuThongBao", new { page = Model.PageCount }))">&raquo;&raquo;</a>
+            </li>
+
+        </ul>
+    </div>
+
+
+    <script>
+        // lấy token anti-forgery từ hidden input tạo bởi Html.AntiForgeryToken() trên trang
+        function getAntiForgeryToken() {
+            var el = document.querySelector('input[name="__RequestVerificationToken"]');
+            return el ? el.value : '';
+        }
+
+        document.addEventListener("click", async function (e) {
+            const btnEmail = e.target.closest(".btn-send-email");
+            const btnSms = e.target.closest(".btn-send-sms");
+
+            if (btnEmail) {
+                const id = btnEmail.dataset.id;
+                const token = getAntiForgeryToken();
+                const res = await fetch("/Admin/BaoNo/GuiEmail", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) + "&id=" + encodeURIComponent(id)
+                });
+                const data = await res.json();
+                alert(data.message);
+            }
+
+            if (btnSms) {
+                const id = btnSms.dataset.id;
+                const token = getAntiForgeryToken();
+                const res = await fetch("/Admin/BaoNo/GuiSMS", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) + "&id=" + encodeURIComponent(id)
+                });
+                const data = await res.json();
+                alert(data.message);
+            }
+        });
+    </script>
