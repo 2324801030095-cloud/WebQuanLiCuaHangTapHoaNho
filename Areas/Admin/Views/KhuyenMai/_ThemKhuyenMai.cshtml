@@ -1,0 +1,61 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.KhuyenMai
+
+<div class="modal fade" id="modalKM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Thêm khuyến mãi</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("Them", "KhuyenMai", FormMethod.Post, new { id = "formAddKM" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="mb-2">
+                        @Html.LabelFor(m => m.TenKM)
+                        @Html.TextBoxFor(m => m.TenKM, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="mb-2 row">
+                        <div class="col">
+                            @Html.LabelFor(m => m.Giam)
+                            @Html.TextBoxFor(m => m.Giam, new { @class = "form-control", type = "number", min = "0", max = "100", step = "0.01" })
+                        </div>
+                        <div class="col">
+                            @Html.Label("Từ")
+                            @Html.TextBox("TuNgay", null, new { @class = "form-control", type = "date" })
+                        </div>
+                        <div class="col">
+                            @Html.Label("Đến")
+                            @Html.TextBox("DenNgay", null, new { @class = "form-control", type = "date" })
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-success" id="btnSaveKM">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("btnSaveKM").addEventListener("click", function () {
+        const form = document.getElementById("formAddKM");
+        const fd = new FormData(form);
+        const token = form.querySelector("input[name='__RequestVerificationToken']")?.value;
+        if (token) fd.set('__RequestVerificationToken', token);
+
+        fetch(form.action || "/Admin/KhuyenMai/Them", {
+            method: "POST",
+            body: fd
+        }).then(r => r.json()).then(d => {
+            alert(d.message);
+            if (d.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalKM"));
+                if (modal) modal.hide();
+                location.reload();
+            }
+        }).catch(e => { console.error(e); alert("Lỗi"); });
+    });
+</script>

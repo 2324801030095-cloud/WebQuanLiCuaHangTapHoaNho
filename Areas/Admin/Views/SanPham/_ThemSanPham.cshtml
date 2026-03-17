@@ -9,7 +9,7 @@
             </div>
 
             <div class="modal-body">
-                @using (Html.BeginForm("Them", "SanPham", FormMethod.Post, new { id = "formAdd" }))
+                @using (Html.BeginForm("Them", "SanPham", FormMethod.Post, new { id = "formAdd", enctype = "multipart/form-data" }))
                 {
                     if (ViewBag.SelectedDM != null)
                     {
@@ -39,9 +39,14 @@
                             @Html.DropDownList("MaKM", (SelectList)ViewBag.MaKM, "-- Không --", new { @class = "form-select" })
                         </div>
 
-                        <div class="col-md-12">
-                            @Html.Label("Link hình ảnh")
-                            @Html.TextBoxFor(m => m.HinhAnh, new { @class = "form-control" })
+                        <div class="col-md-6">
+                            @Html.Label("Tên file ảnh")
+                            @Html.TextBoxFor(m => m.HinhAnh, new { @class = "form-control", placeholder = "vd: nuoc-ngot" })
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Chọn ảnh từ thiết bị</label>
+                            <input type="file" name="imageFile" class="form-control" accept="image/*" />
                         </div>
 
                         <div class="col-md-12">
@@ -69,27 +74,22 @@
     document.getElementById("btnSaveSP").addEventListener("click", function () {
         const form = document.getElementById("formAdd");
         const fd = new FormData(form);
-        const obj = {};
-        fd.forEach((v, k) => obj[k] = v);
-        obj.HoatDong = !!form.querySelector("[name='HoatDong']").checked;
-
         fetch("/Admin/SanPham/Them", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(obj)
+            body: fd
         })
             .then(res => res.json())
             .then(d => {
-                alert(d.message);
+                window.showAppToast?.(d.message, d.success ? "success" : "error");
                 if (d.success) {
-                    const maDM = obj.MaDM;
+                    const maDM = form.querySelector("[name='MaDM']")?.value;
                     const modal = bootstrap.Modal.getInstance(document.getElementById("modalSP"));
                     modal.hide();
 
                     if (typeof reloadProductsInCategory === "function") {
                         reloadProductsInCategory(maDM);
-                    } else {
-                        location.reload();
+                    } else if (window.refreshContent) {
+                        window.refreshContent();
                     }
                 }
             });

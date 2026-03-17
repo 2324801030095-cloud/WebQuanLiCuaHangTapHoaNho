@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "~/Views/Shared/_ErrorLayout.cshtml";
+    ViewBag.Title = "Lỗi 400";
+    ViewBag.StatusCode = 400;
+}
+
+@section ErrorIcon{
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z" fill="#0f172a"/>
+        <path d="M12 7v6" stroke="#2f7cf6" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="17" r="1" fill="#2f7cf6"/>
+    </svg>
+}
+
+@section ErrorBadge{Bad Request}
+@section ErrorCode{400}
+@section ErrorTitle{Yêu cầu chưa hợp lệ}
+@section ErrorMessage{Yêu cầu vừa gửi bị lỗi định dạng hoặc thiếu thông tin cần thiết. Vui lòng kiểm tra lại.}
+@section ErrorActions{
+    <a class="btn primary" href="@Url.Action("Index", "Home")">Về trang chủ</a>
+    <a class="btn ghost" href="javascript:history.back()">Quay lại</a>
+}
+@section ErrorNote{Mã lỗi: 400 • Thời gian: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")}

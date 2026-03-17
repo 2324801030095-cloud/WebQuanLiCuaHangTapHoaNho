@@ -1,0 +1,23 @@
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.NotificationVm>
+
+@{
+    var list = Model ?? Enumerable.Empty<WebQuanLiCuaHangTapHoa.Models.NotificationVm>();
+}
+
+@if (!list.Any()) {
+    <li class="px-3 py-2 text-muted small">Không có thông báo</li>
+} else {
+    foreach (var n in list) {
+        <li class="notify-item">
+            <div style="flex:1">
+                <div class="small text-muted">@n.TieuDe <span class="text-muted">@n.NgayGui?.ToString("g")</span></div>
+                <div>@Html.Raw(n.NoiDung)</div>
+            </div>
+            @if(!string.IsNullOrEmpty(n.Link)){
+                <div class="ms-2">
+                    <a href="@n.Link" class="btn btn-sm btn-outline-primary">Xem</a>
+                </div>
+            }
+        </li>
+    }
+}

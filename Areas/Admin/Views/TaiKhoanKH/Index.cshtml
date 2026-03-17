@@ -1,0 +1,171 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.TaiKhoanKH>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Quản lý tài khoản khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="text-center mb-3">
+        <h4 class="page-title">
+            <i class="fa-solid fa-id-card"></i>
+            Quản lý tài khoản khách hàng
+        </h4>
+    </div>
+
+    <!-- Filter -->
+    <form method="get" class="filter-bar bg-white p-3 rounded shadow-sm mb-3">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Tìm kiếm..." class="form-control" style="width:250px;">
+            <select name="hoatDong" class="form-select" style="width:180px;">
+                <option value="">Tất cả</option>
+                <option value="true" @(ViewBag.HoatDong == true ? "selected" : "")>Hoạt động</option>
+                <option value="false" @(ViewBag.HoatDong == false ? "selected" : "")>Đã khóa</option>
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Lọc</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary"><i class="fa-solid fa-rotate-right"></i> Làm mới</a>
+            <button type="button" class="btn btn-success" onclick="them()">
+                <i class="fa-solid fa-plus"></i> Thêm tài khoản
+            </button>
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã KH</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Email</th>
+                        <th>Tên khách hàng</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Không có tài khoản nào.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MaKH</td>
+                                <td>@item.TenDangNhap</td>
+                                <td>@item.Email</td>
+                                <td>@(item.KhachHang?.TenKH ?? "N/A")</td>
+                                <td>@(item.NgayDangKy?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>
+                                    @if (item.HoatDong == true)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Đã khóa</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="sua(@item.MaKH)" title="Sửa">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button class="btn @(item.HoatDong == true ? "btn-warning" : "btn-success") btn-sm" 
+                                            onclick="khoaMoKhoa(@item.MaKH)" 
+                                            title="@(item.HoatDong == true ? "Khóa" : "Mở khóa")">
+                                        <i class="fa-solid fa-@(item.HoatDong == true ? "lock" : "unlock")"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white text-center">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page, search = ViewBag.Search, hoatDong = ViewBag.HoatDong }),
+            new PagedListRenderOptions
+            {
+                Display = PagedListDisplayMode.IfNeeded,
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                MaximumPageNumbersToDisplay = 5,
+                UlElementClasses = new[] { "pagination" }
+            })
+        </div>
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+
+<script>
+    function them() {
+        fetch("/Admin/TaiKhoanKH/Them")
+            .then(r => r.text())
+            .then(html => {
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
+                new bootstrap.Modal(document.getElementById("modalThemTK")).show();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Không thể tải form thêm tài khoản.");
+            });
+    }
+
+    function sua(id) {
+        fetch(`/Admin/TaiKhoanKH/Sua/${id}`)
+            .then(r => r.text())
+            .then(html => {
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
+                new bootstrap.Modal(document.getElementById("modalTK")).show();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Không thể tải form sửa tài khoản.");
+            });
+    }
+
+    function khoaMoKhoa(id) {
+        if (!confirm("Bạn có chắc muốn thay đổi trạng thái tài khoản này?")) return;
+        
+        fetch("/Admin/TaiKhoanKH/KhoaMoKhoa", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded",
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+            },
+            body: `id=${id}`
+        })
+        .then(r => r.json())
+        .then(d => {
+            alert(d.message);
+            if (d.success) location.reload();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Có lỗi xảy ra khi thực hiện thao tác.");
+        });
+    }
+</script>
+

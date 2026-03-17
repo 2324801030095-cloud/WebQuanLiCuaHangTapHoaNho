@@ -87,7 +87,12 @@
         fetch(`/Admin/SanPham/Them?maDM=${maDM}`)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     }
@@ -97,7 +102,12 @@
         fetch(`/Admin/SanPham/Sua/${id}`)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     }
@@ -107,7 +117,12 @@
         fetch(`/Admin/SanPham/ChiTiet/${id}`)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     }
@@ -133,7 +148,12 @@
         fetch(`/Admin/DanhMuc/ChiTietDanhMuc/${maDM}`)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalDMCT")).show();
             });
     }

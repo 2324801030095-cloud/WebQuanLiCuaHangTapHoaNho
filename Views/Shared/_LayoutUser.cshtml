@@ -16,12 +16,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
+
     <!-- ===== CSS riêng của dự án (nếu có) ===== -->
     <link href='@Url.Content("~/Content/ThanhNhan/Layout.css")?v=@DateTime.UtcNow.Ticks' rel="stylesheet" />
 
     @RenderSection("styles", required: false)
 
-    <style>
+<style>
         /* ========= Biến theme chung ========= */
         :root {
             --g1: #16a34a;
@@ -158,6 +161,21 @@
             box-shadow: var(--shadow);
             position: relative;
         }
+
+        /* ============================================================
+           CSS cho hiệu ứng rung icon
+        ============================================================ */
+        .cart-shake {
+            animation: cartShakeAnim .6s ease;
+        }
+
+        @@keyframes cartShakeAnim {
+            0% { transform: rotate(0); }
+            25% { transform: rotate(-12deg); }
+            50% { transform: rotate(12deg); }
+            75% { transform: rotate(-6deg); }
+            100% { transform: rotate(0); }
+}
 
         .product-card {
             overflow: hidden;
@@ -319,7 +337,7 @@
         #appHeader {
             transition: transform .25s ease;
         }
-    </style>
+</style>
 </head>
 
 <body>
@@ -349,160 +367,333 @@
     <div class="backtop" id="backTop"><i class="bi bi-arrow-up"></i></div>
 
     <!-- ===== JS thư viện ===== -->
+    @Scripts.Render("~/bundles/jquery")
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src='@Url.Content("~/Scripts/ThanhNhan/Layout.js")?v=@DateTime.UtcNow.Ticks'></script>
 
     @RenderSection("scripts", required: false)
 
-    <script>
-    /* ================== GIỎ HÀNG THẬT ================== */
-    async function updateCartBadge() {
-        try {
-            const res = await fetch('@Url.Action("DemSoLuong", "GioHang")');
-            const data = await res.json();
-            const badge = document.getElementById('cartCount');
-            if (badge) badge.innerText = data.tong || 0;
-        } catch (e) {
-            console.warn('Không thể cập nhật giỏ hàng:', e);
-        }
+<script>
+/* ============================================================
+   1) GIỎ HÀNG THẬT – DÙNG TOÀN DỰ ÁN
+   (Bản chuẩn DUY NHẤT — KHÔNG ĐƯỢC ĐỂ TRÙNG HÀM)
+============================================================ */
+async function updateCartBadge() {
+    try {
+        const res = await fetch('@Url.Action("DemSoLuong", "GioHang")');
+        const data = await res.json();
+
+        const badge = document.getElementById('cartCount');
+        if (badge) badge.innerText = data.tong || 0;
+
+    } catch (e) {
+        console.warn('Không thể cập nhật giỏ hàng:', e);
     }
+}
 
-    async function reloadCartOffcanvas() {
+async function reloadCartOffcanvas() {
+    try {
+        // Fetch partial HTML
+        const html = await fetch('@Url.Action("PartialCart", "GioHang")')
+            .then(r => r.text());
+
+        // preserve old state
+        const old = document.getElementById("cartOffcanvas");
+        const wasShown = old && old.classList.contains("show");
+
+        // dispose old instance
         try {
-            const html = await fetch('@Url.Action("PartialCart", "GioHang")').then(r => r.text());
-            document.getElementById('cartPartial').innerHTML = html;
-        } catch (e) {
-            console.warn('Không thể nạp lại giỏ hàng:', e);
-        }
-    }
-
-    async function addToCartReal(maSP) {
-        try {
-            const res = await fetch('@Url.Action("Them", "GioHang")?maSP=' + maSP, {
-                method: 'GET',
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                await updateCartBadge();
-                await reloadCartOffcanvas();
-
-                // toast thông báo
-                const toast = document.createElement('div');
-                toast.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3 show';
-                toast.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">✅ Đã thêm sản phẩm vào giỏ hàng!</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>`;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 2500);
+            if (old) {
+                const inst = bootstrap.Offcanvas.getInstance(old);
+                if (inst) {
+                    try { inst.hide(); } catch { }
+                    inst.dispose();
+                }
             }
-        } catch (err) {
-            alert('Không thể thêm sản phẩm vào giỏ.');
-            console.error(err);
-        }
-    }
+        } catch { }
 
-    /* ================== SLIDERS ================== */
-    document.addEventListener('DOMContentLoaded', () => {
-        try {
-            new Swiper('#promoSwiper', {
-                loop: true, speed: 600,
-                autoplay: { delay: 3500, disableOnInteraction: false },
-                spaceBetween: 24, slidesPerView: 1,
-                breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
-                navigation: { nextEl: '#promoNext', prevEl: '#promoPrev' }
-            });
-        } catch(e){/* no promoSwiper present */ }
+        // wrapper parse
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = html;
 
-        try {
-            new Swiper('#testiSwiper', {
-                loop: true, speed: 580,
-                autoplay: { delay: 3200, disableOnInteraction: false },
-                spaceBetween: 24, slidesPerView: 1,
-                breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
-                navigation: { nextEl: '#testiNext', prevEl: '#testiPrev' }
-            });
-        } catch(e){}
+        // extract scripts
+        const scripts = [...wrapper.querySelectorAll("script")];
+        scripts.forEach(s => s.remove());
 
-        try {
-            new Swiper('#topCarousel', {
-                loop: true, speed: 600,
-                autoplay: { delay: 3000, disableOnInteraction: false },
-                slidesPerView: 1.25, centeredSlides: true, spaceBetween: 22,
-                breakpoints: { 768: { slidesPerView: 1.6, spaceBetween: 24 }, 1200: { slidesPerView: 2.2, spaceBetween: 28 } },
-                pagination: { el: '.swiper-pagination', clickable: true }
-            });
-        } catch(e){}
-    });
+        // replace html
+        const target = document.getElementById("cartPartial");
+        target.innerHTML = "";
+        while (wrapper.firstChild) target.appendChild(wrapper.firstChild);
 
-    /* ================== BACK-TO-TOP ================== */
-    const backTop = document.getElementById('backTop');
-    window.addEventListener('scroll', () => { backTop.style.display = window.scrollY > 400 ? 'flex' : 'none'; });
-    backTop && backTop.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
-    /* ================== KHỞI TẠO ================== */
-    document.addEventListener('DOMContentLoaded', () => {
-        updateCartBadge();
-    });
-
-    /* ================== NAVBAR HIDE-ON-SCROLL (DUY NHẤT) ==================
-       Yêu cầu: ẩn khi cuộn xuống, hiện khi dừng hoặc cuộn lên. Hoạt động toàn trang.
-       Target: phần header (partial) có id="appHeader" — đảm bảo trong _HeaderPartial có id này.
-    ================================================================ */
-    (function(){
-        const header = document.getElementById('appHeader');
-        if (!header) return; // nếu header partial không có id, không làm gì
-
-        let lastY = window.scrollY;
-        let timer = null;
-        const HIDE_MIN_SCROLL = 30; // tối thiểu px chuyển hướng để ẩn
-
-        window.addEventListener('scroll', function() {
-            const y = window.scrollY;
-            const goingDown = y > lastY && (y - lastY) > 0;
-
-            // nếu scroll xuống nhiều hơn threshold → ẩn
-            if (goingDown && y > HIDE_MIN_SCROLL) {
-                header.classList.add('nav-hidden');
-                header.classList.remove('nav-compact');
+        // run scripts in order
+        for (const oldScript of scripts) {
+            const s = document.createElement("script");
+            if (oldScript.src) {
+                s.src = oldScript.src;
+                await new Promise(res => { s.onload = res; document.body.appendChild(s); });
+            } else {
+                s.textContent = oldScript.textContent;
+                document.body.appendChild(s);
+                document.body.removeChild(s);
             }
+        }
 
-            // cập nhật lastY
-            lastY = y;
+        // re-init offcanvas
+        const newEl = document.getElementById("cartOffcanvas");
+        if (newEl) {
+            const newInst = new bootstrap.Offcanvas(newEl);
+            if (wasShown) setTimeout(() => newInst.show(), 30);
+        }
 
-            // clear timeout và đặt lại: khi dừng cuộn => hiện lên ở trạng thái compact
-            clearTimeout(timer);
-            timer = setTimeout(function(){
-                header.classList.remove('nav-hidden');
-                header.classList.add('nav-compact');
-            }, 180); // 180ms sau khi dừng cuộn
+    } catch (err) {
+        console.warn("reloadCartOffcanvas error:", err);
+    }
+}
 
-        }, { passive: true });
 
-        // hover vào header → giữ hiện đầy đủ
-        header.addEventListener('mouseenter', function(){
-            header.classList.remove('nav-hidden');
+
+
+
+/* ================== SLIDERS ================== */
+document.addEventListener('DOMContentLoaded', () => {
+
+    try {
+        new Swiper('#promoSwiper', {
+            loop: true, speed: 600,
+            autoplay: { delay: 3500, disableOnInteraction: false },
+            spaceBetween: 24, slidesPerView: 1,
+            breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
+            navigation: { nextEl: '#promoNext', prevEl: '#promoPrev' }
+        });
+    } catch (e) { }
+
+    try {
+        new Swiper('#testiSwiper', {
+            loop: true, speed: 580,
+            autoplay: { delay: 3200, disableOnInteraction: false },
+            spaceBetween: 24, slidesPerView: 1,
+            breakpoints: { 768: { slidesPerView: 2 }, 1200: { slidesPerView: 3 } },
+            navigation: { nextEl: '#testiNext', prevEl: '#testiPrev' }
+        });
+    } catch (e) { }
+
+    try {
+        new Swiper('#topCarousel', {
+            loop: true, speed: 600,
+            autoplay: { delay: 3000, disableOnInteraction: false },
+            slidesPerView: 1.25, centeredSlides: true, spaceBetween: 22,
+            breakpoints: { 768: { slidesPerView: 1.6, spaceBetween: 24 }, 1200: { slidesPerView: 2.2, spaceBetween: 28 } },
+            pagination: { el: '.swiper-pagination', clickable: true }
+        });
+    } catch (e) { }
+
+});
+
+
+/* ================== BACK TO TOP ================== */
+const backTop = document.getElementById('backTop');
+window.addEventListener('scroll', () => {
+    backTop.style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+if (backTop) {
+    backTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+
+/* ================== LOAD BAN ĐẦU ================== */
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartBadge();
+});
+
+
+/* ============================================================
+   2) NAVBAR HIDE-ON-SCROLL (KHÔNG ĐỘNG VÀO PHẦN NÀY)
+============================================================ */
+(function () {
+    const header = document.getElementById('appHeader');
+    if (!header) return;
+
+    let lastY = window.scrollY;
+    let timer = null;
+    const HIDE_MIN_SCROLL = 30;
+
+    window.addEventListener('scroll', function () {
+        const y = window.scrollY;
+        const goingDown = y > lastY && (y - lastY) > 0;
+
+        if (goingDown && y > HIDE_MIN_SCROLL) {
+            header.classList.add('nav-hidden');
             header.classList.remove('nav-compact');
-        });
+        }
 
-        // rời chuột → nếu đang cuộn ở vị trí > threshold thì compact
-        header.addEventListener('mouseleave', function(){
-            if (window.scrollY > HIDE_MIN_SCROLL) header.classList.add('nav-compact');
-        });
+        lastY = y;
 
-        // nếu trang được tải và đang ở top → đảm bảo hiển thị
-        window.addEventListener('load', function(){
-            if (window.scrollY <= HIDE_MIN_SCROLL) {
-                header.classList.remove('nav-compact');
-                header.classList.remove('nav-hidden');
-            }
-        });
-    })();
-    </script>
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            header.classList.remove('nav-hidden');
+            header.classList.add('nav-compact');
+        }, 180);
+
+    }, { passive: true });
+
+    header.addEventListener('mouseenter', function () {
+        header.classList.remove('nav-hidden');
+        header.classList.remove('nav-compact');
+    });
+
+    header.addEventListener('mouseleave', function () {
+        if (window.scrollY > HIDE_MIN_SCROLL)
+            header.classList.add('nav-compact');
+    });
+
+    window.addEventListener('load', function () {
+        if (window.scrollY <= HIDE_MIN_SCROLL) {
+            header.classList.remove('nav-compact');
+            header.classList.remove('nav-hidden');
+        }
+    });
+})();
+
+
+/* ============================================================
+   3) AJAX ADD-TO-CART + FLY-TO-CART + ICON SHAKE
+   (Unified handler with duplicate protection)
+============================================================ */
+
+/* ========= FLY TO CART ========= */
+function flyToCart(btn, imgSrc, cartIcon) {
+
+    const img = document.createElement("img");
+    img.src = imgSrc;
+
+    img.style.position = "fixed";
+    img.style.width = "60px";
+    img.style.height = "60px";
+    img.style.borderRadius = "8px";
+    img.style.objectFit = "cover";
+    img.style.zIndex = 2000;
+    img.style.transition = "all 0.9s cubic-bezier(.12,.62,.43,1)";
+    img.style.pointerEvents = "none";
+
+    const rect = btn.getBoundingClientRect();
+    img.style.left = rect.left + "px";
+    img.style.top = rect.top + "px";
+
+    document.body.appendChild(img);
+
+    const cartRect = cartIcon.getBoundingClientRect();
+
+    setTimeout(() => {
+        img.style.left = cartRect.left + "px";
+        img.style.top = cartRect.top + "px";
+        img.style.width = "10px";
+        img.style.height = "10px";
+        img.style.opacity = "0.2";
+    }, 30);
+
+    setTimeout(() => img.remove(), 900);
+}
+
+
+/* ========= ICON CART SHAKE ========= */
+function cartShake() {
+    const cart = document.querySelector('.btn-icon-modern[data-bs-target="#cartOffcanvas"]');
+    if (!cart) return;
+
+    cart.classList.add("cart-shake");
+    setTimeout(() => cart.classList.remove("cart-shake"), 600);
+}
+
+// Small helpers: polyfills and findClosest to improve event delegation compatibility
+if (typeof Element !== 'undefined' && !Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+}
+
+function findClosest(el, selector) {
+    while (el && el !== document) {
+        if (el.matches && el.matches(selector)) return el;
+        el = el.parentElement;
+    }
+    return null;
+}
+
+// Unified add-to-cart handler (with double-click/duplicate guard)
+const addToCartSelector = '.btn-add-cart, .btn-addcart, .btn-add-cart-ajax, .btn-addcart-ajax, .btn-brand[data-id]';
+
+document.addEventListener("click", async function (e) {
+    const btn = findClosest(e.target, addToCartSelector);
+    if (!btn) return;
+
+    // prevent other click handlers from running for this event
+    try { e.stopImmediatePropagation && e.stopImmediatePropagation(); } catch (er) { }
+
+    e.preventDefault();
+
+    // guard against duplicate requests (double click or multiple handlers)
+    if (btn.dataset.adding === '1') return;
+    btn.dataset.adding = '1';
+    const prevDisabled = btn.disabled;
+    btn.disabled = true;
+
+    const maSP = btn.getAttribute('data-id') || btn.dataset.id;
+    const imgSrc = btn.getAttribute('data-img') || btn.dataset.img;
+
+    try {
+        let res = null;
+        try {
+            const body = new URLSearchParams({ maSP: maSP, soLuong: 1 });
+            res = await fetch('@Url.Action("ThemAjax", "GioHang")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString()
+            });
+        } catch (postErr) {
+            res = null;
+        }
+
+        if (!res || !res.ok) {
+            // fallback to GET when POST is blocked or fails
+            res = await fetch('/GioHang/ThemAjax?maSP=' + encodeURIComponent(maSP), {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        }
+
+        if (!res || !res.ok) throw new Error('Server lỗi');
+
+        const data = await res.json();
+        if (data.ok) {
+            const badge = document.getElementById('cartCount');
+            if (badge) badge.innerText = data.count ?? (parseInt(badge.innerText || '0') + 1);
+
+            // visual effects
+            const cartIcon = document.querySelector('.btn-icon-modern[data-bs-target="#cartOffcanvas"] i');
+            if (cartIcon) flyToCart(btn, imgSrc, cartIcon);
+            await reloadCartOffcanvas();
+            cartShake();
+
+            try { showToast && showToast('Đã thêm vào giỏ!'); } catch { }
+        } else {
+            alert(data.message || 'Không thể thêm vào giỏ hàng.');
+        }
+    } catch (err) {
+        console.error('Add cart error:', err);
+        alert('Không thể thêm vào giỏ hàng!');
+    } finally {
+        // re-enable button
+        delete btn.dataset.adding;
+        btn.disabled = prevDisabled;
+    }
+});
+
+
+</script>
 
 </body>
 </html>

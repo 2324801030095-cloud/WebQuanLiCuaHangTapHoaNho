@@ -1,0 +1,125 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.KienThuc>
+
+<div class="row g-4">
+
+    @foreach (var kt in Model)
+    {
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+            <div class="kt-card shadow-sm">
+
+                <!-- ẢNH -->
+                <div class="kt-thumb">
+                    <img src="@kt.AnhDaiDien" alt="@kt.TieuDe" />
+                </div>
+
+                <div class="kt-body">
+
+                    <!-- META -->
+                    <div class="kt-meta mb-2">
+                        <span><i class="bi bi-person"></i> @kt.TacGia</span>
+                        <span class="dot"></span>
+                        <span><i class="bi bi-tags"></i> @kt.ChuDeChinh</span>
+                    </div>
+
+                    <!-- TIÊU ĐỀ -->
+                    <h5 class="kt-title">@kt.TieuDe</h5>
+
+                    <!-- MÔ TẢ NGẮN -->
+                    <p class="kt-desc">
+                        @kt.MoTaNgan
+                    </p>
+
+                    <!-- NÚT -->
+                    <a href="@Url.Action("ChiTiet", "KienThuc", new { slug = kt.Slug })" class="btn btn-kt">
+                        Xem thêm
+                        <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    }
+
+</div>
+
+
+<style>
+    .kt-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: .25s ease;
+        border: 1px solid #e5e7eb;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .kt-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+        }
+
+    .kt-thumb img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .kt-body {
+        padding: 18px 20px 22px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .kt-meta {
+        font-size: .85rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+        .kt-meta .dot {
+            width: 4px;
+            height: 4px;
+            background: #9ca3af;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+    .kt-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1f2937;
+        line-height: 1.35;
+        margin-bottom: 10px;
+    }
+
+    .kt-desc {
+        flex: 1;
+        font-size: .9rem;
+        color: #6b7280;
+        margin-bottom: 16px;
+    }
+
+    .btn-kt {
+        background: #16a34a;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: .9rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: .25s;
+        align-self: flex-start;
+    }
+
+        .btn-kt:hover {
+            background: #0e7a35;
+            color: #fff;
+            transform: translateX(3px);
+        }
+</style>

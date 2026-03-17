@@ -1,0 +1,76 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+    ViewBag.Title = "Kết quả thanh toán VNPay";
+}
+
+<style>
+    .pay-result-wrapper {
+        max-width: 760px;
+        margin: 60px auto;
+        text-align: center;
+        padding: 30px;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 18px 48px rgba(0,0,0,0.08);
+        border: 1px solid #e2e8f0;
+    }
+
+    .pay-icon {
+        width: 120px;
+        margin-bottom: 18px;
+        animation: scaleIn .6s ease-out;
+    }
+
+    @@keyframes scaleIn {
+        0% { transform: scale(.4); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .pay-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .pay-message {
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 16px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #0f172a;
+        margin: 18px 0 28px;
+        border-left: 5px solid #16a34a;
+    }
+
+    .btn-back {
+        padding: 12px 28px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        background: #16a34a;
+        border: none;
+        color: #fff;
+        transition: .25s;
+    }
+    .btn-back:hover {
+        background: #15803d;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(22,163,74,.28);
+    }
+</style>
+
+<div class="pay-result-wrapper">
+
+    <img src="https://img.icons8.com/external-justicon-lineal-color-justicon/344/external-checkmark-notifications-justicon-lineal-color-justicon.png"
+         class="pay-icon" />
+
+    <div class="pay-title">KẾT QUẢ THANH TOÁN VNPay</div>
+
+    <div class="pay-message">@ViewBag.Message</div>
+
+    <a href="/GioHang/GioHang" class="btn-back">
+        Quay về giỏ hàng
+    </a>
+</div>

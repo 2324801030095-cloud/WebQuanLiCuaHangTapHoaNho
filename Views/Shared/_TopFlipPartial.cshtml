@@ -1,0 +1,347 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>
+
+@{
+    bool noData = ViewBag.NoDataTopToday != null && ViewBag.NoDataTopToday == true;
+}
+<style>
+    /* ======= GIỮ NGUYÊN 100% PHẦN NODATA ======= */
+
+    .top-today-section .top-today-empty {
+        font-family: 'Segoe UI', system-ui;
+        padding: 60px 0 40px;
+        position: relative;
+        z-index: 5;
+    }
+
+    .top-today-section .empty-text {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #166534;
+    }
+
+    .top-today-section .empty-line {
+        width: 220px;
+        height: 7px;
+        background: linear-gradient(90deg, rgba(22,163,74,0), #16a34a, rgba(22,163,74,0));
+        margin: 18px auto 0;
+        border-radius: 12px;
+    }
+
+    /* ======= CARD PREMIUM – PHẦN CÓ DATA ======= */
+
+    .top-slide {
+        width: 280px;
+        height: 350px;
+    }
+
+    .card-premium {
+        width: 100%;
+        height: 100%;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: .25s ease;
+        position: relative;
+    }
+
+        .card-premium:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        }
+
+    /* Flip Engine */
+    .flip {
+        cursor: default;
+        height: 100%;
+    }
+
+    .flip-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform .6s;
+    }
+
+    .flipped .flip-inner {
+        transform: rotateY(180deg);
+    }
+
+    .flip-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        background: white;
+        border-radius: 16px;
+        padding: 12px;
+    }
+
+    /* MẶT TRƯỚC */
+    .card-img-wrap {
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .card-title {
+        text-align: center;
+        font-size: 15px;
+        font-weight: 600;
+        height: 40px;
+        overflow: hidden;
+        margin-top: 6px;
+        color: #1f2937;
+    }
+
+    .card-price {
+        text-align: center;
+        color: #16a34a;
+        font-weight: 800;
+        font-size: 17px;
+        margin-top: 5px;
+    }
+
+    .card-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* ===== Nâng cấp UI nút XEM + THÊM ===== */
+    .btn-view, .btn-add {
+        text-decoration: none !important;
+        padding: 8px 18px;
+        border-radius: 22px;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        transition: 0.16s ease;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1;
+        box-shadow: 0 4px 10px rgba(16,24,40,0.06);
+    }
+
+    .btn-view {
+        background: #ffffff;
+        color: #111;
+        border: 1px solid #e6e9ee;
+    }
+
+        .btn-view:hover {
+            background: #f8fafb;
+            transform: translateY(-2px);
+        }
+
+    .btn-add {
+        background: linear-gradient(180deg,#16a34a,#13803d);
+        color: white;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+        }
+
+        /* remove underline on anchors used as buttons */
+        .btn-view[role="button"], .btn-add[role="button"], .btn-view, .btn-add {
+            text-decoration: none !important;
+        }
+            /* ======= NÚT LẬT THẺ – NHỎ – GỌN – ĐẸP ======= */
+    .flip-hint {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.75);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        z-index: 20;
+        white-space: nowrap;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+        .flip-hint i {
+            font-size: 14px;
+        }
+
+    .flip-hint:hover {
+        transform: translateY(-1px);
+        background: rgba(15, 23, 42, 0.9);
+    }
+
+    .flip-hover-note {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        color: #111827;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 15;
+    }
+
+    .flip:hover .flip-hover-note {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ======= MẶT SAU ======= */
+    .flip-back {
+        transform: rotateY(180deg);
+        border: 2px solid #16a34a;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        justify-content: flex-start;
+    }
+
+    .flip-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #16a34a;
+    }
+
+    .flip-desc {
+        font-size: 14px;
+        line-height: 1.35;
+        max-height: 130px;
+        overflow: hidden;
+        color: #374151;
+        white-space: normal;
+    }
+</style>
+
+@if (noData)
+{
+    <div class="top-today-empty text-center">
+        <h5 class="empty-text">Hiện chưa có sản phẩm nào được mua trong hôm nay!</h5>
+        <div class="empty-line"></div>
+    </div>
+}
+else
+{
+    <div class="swiper-wrapper" role="list">
+
+        @foreach (var sp in Model)
+        {
+            <div class="swiper-slide top-slide">
+
+                <div class="card-premium flip">
+
+                    <!-- NÚT LẬT -->
+                    <div class="flip-hint" onclick="flipCard(this)" aria-label="Lật để xem thông tin ngắn">
+                        <i class="bi bi-arrow-repeat"></i> Lật
+                    </div>
+                    <div class="flip-hover-note">Bấm để hiện thông tin về sản phẩm</div>
+
+                    <div class="flip-inner">
+
+                        <!-- ================= MẶT TRƯỚC ================= -->
+                        <div class="flip-face flip-front">
+
+                            <div class="card-img-wrap">
+                                <img src="@Url.Content("~/Content/Images/" + sp.HinhAnh)"
+                                     class="card-img" />
+                            </div>
+
+                            <div class="card-title">@sp.TenSP</div>
+
+                            <div class="card-price">
+                                @String.Format("{0:N0} ₫", sp.GiaBan)
+                            </div>
+
+                            <div class="card-actions">
+                                <a href="@Url.Action("ChiTiet", "SanPham", new { id = sp.MaSP })"
+                                   class="btn-view">Xem</a>
+
+                                <button type="button"
+                                        class="btn-add btn-addcart"
+                                        data-id="@sp.MaSP"
+                                        data-img="@Url.Content("~/Content/Images/" + sp.HinhAnh)">
+                                    Thêm
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ================= MẶT SAU ================= -->
+                        <div class="flip-face flip-back">
+
+                            <div class="flip-title">@sp.TenSP</div>
+
+                            <div class="flip-desc">
+                                @(string.IsNullOrWhiteSpace(sp.MoTaNgan) ? "Chưa có mô tả ngắn cho sản phẩm này." : sp.MoTaNgan)
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <script>
+        function flipCard(btn) {
+            let card = btn.closest(".flip");
+            card.classList.toggle("flipped");
+        }
+
+        (function () {
+            if (typeof Swiper === "undefined") return;
+
+            new Swiper("#topCarousel", {
+                effect: "coverflow",
+                grabCursor: true,
+                centeredSlides: true,
+                slidesPerView: "auto",
+                loop: true,
+                autoplay: {
+                    delay: 2200,
+                    disableOnInteraction: false
+                },
+                coverflowEffect: {
+                    rotate: 30,
+                    stretch: 0,
+                    depth: 160,
+                    modifier: 1,
+                    slideShadows: true
+                }
+            });
+        })();
+
+
+
+
+    </script>
+}

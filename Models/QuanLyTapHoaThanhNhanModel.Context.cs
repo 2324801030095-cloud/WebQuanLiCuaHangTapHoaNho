@@ -45,6 +45,14 @@ namespace WebQuanLiCuaHangTapHoa.Models
         public virtual DbSet<TaiKhoanKH> TaiKhoanKH { get; set; }
         public virtual DbSet<BaoNo> BaoNo { get; set; }
         public virtual DbSet<LichSuThongBao> LichSuThongBao { get; set; }
+        public virtual DbSet<KienThuc> KienThuc { get; set; }
+        public virtual DbSet<DanhGia> DanhGia { get; set; }
+        public virtual DbSet<LoaiThanhToan> LoaiThanhToan { get; set; }
+        public virtual DbSet<PhuongThucThanhToan> PhuongThucThanhToan { get; set; }
+        public virtual DbSet<LichSuXemThongBao> LichSuXemThongBao { get; set; }
+        public virtual DbSet<Menu> Menu { get; set; }
+        public virtual DbSet<TinNhan> TinNhan { get; set; }
+        public virtual DbSet<ThongBao> ThongBao { get; set; }
     
         public virtual int sp_alterdiagram(string diagramname, Nullable<int> owner_id, Nullable<int> version, byte[] definition)
         {

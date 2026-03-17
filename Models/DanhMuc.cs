@@ -18,6 +18,7 @@ namespace WebQuanLiCuaHangTapHoa.Models
         public DanhMuc()
         {
             this.SanPham = new HashSet<SanPham>();
+            this.KienThuc = new HashSet<KienThuc>();
         }
     
         public int MaDM { get; set; }
@@ -26,5 +27,7 @@ namespace WebQuanLiCuaHangTapHoa.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SanPham> SanPham { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<KienThuc> KienThuc { get; set; }
     }
 }

@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+
+    var results = ViewBag.SearchResult as IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>
+                  ?? Enumerable.Empty<WebQuanLiCuaHangTapHoa.Models.SanPhamView>();
+
+    var kw = ViewBag.Keyword as string ?? "";
+    var total = ViewBag.TotalItems as int? ?? results.Count();
+    var page = ViewBag.Page as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 24;
+}
+
+<style>
+    .search-header-box {
+        background: #f0fdf4;
+        border-left: 6px solid #16a34a;
+        padding: 18px 22px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .btn-back {
+        border-radius: 30px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: .2s ease;
+        border: 1px solid #16a34a;
+        color: #166534;
+        background: #dcfce7;
+    }
+
+        .btn-back:hover {
+            background: #16a34a;
+            color: #fff;
+        }
+
+    .page-item.active .page-link {
+        background: #16a34a !important;
+        border-color: #16a34a !important;
+        color: #fff !important;
+    }
+
+    .page-link {
+        color: #14532d;
+    }
+
+        .page-link:hover {
+            background: #dcfce7;
+            color: #14532d;
+        }
+</style>
+
+<div class="container py-4">
+
+    <!-- ================= HEADER SEARCH ================= -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn-back" onclick="goBackHome()">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </button>
+    </div>
+
+    <div class="search-header-box">
+        <h1 class="h4 fw-bold mb-2">
+            Kết quả tìm kiếm cho:
+            <span class="text-success">"@kw"</span>
+        </h1>
+
+        <p class="text-muted small mb-0">
+            Tìm thấy <strong>@total</strong> kết quả. (Trang @page)
+        </p>
+    </div>
+
+    <!-- ================= SEARCH RESULTS (Partial) ================= -->
+    @Html.Partial("_SearchResult", results)
+
+    <!-- ================= PAGING ================= -->
+    @if (total > pageSize)
+    {
+        var totalPages = (int)Math.Ceiling((double)total / pageSize);
+
+        <nav aria-label="Search paging" class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                <li class="page-item @(page <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@Url.Action("Search","Search",
+                        new { kw = kw, page = page - 1, pageSize = pageSize })">Trước</a>
+                </li>
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == page ? "active" : "")">
+                        <a class="page-link"
+                           href="@Url.Action("Search","Search", new { kw = kw, page = i, pageSize = pageSize })">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       href="@Url.Action("Search","Search",
+                       new { kw = kw, page = page + 1, pageSize = pageSize })">Tiếp</a>
+                </li>
+
+            </ul>
+        </nav>
+    }
+</div>
+
+
+<script>
+    // ==============================
+    // NÚT QUAY LẠI KHÔNG RELOAD
+    // ==============================
+    function goBackHome() {
+        if (document.referrer) {
+            history.back();
+        } else {
+            window.location.href = '/';
+        }
+    }
+</script>

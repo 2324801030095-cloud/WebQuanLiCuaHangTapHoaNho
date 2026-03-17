@@ -1,1173 +1,1102 @@
-﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+﻿        @model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
 
-<div class="offcanvas offcanvas-end modern-cart-offcanvas"
-     tabindex="-1"
-     id="cartOffcanvas"
-     aria-labelledby="cartOffcanvasLabel">
+        <div class="offcanvas offcanvas-end modern-cart-offcanvas"
+             tabindex="-1"
+             id="cartOffcanvas"
+             aria-labelledby="cartOffcanvasLabel">
 
-    <!-- Enhanced Header -->
-    <div class="offcanvas-header bg-gradient text-white shadow-sm">
-        <div class="d-flex align-items-center">
-            <div class="cart-icon-badge">
-                <i class="bi bi-bag-check-fill fs-4 me-3"></i>
-            </div>
-            <div>
-                <h5 class="offcanvas-title mb-0 fw-bold">Giỏ hàng</h5>
-                <small class="opacity-75">
-                    @if (Model != null && Model.Any())
-                    {
-                        <text>@Model.Count sản phẩm</text>
-                    }
-                    else
-                    {
-                        <text>Trống</text>
-                    }
-                </small>
-            </div>
-        </div>
-        <button type="button" class="btn-close btn-close-white shadow-sm" data-bs-dismiss="offcanvas"></button>
-    </div>
-
-    <!-- Enhanced Body -->
-    <div class="offcanvas-body d-flex flex-column p-0">
-
-        <div class="cart-items-container flex-grow-1 overflow-hidden">
-            <div class="cart-items overflow-auto p-3 h-100">
-                @if (Model == null || !Model.Any())
-                {
-                    <div class="empty-state text-center text-muted py-5">
-                        <div class="empty-icon-container mb-3">
-                            <i class="bi bi-cart-x display-1 opacity-50"></i>
-                        </div>
-                        <h5 class="mb-2 fw-semibold">Giỏ hàng trống</h5>
-                        <p class="mb-3 opacity-75">Thêm sản phẩm để bắt đầu mua sắm</p>
-                        <a href="/" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-arrow-left me-1"></i> Tiếp tục mua sắm
-                        </a>
+            <!-- Enhanced Header -->
+            <div class="offcanvas-header bg-gradient text-white shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="cart-icon-badge">
+                        <i class="bi bi-bag-check-fill fs-4 me-3"></i>
                     </div>
-                }
-                else
-                {
-                    foreach (var item in Model)
-                    {
-                        <div class="cart-item-card mb-3 border-0 shadow-sm rounded-3 overflow-hidden">
-                            <div class="d-flex align-items-center p-3">
+                    <div>
+                        <h5 class="offcanvas-title mb-0 fw-bold">Giỏ hàng</h5>
+                        <small class="opacity-75">
+                            @if (Model != null && Model.Any())
+                            {
+                                <text>@Model.Count sản phẩm</text>
+                            }
+                            else
+                            {
+                                <text>Trống</text>
+                            }
+                        </small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white shadow-sm" data-bs-dismiss="offcanvas"></button>
+            </div>
 
-                                <!-- Enhanced Product Image -->
-                                <div class="product-image-container me-3">
-                                    <img src="@(string.IsNullOrEmpty(item.HinhAnh)
-                                        ? "https://picsum.photos/150/120?random=" + item.MaSP
-                                        : item.HinhAnh)"
-                                         class="product-image rounded-3 shadow-sm"
-                                         alt="@item.TenSP" />
-                                    <div class="quantity-badge bg-success text-white">
-                                        @item.SoLuong
-                                    </div>
+            <!-- Enhanced Body -->
+            <div class="offcanvas-body d-flex flex-column p-0">
+
+                <div class="cart-items-container flex-grow-1 overflow-hidden">
+                    <div class="cart-items overflow-auto p-3 h-100">
+                        @if (Model == null || !Model.Any())
+                        {
+                            <div class="empty-state text-center text-muted py-5">
+                                <div class="empty-icon-container mb-3">
+                                    <i class="bi bi-cart-x display-1 opacity-50"></i>
                                 </div>
+                                <h5 class="mb-2 fw-semibold">Giỏ hàng trống</h5>
+                                <p class="mb-3 opacity-75">Thêm sản phẩm để bắt đầu mua sắm</p>
+                                <a href="/" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-arrow-left me-1"></i> Tiếp tục mua sắm
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <div class="cart-item-card mb-3 border-0 shadow-sm rounded-3 overflow-hidden">
+                                    <div class="d-flex align-items-center p-3">
 
-                                <!-- Enhanced Product Info -->
-                                <div class="flex-grow-1">
-                                    <h6 class="product-title mb-2 fw-bold text-dark">
-                                        @item.TenSP
-                                    </h6>
-
-                                    <div class="price-container mb-3">
-                                        <span class="product-price text-success fw-bold">
-                                            @String.Format("{0:N0} ₫", item.DonGia)
-                                        </span>
-                                        <small class="text-muted ms-2">/đơn vị</small>
-                                    </div>
-
-                                    <!-- Enhanced Quantity Controls -->
-                                    <div class="quantity-controls d-flex align-items-center justify-content-between">
-                                        <div class="quantity-btn-group">
-                                            <button class="quantity-btn decrease"
-                                                    onclick="updateQuantity(@item.MaSP, @item.SoLuong - 1)"
-                                                    @(item.SoLuong <= 1 ? "disabled" : "")>
-                                                <i class="bi bi-dash-lg"></i>
-                                            </button>
-
-                                            <span class="quantity-display">@item.SoLuong</span>
-
-                                            <button class="quantity-btn increase"
-                                                    onclick="updateQuantity(@item.MaSP, @item.SoLuong + 1)">
-                                                <i class="bi bi-plus-lg"></i>
-                                            </button>
+                                        <!-- Enhanced Product Image -->
+                                        <div class="product-image-container me-3">
+                                            <img src="@Url.Content("~/Content/Images/" + item.HinhAnh)"
+                                                 class="product-image rounded-3 shadow-sm"
+                                                 alt="@item.TenSP" />
+                                            <div class="quantity-badge bg-success text-white">
+                                                @item.SoLuong
+                                            </div>
                                         </div>
 
-                                        <button class="delete-btn btn btn-outline-danger btn-sm"
-                                                onclick="confirmDelete(@item.MaSP)">
-                                            <i class="bi bi-trash3-fill"></i>
-                                            <span class="d-none d-sm-inline ms-1">Xóa</span>
-                                        </button>
+                                        <!-- Enhanced Product Info -->
+                                        <div class="flex-grow-1">
+                                            <h6 class="product-title mb-2 fw-bold text-dark">
+                                                @item.TenSP
+                                            </h6>
+
+                                            <div class="price-container mb-3">
+                                                <span class="product-price text-success fw-bold">
+                                                    @String.Format("{0:N0} ₫", item.DonGia)
+                                                </span>
+                                                <small class="text-muted ms-2">/đơn vị</small>
+                                            </div>
+
+                                            <!-- Enhanced Quantity Controls -->
+                                            <div class="quantity-controls d-flex align-items-center justify-content-between">
+                                                <div class="quantity-btn-group">
+                                                    <button class="quantity-btn decrease"
+                                                            onclick="updateQuantity(@item.MaSP, @item.SoLuong - 1)"
+                                                            @(item.SoLuong <= 1 ? "disabled" : "")>
+                                                        <i class="bi bi-dash-lg"></i>
+                                                    </button>
+
+                                                    <span class="quantity-display">@item.SoLuong</span>
+
+                                                    <button class="quantity-btn increase"
+                                                            onclick="updateQuantity(@item.MaSP, @item.SoLuong + 1)">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+
+                                                <button class="delete-btn btn btn-outline-danger btn-sm"
+                                                        onclick="confirmDelete(@item.MaSP)">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                    <span class="d-none d-sm-inline ms-1">Xóa</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
+                            }
+                        }
+                    </div>
+                </div>
 
+                <!-- Enhanced Footer -->
+                @if (Model != null && Model.Any())
+                {
+                    <div class="offcanvas-footer border-0 bg-light">
+                        <div class="summary-container p-3">
+                            <!-- Progress Bar -->
+                            <div class="progress-container mb-3">
+                                <div class="d-flex justify-content-between text-sm mb-1">
+                                    <span>Tổng đơn hàng</span>
+                                    <span class="text-success fw-bold">
+                                        @String.Format("{0:N0} ₫", Model.Sum(x => x.ThanhTien))
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-lg shadow-sm checkout-btn"
+                                        onclick="proceedToCheckout()">
+                                    <i class="bi bi-credit-card-2-front-fill me-2"></i>
+                                    Thanh toán ngay
+                                </button>
+
+                                <div class="d-flex gap-2">
+                                    <a href="/" class="btn btn-outline-secondary flex-fill">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        <span class="d-none d-md-inline">Tiếp tục mua sắm</span>
+                                        <span class="d-md-none">Mua thêm</span>
+                                    </a>
+
+                                    <button class="btn btn-outline-primary flex-fill"
+                                            onclick="clearCart()"
+                                            title="Xóa tất cả">
+                                        <i class="bi bi-trash3"></i>
+                                        <span class="d-none d-md-inline ms-1">Xóa giỏ</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 }
             </div>
         </div>
 
-        <!-- Enhanced Footer -->
-        @if (Model != null && Model.Any())
-        {
-            <div class="offcanvas-footer border-0 bg-light">
-                <div class="summary-container p-3">
-                    <!-- Progress Bar -->
-                    <div class="progress-container mb-3">
-                        <div class="d-flex justify-content-between text-sm mb-1">
-                            <span>Tổng đơn hàng</span>
-                            <span class="text-success fw-bold">
-                                @String.Format("{0:N0} ₫", Model.Sum(x => x.ThanhTien))
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-success btn-lg shadow-sm checkout-btn"
-                                onclick="proceedToCheckout()">
-                            <i class="bi bi-credit-card-2-front-fill me-2"></i>
-                            Thanh toán ngay
-                        </button>
-
-                        <div class="d-flex gap-2">
-                            <a href="/" class="btn btn-outline-secondary flex-fill">
-                                <i class="bi bi-arrow-left me-1"></i>
-                                <span class="d-none d-md-inline">Tiếp tục mua sắm</span>
-                                <span class="d-md-none">Mua thêm</span>
-                            </a>
-
-                            <button class="btn btn-outline-primary flex-fill"
-                                    onclick="clearCart()"
-                                    title="Xóa tất cả">
-                                <i class="bi bi-trash3"></i>
-                                <span class="d-none d-md-inline ms-1">Xóa giỏ</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <!-- Loading Overlay -->
+        <div id="cartLoading" class="loading-overlay d-none">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Đang cập nhật...</span>
             </div>
-        }
-    </div>
-</div>
-
-<!-- Loading Overlay -->
-<div id="cartLoading" class="loading-overlay d-none">
-    <div class="spinner-border text-success" role="status">
-        <span class="visually-hidden">Đang cập nhật...</span>
-    </div>
-</div>
+        </div>
 
 <script>
-    /**
-     * Modern Cart Enhancements JavaScript
-     * Handles all cart-related interactions with modern UX patterns
-     */
-
-    class CartEnhancements {
-        constructor() {
-            this.init();
-            this.bindEvents();
-        }
-
-        init() {
-            // Add entrance animation to cart items
-            this.animateCartItems();
-
-            // Setup keyboard shortcuts
-            this.setupKeyboardShortcuts();
-
-            // Initialize tooltips if Bootstrap is available
-            this.initTooltips();
-        }
-
-        bindEvents() {
-            // Event delegation for dynamic content
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('.quantity-btn')) {
-                    this.handleQuantityChange(e);
-                }
-                if (e.target.closest('.delete-btn')) {
-                    this.handleDelete(e);
-                }
-                if (e.target.closest('.checkout-btn')) {
-                    this.handleCheckout(e);
-                }
-            });
-
-            // Image click to enlarge
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('.product-image')) {
-                    this.showImageModal(e.target);
-                }
-            });
-
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                this.handleKeyboard(e);
-            });
-        }
-
-        async updateQuantity(maSP, soLuong) {
-            // Validate input
-            if (soLuong < 0) {
-                this.showToast('Số lượng không hợp lệ', 'error');
-                return;
-            }
-
-            // Check if we're removing the last item
-            if (soLuong === 0) {
-                if (!confirm('Xóa sản phẩm này khỏi giỏ hàng?')) return;
-            }
-
-            // Show loading state
-            this.showLoading(true);
-
-            try {
-                // Optimistic UI update
-                const optimisticItems = this.getOptimisticCartItems(maSP, soLuong);
-                this.updateCartUI(optimisticItems);
-
-                // Make API call
-                const response = await fetch('/GioHang/CapNhat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: `maSP=${maSP}&soLuong=${soLuong}`
-                });
-
-                if (response.ok) {
-                    // Reload cart partial
-                    await this.reloadCartPartial();
-                    this.showToast('Cập nhật thành công!', 'success');
-
-                    // Update cart badge if exists
-                    this.updateCartBadge();
-                } else {
-                    throw new Error('Server error');
+            class CartEnhancements {
+                constructor() {
+                    this.init();
+                    this.bindEvents();
                 }
 
-            } catch (error) {
-                console.error('Update quantity error:', error);
-                this.showToast('Không thể cập nhật số lượng. Vui lòng thử lại.', 'error');
-
-                // Revert optimistic update
-                await this.reloadCartPartial();
-            } finally {
-                this.showLoading(false);
-            }
-        }
-
-        async reloadCartPartial() {
-            try {
-                const response = await fetch('/GioHang/PartialCart');
-                const html = await response.text();
-
-                // Smooth transition effect
-                const cartContainer = document.querySelector('.cart-items');
-                if (cartContainer) {
-                    cartContainer.style.opacity = '0.5';
-                    cartContainer.style.transform = 'translateY(10px)';
-
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                    document.getElementById('cartPartial').innerHTML = html;
-
-                    cartContainer.style.opacity = '1';
-                    cartContainer.style.transform = 'translateY(0)';
-
-                    // Re-animate items
+                init() {
                     this.animateCartItems();
+                    this.setupKeyboardShortcuts();
+                    this.initTooltips();
                 }
-            } catch (error) {
-                console.error('Reload partial error:', error);
-                this.showToast('Lỗi tải dữ liệu giỏ hàng', 'error');
-            }
-        }
 
-        confirmDelete(maSP) {
-            // Enhanced confirmation with custom modal
-            this.showConfirmModal({
-                title: 'Xóa sản phẩm',
-                message: 'Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?',
-                confirmText: 'Xóa',
-                cancelText: 'Hủy',
-                confirmClass: 'btn-danger',
-                onConfirm: () => {
-                    this.deleteItem(maSP);
+                bindEvents() {
+                    document.addEventListener('click', (e) => {
+                        if (e.target.closest('.quantity-btn')) {
+                            this.handleQuantityChange(e);
+                        }
+                        if (e.target.closest('.delete-btn')) {
+                            this.handleDelete(e);
+                        }
+                        if (e.target.closest('.checkout-btn')) {
+                            this.handleCheckout(e);
+                        }
+                        if (e.target.closest('.product-image')) {
+                            this.showImageModal(e.target);
+                        }
+                    });
+
+                    document.addEventListener('keydown', (e) => this.handleKeyboard(e));
                 }
-            });
-        }
 
-        async deleteItem(maSP) {
-            this.showLoading(true);
+                async updateQuantity(maSP, soLuong) {
+                    if (soLuong < 0) {
+                        this.showToast('Số lượng không hợp lệ', 'error');
+                        return;
+                    }
 
-            try {
-                window.location.href = `/GioHang/Xoa?maSP=${maSP}`;
-            } catch (error) {
-                console.error('Delete error:', error);
-                this.showToast('Không thể xóa sản phẩm', 'error');
-                this.showLoading(false);
-            }
-        }
+                    if (soLuong === 0) {
+                        if (!confirm('Xóa sản phẩm này khỏi giỏ hàng?')) return;
+                    }
 
-        proceedToCheckout() {
-            // Add loading state
-            const checkoutBtn = document.querySelector('.checkout-btn');
-            if (checkoutBtn) {
-                checkoutBtn.disabled = true;
-                checkoutBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang xử lý...';
-            }
+                    this.showLoading(true);
 
-            // Navigate to checkout
-            window.location.href = '/GioHang/ThanhToan';
-        }
-
-        async clearCart() {
-            this.showConfirmModal({
-                title: 'Xóa toàn bộ giỏ hàng',
-                message: 'Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?',
-                confirmText: 'Xóa tất cả',
-                cancelText: 'Hủy',
-                confirmClass: 'btn-danger',
-                onConfirm: async () => {
                     try {
-                        await fetch('/GioHang/XoaTatCa', { method: 'POST' });
+                        const optimisticItems = this.getOptimisticCartItems(maSP, soLuong);
+                        this.updateCartUI(optimisticItems);
+
+                        const response = await fetch('/GioHang/CapNhat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: `maSP=${maSP}&soLuong=${soLuong}`
+                        });
+
+                        if (!response.ok) throw new Error("Server error");
+
                         await this.reloadCartPartial();
-                        this.showToast('Đã xóa tất cả sản phẩm', 'success');
+                        this.showToast('Cập nhật thành công!', 'success');
+                        this.updateCartBadge();
+
                     } catch (error) {
-                        console.error('Clear cart error:', error);
-                        this.showToast('Không thể xóa giỏ hàng', 'error');
+                        console.error('Update quantity error:', error);
+                        this.showToast('Không thể cập nhật số lượng.', 'error');
+                        await this.reloadCartPartial();
+                    } finally {
+                        this.showLoading(false);
                     }
                 }
-            });
-        }
 
-        showLoading(show = true) {
-            const overlay = document.getElementById('cartLoading');
-            if (overlay) {
-                if (show) {
-                    overlay.classList.remove('d-none');
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.opacity = '1', 10);
-                } else {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.classList.add('d-none'), 300);
+                async reloadCartPartial() {
+                    try {
+                        // Dùng hàm chuẩn trong layout: reloadCartOffcanvas()
+                        if (typeof reloadCartOffcanvas === 'function') {
+                            await reloadCartOffcanvas();
+                        } else {
+                            console.warn('reloadCartOffcanvas không tồn tại (layout chưa load?)');
+                        }
+                    } catch (error) {
+                        console.error('reloadCartPartial error:', error);
+                        this.showToast('Không thể tải giỏ hàng', 'error');
+                    }
+
+
+
+                    // Sau khi render lại nếu giỏ hàng trống → reset Offcanvas instance
+                    const offcanvasEl = document.getElementById('cartOffcanvas');
+                    if (offcanvasEl) {
+                        try {
+                            let inst = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                   
+                        } catch (e) {
+                            console.warn("Không thể reset offcanvas instance:", e);
+                        }
+                    }
+
+                }
+
+
+                confirmDelete(maSP) {
+                    this.showConfirmModal({
+                        title: 'Xóa sản phẩm',
+                        message: 'Bạn có chắc muốn xóa sản phẩm này?',
+                        confirmText: 'Xóa',
+                        cancelText: 'Hủy',
+                        confirmClass: 'btn-danger',
+                        onConfirm: () => this.deleteItem(maSP)
+                    });
+                }
+
+                async deleteItem(maSP) {
+                    this.showLoading(true);
+
+                    try {
+                        const res = await fetch(`/GioHang/Xoa?maSP=${maSP}`, {
+                            method: 'GET',
+                            headers: { "X-Requested-With": "XMLHttpRequest" }
+                        });
+
+
+                        const data = await res.json();
+                        if (data.ok) {
+                            await this.reloadCartPartial();
+                            this.updateCartBadge();
+                            this.showToast("Đã xóa sản phẩm", "success");
+                        }
+
+                    } catch (err) {
+                        console.error("Delete error:", err);
+                        this.showToast("Không thể xóa sản phẩm", "error");
+                    } finally {
+                        this.showLoading(false);
+                    }
+                }
+
+                proceedToCheckout() {
+                    const checkoutBtn = document.querySelector('.checkout-btn');
+                    if (checkoutBtn) {
+                        checkoutBtn.disabled = true;
+                        checkoutBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang xử lý...';
+                    }
+                    window.location.href = '/GioHang/ThanhToan';
+                }
+
+                async clearCart() {
+                    this.showConfirmModal({
+                        title: 'Xóa toàn bộ giỏ hàng',
+                        message: 'Bạn muốn xóa tất cả sản phẩm?',
+                        confirmText: 'Xóa tất cả',
+                        confirmClass: 'btn-danger',
+                        onConfirm: async () => {
+                            try {
+                                await fetch('/GioHang/XoaTatCa', {
+                                    method: 'GET',
+                                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                                });
+                                await this.reloadCartPartial();
+                                this.updateCartBadge();
+                                this.showToast('Đã xóa toàn bộ giỏ hàng', 'success');
+                            } catch (error) {
+                                this.showToast('Không thể xóa giỏ hàng', 'error');
+                            }
+                        }
+                    });
+                }
+
+                showLoading(show = true) {
+                    const overlay = document.getElementById('cartLoading');
+                    if (!overlay) return;
+
+                    if (show) {
+                        overlay.classList.remove('d-none');
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.style.opacity = '1', 10);
+                    } else {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.classList.add('d-none'), 300);
+                    }
+                }
+
+                showToast(message, type = 'info', duration = 3000) {
+                    let container = document.getElementById('toast-container');
+                    if (!container) {
+                        container = document.createElement('div');
+                        container.id = 'toast-container';
+                        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                        document.body.appendChild(container);
+                    }
+
+                    const toast = document.createElement('div');
+                    toast.className = `toast text-white bg-${this.getToastType(type)} border-0`;
+                    toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">${this.getToastIcon(type)} ${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
+
+                    container.appendChild(toast);
+
+                    if (bootstrap.Toast) {
+                        new bootstrap.Toast(toast, { delay: duration }).show();
+                    }
+                }
+
+                showConfirmModal(options) {
+                    const {
+                        title = 'Xác nhận',
+                        message = 'Bạn có chắc không?',
+                        confirmText = 'Đồng ý',
+                        cancelText = 'Hủy',
+                        confirmClass = 'btn-primary',
+                        onConfirm = null
+                    } = options;
+
+                    const modalHtml = `
+                        <div class="modal fade" id="confirmModal" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title">${title}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body text-center py-4">
+                                        <i class="bi bi-question-circle-fill text-warning display-4 mb-3"></i>
+                                        <p>${message}</p>
+                                    </div>
+                                    <div class="modal-footer border-0 justify-content-center">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelText}</button>
+                                        <button type="button" class="btn ${confirmClass} confirm-action">${confirmText}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = modalHtml;
+                    document.body.appendChild(wrapper);
+
+                    const modal = new bootstrap.Modal(wrapper.querySelector('.modal'));
+                    wrapper.querySelector('.confirm-action').addEventListener('click', () => {
+                        modal.hide();
+                        onConfirm && onConfirm();
+                    });
+
+                    wrapper.querySelector('.modal').addEventListener('hidden.bs.modal', () => wrapper.remove());
+
+                    modal.show();
+                }
+
+                showImageModal(img) {
+                    const modalHtml = `
+                        <div class="modal fade" id="imageModal" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0">
+                                    <div class="modal-body p-2 text-center">
+                                        <img src="${img.src}" class="img-fluid rounded">
+                                    </div>
+                                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3"
+                                        data-bs-dismiss="modal"></button>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = modalHtml;
+                    document.body.appendChild(wrapper);
+
+                    const modal = new bootstrap.Modal(wrapper.querySelector('.modal'));
+                    wrapper.querySelector('.modal').addEventListener('hidden.bs.modal', () => wrapper.remove());
+                    modal.show();
+                }
+
+                getOptimisticCartItems(maSP, soLuong) {
+                    return null;
+                }
+
+                updateCartUI(items) {
+                    const container = document.querySelector('.cart-items');
+                    if (container) container.style.opacity = '0.7';
+                }
+
+                async updateCartBadge() {
+                    try {
+                        const res = await fetch('/GioHang/DemSoLuong');
+                        const data = await res.json();
+                        const badge = document.getElementById('cartCount');
+                        if (badge) badge.innerText = data.tong || 0;
+                    } catch { }
+                }
+
+                animateCartItems() {
+                    const items = document.querySelectorAll('.cart-item-card');
+                    items.forEach((item, index) => {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            item.style.transition = 'all 0.5s ease';
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateX(0)';
+                        }, index * 80);
+                    });
+                }
+
+                setupKeyboardShortcuts() {
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
+                            if (offcanvas) offcanvas.hide();
+                        }
+                    });
+                }
+
+                initTooltips() {
+                    if (bootstrap.Tooltip) {
+                        const list = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        list.forEach(el => new bootstrap.Tooltip(el));
+                    }
+                }
+
+                handleKeyboard() { }
+                handleQuantityChange() { }
+                handleDelete() { }
+                handleCheckout() { }
+
+                getToastType(t) {
+                    return { success: 'success', error: 'danger', warning: 'warning', info: 'info' }[t] || 'info';
+                }
+
+                getToastIcon(t) {
+                    return {
+                        success: '<i class="bi bi-check-circle-fill me-2"></i>',
+                        error: '<i class="bi bi-exclamation-triangle-fill me-2"></i>',
+                        warning: '<i class="bi bi-exclamation-circle-fill me-2"></i>',
+                        info: '<i class="bi bi-info-circle-fill me-2"></i>'
+                    }[t];
                 }
             }
-        }
 
-        showToast(message, type = 'info', duration = 3000) {
-            // Create toast container if it doesn't exist
-            let container = document.getElementById('toast-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'toast-container';
-                container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                container.style.zIndex = '1060';
-                document.body.appendChild(container);
-            }
-
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${this.getToastType(type)} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${this.getToastIcon(type)} ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-
-            // Add to container
-            container.appendChild(toast);
-
-            // Initialize Bootstrap toast if available
-            if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-                const bsToast = new bootstrap.Toast(toast, {
-                    delay: duration,
-                    autohide: true
-                });
-                bsToast.show();
-            } else {
-                // Fallback for basic toast behavior
-                setTimeout(() => toast.remove(), duration);
-            }
-
-            // Remove toast after hide
-            toast.addEventListener('hidden.bs.toast', () => toast.remove());
-        }
-
-        showConfirmModal(options) {
-            const {
-                title = 'Xác nhận',
-                message = 'Bạn có chắc chắn?',
-                confirmText = 'Xác nhận',
-                cancelText = 'Hủy',
-                confirmClass = 'btn-primary',
-                onConfirm = null
-            } = options;
-
-            // Create modal HTML
-            const modalHtml = `
-                <div class="modal fade" id="confirmModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header border-0">
-                                <h5 class="modal-title">${title}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body text-center py-4">
-                                <i class="bi bi-question-circle-fill text-warning display-4 mb-3"></i>
-                                <p class="mb-0">${message}</p>
-                            </div>
-                            <div class="modal-footer border-0 justify-content-center">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    ${cancelText}
-                                </button>
-                                <button type="button" class="btn ${confirmClass} confirm-action">
-                                    ${confirmText}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Add to body
-            const modalContainer = document.createElement('div');
-            modalContainer.innerHTML = modalHtml;
-            document.body.appendChild(modalContainer);
-
-            // Show modal
-            const modal = new bootstrap.Modal(modalContainer.querySelector('.modal'));
-
-            // Handle confirm action
-            const confirmBtn = modalContainer.querySelector('.confirm-action');
-            confirmBtn.addEventListener('click', () => {
-                modal.hide();
-                if (onConfirm) onConfirm();
+            document.addEventListener('DOMContentLoaded', () => {
+                window.cartEnhancements = new CartEnhancements();
             });
 
-            // Handle modal hide
-            modalContainer.querySelector('.modal').addEventListener('hidden.bs.modal', () => {
-                modalContainer.remove();
-            });
-
-            modal.show();
-        }
-
-        showImageModal(img) {
-            // Simple image modal for product images
-            const modalHtml = `
-                <div class="modal fade" id="imageModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content border-0">
-                            <div class="modal-body p-2 text-center">
-                                <img src="${img.src}" alt="${img.alt}" class="img-fluid rounded">
-                            </div>
-                            <button type="button" class="btn-close position-absolute top-0 end-0 m-3"
-                                    data-bs-dismiss="modal" style="z-index: 1;"></button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            const modalContainer = document.createElement('div');
-            modalContainer.innerHTML = modalHtml;
-            document.body.appendChild(modalContainer);
-
-            const modal = new bootstrap.Modal(modalContainer.querySelector('.modal'));
-            modalContainer.querySelector('.modal').addEventListener('hidden.bs.modal', () => {
-                modalContainer.remove();
-            });
-
-            modal.show();
-        }
-
-        getOptimisticCartItems(maSP, soLuong) {
-            // This would contain the optimistic UI update logic
-            return null;
-        }
-
-        updateCartUI(items) {
-            // Update cart UI optimistically
-            const cartContainer = document.querySelector('.cart-items');
-            if (cartContainer) {
-                cartContainer.style.opacity = '0.7';
+            async function updateQuantity(maSP, soLuong) {
+                await window.cartEnhancements.updateQuantity(maSP, soLuong);
             }
-        }
 
-        updateCartBadge() {
-            // Update cart badge if it exists
-            const badge = document.querySelector('.cart-badge');
-            if (badge) {
-                badge.textContent = '0';
+            function confirmDelete(maSP) {
+                window.cartEnhancements.confirmDelete(maSP);
             }
-        }
 
-        animateCartItems() {
-            const items = document.querySelectorAll('.cart-item-card');
-            items.forEach((item, index) => {
-                item.style.opacity = '0';
-                item.style.transform = 'translateX(20px)';
-                setTimeout(() => {
-                    item.style.transition = 'all 0.5s ease';
-                    item.style.opacity = '1';
-                    item.style.transform = 'translateX(0)';
-                }, index * 100);
-            });
-        }
+            function proceedToCheckout() {
+                window.cartEnhancements.proceedToCheckout();
+            }
 
-        setupKeyboardShortcuts() {
-            document.addEventListener('keydown', (e) => {
-                // ESC to close cart
-                if (e.key === 'Escape') {
-                    const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
-                    if (offcanvas) offcanvas.hide();
+            function clearCart() {
+                window.cartEnhancements.clearCart();
+            }
+
+
+        
+
+        </script>
+
+        <style>
+            /* Enhanced Offcanvas */
+
+            .modern-cart-offcanvas .offcanvas-header {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+                color: #ffffff !important;
+                backdrop-filter: none !important;
+            }
+
+
+            .modern-cart-offcanvas {
+                width: 480px !important;
+                max-width: 95vw;
+                box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+                border-radius: 16px 0 0 16px;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+
+                .modern-cart-offcanvas .offcanvas-header {
+                    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                    padding: 1.5rem 1.5rem;
+                    border-radius: 0;
                 }
-            });
-        }
 
-        initTooltips() {
-            // Initialize Bootstrap tooltips if available
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
+            .cart-icon-badge {
+                position: relative;
             }
-        }
-
-        handleKeyboard(e) {
-            // Additional keyboard handling can be added here
-        }
-
-        getToastType(type) {
-            const typeMap = {
-                'success': 'success',
-                'error': 'danger',
-                'warning': 'warning',
-                'info': 'info'
-            };
-            return typeMap[type] || 'info';
-        }
-
-        getToastIcon(type) {
-            const iconMap = {
-                'success': '<i class="bi bi-check-circle-fill me-2"></i>',
-                'error': '<i class="bi bi-exclamation-triangle-fill me-2"></i>',
-                'warning': '<i class="bi bi-exclamation-circle-fill me-2"></i>',
-                'info': '<i class="bi bi-info-circle-fill me-2"></i>'
-            };
-            return iconMap[type] || iconMap['info'];
-        }
-
-        handleQuantityChange(e) {
-            // This is already handled by updateQuantity
-        }
-
-        handleDelete(e) {
-            // This is already handled by confirmDelete
-        }
-
-        handleCheckout(e) {
-            // This is already handled by proceedToCheckout
-        }
-    }
-
-    // Initialize cart enhancements when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-        window.cartEnhancements = new CartEnhancements();
-    });
-
-    // Global functions for backward compatibility
-    async function updateQuantity(maSP, soLuong) {
-        if (window.cartEnhancements) {
-            await window.cartEnhancements.updateQuantity(maSP, soLuong);
-        }
-    }
-
-    function confirmDelete(maSP) {
-        if (window.cartEnhancements) {
-            window.cartEnhancements.confirmDelete(maSP);
-        }
-    }
-
-    function proceedToCheckout() {
-        if (window.cartEnhancements) {
-            window.cartEnhancements.proceedToCheckout();
-        }
-    }
-
-    function clearCart() {
-        if (window.cartEnhancements) {
-            window.cartEnhancements.clearCart();
-        }
-    }
-</script>
-
-<style>
-    /* Enhanced Offcanvas */
-    .modern-cart-offcanvas {
-        width: 480px !important;
-        max-width: 95vw;
-        box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
-        border-radius: 16px 0 0 16px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }
-
-    .modern-cart-offcanvas .offcanvas-header {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        padding: 1.5rem 1.5rem;
-        border-radius: 0;
-    }
-
-    .cart-icon-badge {
-        position: relative;
-    }
-
-    .cart-icon-badge::after {
-        content: '';
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        width: 8px;
-        height: 8px;
-        background: #ffc107;
-        border-radius: 50%;
-        border: 2px solid white;
-        animation: pulse 2s infinite;
-    }
-
-    /* Enhanced Empty State */
-    .empty-state {
-        animation: fadeInUp 0.6s ease-out;
-    }
-
-    .empty-icon-container {
-        opacity: 0.7;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    /* Enhanced Cart Items */
-    .cart-item-card {
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 0, 0, 0.05) !important;
-        animation: slideInRight 0.5s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cart-item-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.1), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .cart-item-card:hover::before {
-        left: 100%;
-    }
-
-    .cart-item-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
-        border-color: rgba(40, 167, 69, 0.2) !important;
-    }
-
-    /* Enhanced Product Image */
-    .product-image-container {
-        position: relative;
-        overflow: hidden;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-    .product-image-container:hover {
-        transform: scale(1.02);
-    }
-
-    .product-image {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border-radius: 8px;
-    }
-
-    .product-image:hover {
-        transform: scale(1.08);
-        filter: brightness(1.05) saturate(1.1);
-    }
-
-    .quantity-badge {
-        position: absolute;
-        bottom: -5px;
-        right: -5px;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: bold;
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        animation: badgePulse 2s infinite;
-    }
-
-    /* Enhanced Product Info */
-    .product-title {
-        font-size: 1rem;
-        line-height: 1.3;
-        max-height: 2.6em;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        color: #2c3e50;
-    }
-
-    .product-price {
-        font-size: 1.1rem;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        position: relative;
-    }
-
-    .price-container {
-        position: relative;
-    }
-
-    .price-container::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(to right, #28a745, transparent);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s ease;
-    }
-
-    .cart-item-card:hover .price-container::after {
-        transform: scaleX(1);
-    }
-
-    /* Enhanced Quantity Controls */
-    .quantity-btn-group {
-        display: flex;
-        align-items: center;
-        background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-        border-radius: 12px;
-        padding: 4px;
-        gap: 4px;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-        position: relative;
-    }
-
-    .quantity-btn-group::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(145deg, transparent, rgba(40, 167, 69, 0.1), transparent);
-        border-radius: 12px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .quantity-btn-group:hover::before {
-        opacity: 1;
-    }
-
-    .quantity-btn {
-        width: 36px;
-        height: 36px;
-        border: none;
-        background: white;
-        color: #28a745;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        position: relative;
-        z-index: 1;
-    }
-
-    .quantity-btn:hover:not(:disabled) {
-        background: #28a745;
-        color: white;
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-    }
-
-    .quantity-btn:active {
-        transform: scale(0.95);
-    }
-
-    .quantity-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .quantity-btn:disabled:hover {
-        background: white;
-        color: #28a745;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .quantity-display {
-        min-width: 40px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 1rem;
-        color: #333;
-        z-index: 1;
-        position: relative;
-    }
-
-    .delete-btn {
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        padding: 8px 12px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .delete-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(220, 53, 69, 0.2), transparent);
-        transition: left 0.4s ease;
-    }
-
-    .delete-btn:hover::before {
-        left: 100%;
-    }
-
-    .delete-btn:hover {
-        background: #dc3545;
-        color: white;
-        border-color: #dc3545;
-        transform: scale(1.05);
-    }
-
-    .delete-btn:active {
-        transform: scale(0.95);
-    }
-
-    /* Enhanced Footer */
-    .summary-container {
-        background: linear-gradient(to bottom, #f8f9fa, #ffffff);
-        border-top: 1px solid #e9ecef;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .summary-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(to right, #28a745, #20c997, #28a745);
-        animation: shimmer 3s infinite;
-    }
-
-    .checkout-btn {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        border: none;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-    }
-
-    .checkout-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.6s ease;
-    }
-
-    .checkout-btn:hover::before {
-        left: 100%;
-    }
-
-    .checkout-btn:hover {
-        background: linear-gradient(135deg, #218838, #1e7e34);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-    }
-
-    .checkout-btn:active {
-        transform: translateY(0);
-    }
-
-    /* Loading Overlay */
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1055;
-        backdrop-filter: blur(3px);
-        animation: fadeIn 0.3s ease;
-    }
-
-    .loading-overlay .spinner-border {
-        width: 3rem;
-        height: 3rem;
-        border-width: 0.3em;
-        animation: spin 1s linear infinite;
-    }
-
-    /* Animations */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @@keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-8px);
-        }
-    }
-
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.1);
-            opacity: 0.7;
-        }
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    @@keyframes badgePulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
-    @@keyframes shimmer {
-        0% {
-            background-position: -200px 0;
-        }
-        100% {
-            background-position: calc(200px + 100%) 0;
-        }
-    }
-
-    /* Responsive Improvements */
-    @@media (max-width: 768px) {
-        .modern-cart-offcanvas {
-            width: 100% !important;
-            max-width: 100vw;
-            border-radius: 0;
-        }
-
-        .product-title {
-            font-size: 0.9rem;
-        }
-
-        .product-price {
-            font-size: 1rem;
-        }
-
-        .quantity-btn {
-            width: 32px;
-            height: 32px;
-        }
-
-        .quantity-display {
-            min-width: 36px;
-            font-size: 0.9rem;
-        }
-
-        .checkout-btn {
-            font-size: 0.85rem;
-            padding: 0.75rem 1rem;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .cart-item-card {
-            margin: 0 -0.5rem;
-        }
-
-        .product-image {
-            width: 80px;
-            height: 80px;
-        }
-
-        .quantity-badge {
-            width: 24px;
-            height: 24px;
-            font-size: 0.7rem;
-            bottom: -3px;
-            right: -3px;
-        }
-    }
-
-    /* Enhanced Scrollbar Styling */
-    .cart-items::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .cart-items::-webkit-scrollbar-track {
-        background: #f8f9fa;
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-    }
-
-    .cart-items::-webkit-scrollbar-thumb {
-        background: linear-gradient(145deg, #28a745, #20c997);
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-    }
-
-    .cart-items::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(145deg, #218838, #1e7e34);
-    }
-
-    /* Hover effects for better UX */
-    .cart-item-card:hover .product-image {
-        filter: brightness(1.1) contrast(1.1);
-    }
-
-    .cart-item-card:hover .product-title {
-        color: #28a745;
-    }
-
-    /* Notification Toast Styling */
-    .toast-container {
-        z-index: 1060;
-    }
-
-    .toast {
-        animation: slideInFromTop 0.3s ease-out;
-    }
-
-    @@keyframes slideInFromTop {
-        from {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    /* Dark mode support (optional) */
-    @@media (prefers-color-scheme: dark) {
-        .cart-item-card {
-            background: rgba(33, 37, 41, 0.95);
-            border-color: rgba(255, 255, 255, 0.1) !important;
-        }
-
-        .product-title {
-            color: #f8f9fa;
-        }
-
-        .quantity-display {
-            color: #f8f9fa;
-        }
-    }
-
-    /* Print styles */
-    @@media print {
-        .modern-cart-offcanvas {
-            display: none;
-        }
-    }
-</style>
+
+                .cart-icon-badge::after {
+                    content: '';
+                    position: absolute;
+                    top: -2px;
+                    right: -2px;
+                    width: 8px;
+                    height: 8px;
+                    background: #ffc107;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    animation: pulse 2s infinite;
+                }
+
+            /* Enhanced Empty State */
+            .empty-state {
+                animation: fadeInUp 0.6s ease-out;
+            }
+
+            .empty-icon-container {
+                opacity: 0.7;
+                animation: float 3s ease-in-out infinite;
+            }
+
+            /* Enhanced Cart Items */
+            .cart-item-card {
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(0, 0, 0, 0.05) !important;
+                animation: slideInRight 0.5s ease-out;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .cart-item-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.1), transparent);
+                    transition: left 0.6s ease;
+                }
+
+                .cart-item-card:hover::before {
+                    left: 100%;
+                }
+
+                .cart-item-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+                    border-color: rgba(40, 167, 69, 0.2) !important;
+                }
+
+            /* Enhanced Product Image */
+            .product-image-container {
+                position: relative;
+                overflow: hidden;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+
+                .product-image-container:hover {
+                    transform: scale(1.02);
+                }
+
+            .product-image {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border-radius: 8px;
+            }
+
+                .product-image:hover {
+                    transform: scale(1.08);
+                    filter: brightness(1.05) saturate(1.1);
+                }
+
+            .quantity-badge {
+                position: absolute;
+                bottom: -5px;
+                right: -5px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                font-weight: bold;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                animation: badgePulse 2s infinite;
+            }
+
+            /* Enhanced Product Info */
+            .product-title {
+                font-size: 1rem;
+                line-height: 1.3;
+                max-height: 2.6em;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                color: #2c3e50;
+            }
+
+            .product-price {
+                font-size: 1.1rem;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                position: relative;
+            }
+
+            .price-container {
+                position: relative;
+            }
+
+                .price-container::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background: linear-gradient(to right, #28a745, transparent);
+                    transform: scaleX(0);
+                    transform-origin: left;
+                    transition: transform 0.3s ease;
+                }
+
+            .cart-item-card:hover .price-container::after {
+                transform: scaleX(1);
+            }
+
+            /* Enhanced Quantity Controls */
+            .quantity-btn-group {
+                display: flex;
+                align-items: center;
+                background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+                border-radius: 12px;
+                padding: 4px;
+                gap: 4px;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+                position: relative;
+            }
+
+                .quantity-btn-group::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(145deg, transparent, rgba(40, 167, 69, 0.1), transparent);
+                    border-radius: 12px;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+
+                .quantity-btn-group:hover::before {
+                    opacity: 1;
+                }
+
+            .quantity-btn {
+                width: 36px;
+                height: 36px;
+                border: none;
+                background: white;
+                color: #28a745;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                cursor: pointer;
+                position: relative;
+                z-index: 1;
+            }
+
+                .quantity-btn:hover:not(:disabled) {
+                    background: #28a745;
+                    color: white;
+                    transform: scale(1.1);
+                    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+                }
+
+                .quantity-btn:active {
+                    transform: scale(0.95);
+                }
+
+                .quantity-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+                    .quantity-btn:disabled:hover {
+                        background: white;
+                        color: #28a745;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+
+            .quantity-display {
+                min-width: 40px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1rem;
+                color: #333;
+                z-index: 1;
+                position: relative;
+            }
+
+            .delete-btn {
+                border-radius: 8px;
+                transition: all 0.2s ease;
+                padding: 8px 12px;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .delete-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(220, 53, 69, 0.2), transparent);
+                    transition: left 0.4s ease;
+                }
+
+                .delete-btn:hover::before {
+                    left: 100%;
+                }
+
+                .delete-btn:hover {
+                    background: #dc3545;
+                    color: white;
+                    border-color: #dc3545;
+                    transform: scale(1.05);
+                }
+
+                .delete-btn:active {
+                    transform: scale(0.95);
+                }
+
+            /* Enhanced Footer */
+            .summary-container {
+                background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+                border-top: 1px solid #e9ecef;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .summary-container::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: linear-gradient(to right, #28a745, #20c997, #28a745);
+                    animation: shimmer 3s infinite;
+                }
+
+            .checkout-btn {
+                background: linear-gradient(135deg, #28a745, #20c997);
+                border: none;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                text-transform: uppercase;
+                font-size: 0.9rem;
+            }
+
+                .checkout-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.6s ease;
+                }
+
+                .checkout-btn:hover::before {
+                    left: 100%;
+                }
+
+                .checkout-btn:hover {
+                    background: linear-gradient(135deg, #218838, #1e7e34);
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+                }
+
+                .checkout-btn:active {
+                    transform: translateY(0);
+                }
+
+            /* Loading Overlay */
+            .loading-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.95);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1055;
+                backdrop-filter: blur(3px);
+                animation: fadeIn 0.3s ease;
+            }
+
+                .loading-overlay .spinner-border {
+                    width: 3rem;
+                    height: 3rem;
+                    border-width: 0.3em;
+                    animation: spin 1s linear infinite;
+                }
+
+            /* Animations */
+            @@keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @@keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            @@keyframes float {
+                0%, 100% {
+                    transform: translateY(0px);
+                }
+
+                50% {
+                    transform: translateY(-8px);
+                }
+            }
+
+            @@keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+
+                50% {
+                    transform: scale(1.1);
+                    opacity: 0.7;
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @@keyframes badgePulse {
+                0%, 100% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            @@keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @@keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @@keyframes shimmer {
+                0% {
+                    background-position: -200px 0;
+                }
+
+                100% {
+                    background-position: calc(200px + 100%) 0;
+                }
+            }
+
+            /* Responsive Improvements */
+            @@media (max-width: 768px) {
+                .modern-cart-offcanvas {
+                    width: 100% !important;
+                    max-width: 100vw;
+                    border-radius: 0;
+                }
+
+                .product-title {
+                    font-size: 0.9rem;
+                }
+
+                .product-price {
+                    font-size: 1rem;
+                }
+
+                .quantity-btn {
+                    width: 32px;
+                    height: 32px;
+                }
+
+                .quantity-display {
+                    min-width: 36px;
+                    font-size: 0.9rem;
+                }
+
+                .checkout-btn {
+                    font-size: 0.85rem;
+                    padding: 0.75rem 1rem;
+                }
+            }
+
+            @@media (max-width: 576px) {
+                .cart-item-card {
+                    margin: 0 -0.5rem;
+                }
+
+                .product-image {
+                    width: 80px;
+                    height: 80px;
+                }
+
+                .quantity-badge {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 0.7rem;
+                    bottom: -3px;
+                    right: -3px;
+                }
+            }
+
+            /* Enhanced Scrollbar Styling */
+            .cart-items::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .cart-items::-webkit-scrollbar-track {
+                background: #f8f9fa;
+                border-radius: 4px;
+                border: 1px solid #e9ecef;
+            }
+
+            .cart-items::-webkit-scrollbar-thumb {
+                background: linear-gradient(145deg, #28a745, #20c997);
+                border-radius: 4px;
+                border: 1px solid #e9ecef;
+            }
+
+                .cart-items::-webkit-scrollbar-thumb:hover {
+                    background: linear-gradient(145deg, #218838, #1e7e34);
+                }
+
+            /* Hover effects for better UX */
+            .cart-item-card:hover .product-image {
+                filter: brightness(1.1) contrast(1.1);
+            }
+
+            .cart-item-card:hover .product-title {
+                color: #28a745;
+            }
+
+            /* Notification Toast Styling */
+            .toast-container {
+                z-index: 1060;
+            }
+
+            .toast {
+                animation: slideInFromTop 0.3s ease-out;
+            }
+
+            @@keyframes slideInFromTop {
+                from {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            /* Dark mode support (optional) */
+            @@media (prefers-color-scheme: dark) {
+                .cart-item-card {
+                    background: rgba(33, 37, 41, 0.95);
+                    border-color: rgba(255, 255, 255, 0.1) !important;
+                }
+
+                .product-title {
+                    color: #f8f9fa;
+                }
+
+                .quantity-display {
+                    color: #f8f9fa;
+                }
+            }
+
+            /* Print styles */
+            @@media print {
+                .modern-cart-offcanvas {
+                    display: none;
+                }
+            }
+        </style>

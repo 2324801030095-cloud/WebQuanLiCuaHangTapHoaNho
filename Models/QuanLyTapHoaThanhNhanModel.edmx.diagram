@@ -39,6 +39,27 @@
         <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK__BaoNo__MaKH__17036CC0" />
         <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.LichSuThongBao" Width="1.5" PointX="5.25" PointY="22.75" />
         <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_LichSuThongBao_BaoNo" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.KienThuc" Width="1.5" PointX="8.25" PointY="8.25" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_KienThuc_DanhMuc" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_KienThuc_SanPham" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.DanhGia" Width="1.5" PointX="8.25" PointY="13.875" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_DanhGia_KhachHang" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_DanhGia_SanPham" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.LoaiThanhToan" Width="1.5" PointX="3" PointY="26.25" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.PhuongThucThanhToan" Width="1.5" PointX="5.25" PointY="14" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK__PhuongThuc__MaHD__531856C7" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK__PhuongThu__MaLoa__540C7B00" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.LichSuXemThongBao" Width="1.5" PointX="6" PointY="8.125" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.Menu" Width="1.5" PointX="10.375" PointY="0.75" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.TinNhan" Width="1.5" PointX="9" PointY="17.375" />
+        <EntityTypeShape EntityType="QuanLyTapHoaThanhNhanModel.ThongBao" Width="1.5" PointX="6" PointY="17.375" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_LichSuXemThongBao_KhachHang" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_TinNhan_KhachHang" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_ThongBao_KhachHang" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_LichSuXemThongBao_ThongBao" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_Menu_MenuCha" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_TinNhan_NhanVien" />
+        <AssociationConnector Association="QuanLyTapHoaThanhNhanModel.FK_ThongBao_NhanVien" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -1,0 +1,26 @@
+@{
+    ViewBag.Title = "Quản lý tin nhắn";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="text-center">
+        <div class="card shadow-sm" style="max-width: 600px; margin: 50px auto;">
+            <div class="card-body text-center p-5">
+                <i class="fa-solid fa-envelope-open-text" style="font-size: 4rem; color: #3b82f6; margin-bottom: 20px;"></i>
+                <h4 class="text-primary mb-3">Quản lý tin nhắn</h4>
+                <p class="text-muted mb-4">@ViewBag.Message</p>
+                <div class="alert alert-info">
+                    <i class="fa-solid fa-info-circle me-2"></i>
+                    Chức năng này sẽ được phát triển thêm trong tương lai với các tính năng:
+                    <ul class="text-start mt-2 mb-0">
+                        <li>Gửi tin nhắn thông báo cho khách hàng</li>
+                        <li>Quản lý tin nhắn từ khách hàng</li>
+                        <li>Lịch sử tin nhắn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

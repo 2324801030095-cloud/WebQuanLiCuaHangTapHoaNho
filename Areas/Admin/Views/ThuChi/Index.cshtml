@@ -270,11 +270,41 @@
         });
 
         /* ===== Load List ===== */
-        function loadList(page = 1) {
-            fetch(`/Admin/ThuChi/DanhSach?page=${page}`)
-                .then(r => r.text())
-                .then(html => document.getElementById("listContainer").innerHTML = html);
+        const listContainer = document.getElementById("listContainer");
+
+        function buildListUrl(page = 1) {
+            const params = new URLSearchParams();
+            if (page) params.set("page", page);
+
+            const from = document.getElementById("filterFrom")?.value;
+            const to = document.getElementById("filterTo")?.value;
+            const loai = document.getElementById("filterLoai")?.value;
+            const money = document.getElementById("filterMoney")?.value;
+
+            if (from) params.set("from", from);
+            if (to) params.set("to", to);
+            if (loai) params.set("loai", loai);
+            if (money !== null && money !== "") params.set("money", money);
+
+            return `/Admin/ThuChi/DanhSach?${params.toString()}`;
         }
+
+        function loadList(page = 1) {
+            const url = typeof page === "string" ? page : buildListUrl(page);
+            fetch(url)
+                .then(r => r.text())
+                .then(html => {
+                    if (window.renderHtml) {
+                        window.renderHtml(listContainer, html);
+                    } else {
+                        listContainer.innerHTML = html;
+                    }
+                    listContainer?.scrollIntoView({ behavior: "smooth", block: "start" });
+                });
+        }
+        window.refreshList = function () {
+            loadList(1);
+        };
 
 
         /* ===== Modal ===== */
@@ -282,7 +312,12 @@
             fetch(url)
                 .then(r => r.text())
                 .then(html => {
-                    document.getElementById("modalArea").innerHTML = html;
+                    const modalArea = document.getElementById("modalArea");
+                    if (window.renderHtml) {
+                        window.renderHtml(modalArea, html);
+                    } else {
+                        modalArea.innerHTML = html;
+                    }
                     new bootstrap.Modal(document.getElementById("modalTC")).show();
                 });
         }
@@ -292,10 +327,22 @@
             const edit = e.target.closest(".btn-edit-tc");
             const view = e.target.closest(".btn-view-tc");
             const del = e.target.closest(".btn-del-tc");
+            const filter = e.target.closest("#btnFilter");
+            const pageLink = e.target.closest("#listContainer .pagination a");
 
             if (add) loadModal("/Admin/ThuChi/Them");
             if (edit) loadModal(`/Admin/ThuChi/Sua/${edit.dataset.id}`);
             if (view) loadModal(`/Admin/ThuChi/ChiTiet/${view.dataset.id}`);
+
+            if (filter) {
+                e.preventDefault();
+                loadList(1);
+            }
+
+            if (pageLink) {
+                e.preventDefault();
+                loadList(pageLink.href);
+            }
 
             if (del) {
                 if (!confirm("Xóa bản ghi này?")) return;
@@ -307,7 +354,7 @@
                 })
                     .then(r => r.json())
                     .then(d => {
-                        alert(d.message);
+                        window.showAppToast?.(d.message, d.success ? "success" : "error");
                         if (d.success) loadList();
                     });
             }

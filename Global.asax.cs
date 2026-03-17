@@ -1,20 +1,60 @@
-﻿// using cần cho MVC
-using System.Web;                 // HttpApplication
-using System.Web.Mvc;            // MVC filter/areas
-using System.Web.Optimization;   // Bundling
-using System.Web.Routing;        // Routes
+using System;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Optimization;
+using System.Web.Routing;
 
-namespace WebQuanLiCuaHangTapHoa   // ★ PHẢI TRÙNG Global.asax
+namespace WebQuanLiCuaHangTapHoa
 {
     public class MvcApplication : HttpApplication
     {
-        // Chạy 1 lần khi app khởi động
         protected void Application_Start()
         {
-            AreaRegistration.RegisterAllAreas();                          // Đăng ký Areas (nếu có)
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);    // Filter toàn cục
-            RouteConfig.RegisterRoutes(RouteTable.Routes);                // Routes
-            BundleConfig.RegisterBundles(BundleTable.Bundles);            // Bundles
+            AreaRegistration.RegisterAllAreas();
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        protected void Application_Error()
+        {
+            if (!Context.IsCustomErrorEnabled)
+            {
+                return;
+            }
+
+            Exception ex = Server.GetLastError();
+            Response.Clear();
+
+            HttpException httpEx = ex as HttpException;
+            int httpCode = httpEx != null ? httpEx.GetHttpCode() : 500;
+
+            // Log error for debugging
+            try
+            {
+                string logPath = Server.MapPath("~/App_Data/error.log");
+                System.IO.File.AppendAllText(
+                    logPath,
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {httpCode} {ex}\r\n\r\n"
+                );
+            }
+            catch { }
+
+            // Clear the error so we can render a friendly page
+            Server.ClearError();
+            Response.TrySkipIisCustomErrors = true;
+            Response.StatusCode = httpCode;
+
+            // Render error page without redirect loops
+            try
+            {
+                Server.Execute($"/Error/Display/{httpCode}");
+            }
+            catch
+            {
+                Response.ContentType = "text/html";
+                Response.Write($"<h2>Lỗi {httpCode}</h2><p>Không thể tải trang lỗi. Vui lòng thử lại sau.</p>");
+            }
         }
     }
 }

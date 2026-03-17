@@ -1,3 +1,4 @@
+@using WebQuanLiCuaHangTapHoa.Helpers
 @model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>  
 
 @* Menu danh muc: click -> DanhMuc/DanhSach?maDM=... *@
@@ -5,8 +6,10 @@
 {
     foreach (var dm in Model)
     {
+        var (displayName, icon) = CategoryIconHelper.GetCategoryInfo(dm.TenDM);
+
         <a href="@Url.Action("DanhSach","DanhMuc", new { maDM = dm.MaDM })" title="@dm.MoTa">
-            @dm.TenDM
+            <i class="bi @icon"></i> <span>@displayName</span>
         </a>
     }
 }

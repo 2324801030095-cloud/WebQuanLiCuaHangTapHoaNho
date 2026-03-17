@@ -1,19 +1,216 @@
-﻿@{
-    ViewBag.Title = "Đặt hàng thành công";
+﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+
+@{
+    ViewBag.Title = "Đặt hàng";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
+
+    decimal tongTien = ViewBag.TongTien ?? 0;
+    int stt = 1;
+
+    // Lấy thông tin khách hàng từ Session
+    dynamic kh = Session["KH"];
+    string tenKH = kh?.HoTen ?? "";
+    string soDT = kh?.SoDT ?? "";
+    string diaChi = kh?.DiaChi ?? "";
+    string email = kh?.Email ?? "";
 }
 
-<section class="py-5 text-center">
+<section class="py-4">
     <div class="container">
-        <div class="alert alert-success shadow-lg p-4 rounded-3">
-            <h2 class="fw-bold text-success mb-3"><i class="bi bi-check2-circle"></i> Đặt hàng thành công!</h2>
-            <p class="lead">
-                Cảm ơn bạn đã đặt hàng tại <strong>Cửa hàng Tạp hóa Thanh Nhàn</strong> 🎉
-            </p>
-            <p>Mã đơn hàng của bạn là: <strong>#@ViewBag.MaHD</strong></p>
-            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-success mt-3">
-                <i class="bi bi-house"></i> Quay lại trang chủ
-            </a>
+
+        <h2 class="fw-bold mb-4">
+            <i class="bi bi-receipt-cutoff text-success"></i> Xác nhận và thanh toán
+        </h2>
+
+        <!-- =============================== -->
+        <!-- THÔNG TIN KHÁCH HÀNG + GIAO HÀNG -->
+        <!-- =============================== -->
+        <div class="card shadow-sm p-3 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-vcard"></i> Thông tin giao hàng</h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Họ tên</label>
+                    <input type="text" class="form-control" value="@tenKH" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Số điện thoại</label>
+                    <input type="text" class="form-control" value="@soDT" readonly />
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Địa chỉ</label>
+                    <input type="text" class="form-control" value="@diaChi" readonly />
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">Email</label>
+                    <input type="text" class="form-control" value="@email" readonly />
+                </div>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- GIỎ HÀNG / CHI TIẾT HÓA ĐƠN -->
+        <!-- =============================== -->
+        <div class="card shadow-sm p-3 mb-4">
+
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-cart-check text-success"></i> Hóa đơn chi tiết
+            </h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-success">
+                        <tr>
+                            <th>STT</th>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(stt++)</td>
+                                <td class="text-start">@item.TenSP</td>
+                                <td>@item.SoLuong</td>
+                                <td>@String.Format("{0:N0} ₫", item.DonGia)</td>
+                                <td class="fw-bold text-success">@String.Format("{0:N0} ₫", item.ThanhTien)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between fs-5 fw-bold">
+                <span>Tổng tiền:</span>
+                <span class="text-danger">@String.Format("{0:N0} ₫", tongTien)</span>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- PHƯƠNG THỨC THANH TOÁN -->
+        <!-- =============================== -->
+        <h5 class="fw-bold mb-3">Phương thức thanh toán</h5>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <button class="payment-box" onclick="openPayModal('bank')">
+                    <i class="bi bi-bank fs-2 text-danger"></i>
+                    <div>QR Techcombank</div>
+                </button>
+            </div>
+
+            <div class="col-md-4">
+                <button class="payment-box" onclick="openPayModal('momo')">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/MoMo_Logo.png"
+                         style="height:21px; margin-right:6px;">
+                    <div>Ví MoMo</div>
+                </button>
+            </div>
+
+            <div class="col-md-4">
+                <button class="payment-box" onclick="openPayModal('cod')">
+                    <i class="bi bi-shop fs-2 text-success"></i>
+                    <div>Thanh toán tại cửa hàng</div>
+                </button>
+            </div>
         </div>
     </div>
 </section>
+
+<!-- =============================== -->
+<!-- MODAL THANH TOÁN -->
+<!-- =============================== -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold" id="paymentModalTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="paymentModalBody"></div>
+
+            <div class="modal-footer">
+                <form action="/GioHang/DatHang" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="PaymentMethod" id="paymentHidden" />
+
+                    <button type="submit" class="btn btn-success fw-bold">
+                        Xác nhận đặt hàng
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalAmount = @tongTien;
+
+    function openPayModal(type) {
+        let title = "";
+        let html = "";
+
+        if (type === "bank") {
+            title = "QR Thanh toán Techcombank";
+            html = `
+                <div class="text-center">
+                    <h5 class="fw-bold mb-3">Quét mã để thanh toán</h5>
+                    <img src="/GioHang/QrCode?amount=${totalAmount}" class="img-fluid rounded shadow-sm mb-3" style="max-width:280px" />
+                    <div class="text-muted small">STK: 3398329567 – Chủ TK: Thanh Nhan</div>
+                </div>`;
+        }
+
+        if (type === "momo") {
+            title = "Thanh toán MoMo";
+            html = `
+                <div class="text-center">
+                    <h5 class="fw-bold mb-3">Quét QR bằng ví MoMo</h5>
+                    <img src="/GioHang/QrCodeMomo?amount=${totalAmount}" class="img-fluid rounded shadow-sm mb-3" style="max-width:260px" />
+                    <div class="text-muted small">SĐT ví: 0398329567 – Nguyễn Quang Long</div>
+                </div>`;
+        }
+
+        if (type === "cod") {
+            title = "Thanh toán tại cửa hàng";
+            html = `
+                <b>Địa chỉ nhận hàng:</b> @diaChi
+                <p class="text-muted mt-2">Thanh toán khi đến nhận hàng</p>`;
+        }
+
+        document.getElementById("paymentModalTitle").innerHTML = title;
+        document.getElementById("paymentModalBody").innerHTML = html;
+        document.getElementById("paymentHidden").value = type;
+
+        new bootstrap.Modal(document.getElementById("paymentModal")).show();
+    }
+</script>
+
+<style>
+    .payment-box {
+        width: 100%;
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid #cae9d1;
+        background: #fff;
+        cursor: pointer;
+        text-align: center;
+        transition: .25s;
+    }
+
+        .payment-box:hover {
+            background: #e9f8ef;
+            border-color: #28a745;
+        }
+</style>

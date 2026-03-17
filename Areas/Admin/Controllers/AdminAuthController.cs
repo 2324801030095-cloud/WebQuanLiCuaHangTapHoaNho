@@ -7,7 +7,7 @@ using WebQuanLiCuaHangTapHoa.Helpers;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class AdminAuthController : Controller
+    public class AdminAuthController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db =
             new QuanLyTapHoaThanhNhanEntities1();
@@ -20,21 +20,18 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            // Gom toàn bộ thông báo từ Register, Forgot, Login
             ViewBag.Error = TempData["LoginError"];
             ViewBag.RegError = TempData["RegError"];
             ViewBag.RegSuccess = TempData["RegSuccess"];
             ViewBag.ForgotError = TempData["ErrorForgot"];
             ViewBag.ForgotSuccess = TempData["ForgotSuccess"];
-
             ViewBag.ShowSuccess = TempData["ShowSuccess"];
 
             return View();
         }
 
-
         // ============================================
-        // LOGIN (POST)
+        // LOGIN (POST) — ADMIN + KHÁCH HÀNG
         // ============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -51,36 +48,71 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 
             string hash = PasswordHelper.HashSha256(passRaw);
 
-            var user = _db.TaiKhoan.FirstOrDefault(x =>
+            // ===========================
+            // 1) KIỂM TRA ADMIN
+            // ===========================
+            var admin = _db.TaiKhoan.FirstOrDefault(x =>
                 x.TenDangNhap == userName &&
                 (x.MatKhau == passRaw || x.MatKhau == hash)
             );
 
-            if (user == null)
+            if (admin != null)
             {
-                TempData["LoginError"] = "Sai tên đăng nhập hoặc mật khẩu.";
-                return RedirectToAction("Login", new { returnUrl });
+                // Lưu session Admin
+                Session["UserName"] = admin.TenDangNhap;
+                Session["Role"] = admin.Quyen;
+                Session["MaNV"] = admin.MaNV;
+
+                var nv = _db.NhanVien.Find(admin.MaNV);
+                Session["UserAvatar"] = nv?.HinhAnh ?? "default.png";
+
+                if (!string.IsNullOrEmpty(returnUrl))
+                    return Redirect(returnUrl);
+
+                return RedirectToAction("Index", "Admin");
             }
 
-            // LƯU SESSION ĐĂNG NHẬP
-            Session["UserName"] = user.TenDangNhap;
-            Session["Role"] = user.Quyen;
-            Session["MaNV"] = user.MaNV;
+            // ===========================
+            // 2) KIỂM TRA KHÁCH HÀNG
+            // ===========================
+            var userKH = _db.TaiKhoanKH.FirstOrDefault(k =>
+                k.TenDangNhap == userName &&
+                k.MatKhau == hash &&
+                k.HoatDong == true
+            );
 
-            // Lấy avatar nhân viên
-            var nv = _db.NhanVien.Find(user.MaNV);
-            Session["UserAvatar"] = nv?.HinhAnh ?? "default.png";
+            if (userKH != null)
+            {
+                var kh = _db.KhachHang.FirstOrDefault(k => k.MaKH == userKH.MaKH);
 
-            // Điều hướng
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
+                // Lưu SESSION KHÁCH HÀNG
+                Session["KH"] = new
+                {
+                    kh.MaKH,
+                    kh.TenKH,
+                    userKH.TenDangNhap,
+                    userKH.Email
+                };
 
-            return RedirectToAction("Index", "Admin");
+                // Không cho khách hàng quay vào khu vực Admin
+                if (!string.IsNullOrEmpty(returnUrl) &&
+                    !returnUrl.ToLower().Contains("/admin"))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            // ===========================
+            // 3) SAI TÀI KHOẢN
+            // ===========================
+            TempData["LoginError"] = "Sai tên đăng nhập hoặc mật khẩu.";
+            return RedirectToAction("Login", new { returnUrl });
         }
 
-
         // ======================================================
-        // REGISTER — Tạo Nhân Viên + Tạo Tài Khoản (PHƯƠNG ÁN A)
+        // REGISTER — Tạo Nhân Viên + Tạo Tài Khoản ADMIN
         // ======================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -101,16 +133,12 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 return RedirectToAction("Login");
             }
 
-            // Check username tồn tại
             if (_db.TaiKhoan.Any(x => x.TenDangNhap == TenDangNhap))
             {
                 TempData["RegError"] = "Tên đăng nhập đã tồn tại.";
                 return RedirectToAction("Login");
             }
 
-            // =============================
-            // 1) Tạo nhân viên mới
-            // =============================
             var nv = new NhanVien
             {
                 TenNV = TenNV?.Trim(),
@@ -127,7 +155,6 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 HinhAnh = "default.png"
             };
 
-            // Avatar upload (optional)
             if (AvatarFile != null && AvatarFile.ContentLength > 0)
             {
                 string fileName = "avt_" + DateTime.Now.Ticks +
@@ -140,11 +167,8 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             }
 
             _db.NhanVien.Add(nv);
-            _db.SaveChanges(); // => nv.MaNV có giá trị
+            _db.SaveChanges();
 
-            // =============================
-            // 2) Tạo tài khoản
-            // =============================
             string hash = PasswordHelper.HashSha256(MatKhau);
 
             var tk = new TaiKhoan
@@ -152,19 +176,18 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 TenDangNhap = TenDangNhap.Trim(),
                 MatKhau = hash,
                 MaNV = nv.MaNV,
-                Quyen = "QuanTri" // hoặc NhanVien tùy ý
+                Quyen = "QuanTri"
             };
 
             _db.TaiKhoan.Add(tk);
             _db.SaveChanges();
 
-            TempData["ShowSuccess"] = true; // Trigger animation
+            TempData["ShowSuccess"] = true;
             return RedirectToAction("Login");
         }
 
-
         // ============================================
-        // FORGOT PASSWORD (POST)
+        // FORGOT PASSWORD
         // ============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -191,15 +214,18 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             return RedirectToAction("Login");
         }
 
-
         // ============================================
         // LOGOUT
         // ============================================
         public ActionResult Logout()
         {
             Session.Clear();
-            return RedirectToAction("Login");
+            Session.Abandon();
+
+            // Điều hướng về trang đăng nhập của khách (TaiKhoan/DangNhap)
+            return RedirectToAction("DangNhap", "TaiKhoan", new { area = "" });
         }
+
 
         protected override void Dispose(bool disposing)
         {

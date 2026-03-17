@@ -20,6 +20,8 @@ namespace WebQuanLiCuaHangTapHoa.Models
             this.HoaDon = new HashSet<HoaDon>();
             this.PhieuNhap = new HashSet<PhieuNhap>();
             this.TaiKhoan = new HashSet<TaiKhoan>();
+            this.TinNhan = new HashSet<TinNhan>();
+            this.ThongBao = new HashSet<ThongBao>();
         }
     
         public int MaNV { get; set; }
@@ -42,5 +44,9 @@ namespace WebQuanLiCuaHangTapHoa.Models
         public virtual ICollection<PhieuNhap> PhieuNhap { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<TaiKhoan> TaiKhoan { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TinNhan> TinNhan { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ThongBao> ThongBao { get; set; }
     }
 }

@@ -61,7 +61,7 @@
                             {
                                 <tr>
                                     <td style="width:120px">
-                                        <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "https://picsum.photos/120/100?random=" + item.MaSP : item.HinhAnh)"
+                                        <img src="@Url.Content("~/Content/Images/" + item.HinhAnh)"
                                              class="product-img" />
                                     </td>
 
@@ -117,9 +117,10 @@
                         <i class="bi bi-x-circle"></i> Xóa tất cả
                     </a>
 
-                    <a href="@Url.Action("DatHang", "GioHang")"
+                    <!-- FIX: Đổi từ DatHang sang ThanhToan -->
+                    <a href="@Url.Action("ThanhToan", "GioHang")"
                        class="btn btn-gradient rounded-pill px-4">
-                        <i class="bi bi-lightning-charge-fill"></i> Đặt hàng
+                        <i class="bi bi-lightning-charge-fill"></i> Thanh toán
                     </a>
                 </div>
             </div>
@@ -168,7 +169,7 @@
         }
 
         /* Responsive */
-        @@media (max-width: 480px) {
+       @@media (max-width: 480px) {
             .svg-gradient-title {
                 width: 100%;
             }

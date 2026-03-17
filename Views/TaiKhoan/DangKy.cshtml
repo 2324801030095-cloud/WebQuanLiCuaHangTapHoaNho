@@ -1,91 +1,1077 @@
 ﻿@model WebQuanLiCuaHangTapHoa.Models.ViewModels.Auth.DangKyVM
 
 @{
-    ViewBag.Title = "Đăng ký tài khoản";
-    Layout = "~/Views/Shared/_LayoutUser.cshtml";   // hoặc Layout Login riêng nếu bạn có
+    Layout = null;
+    var regError = TempData["RegError"] ?? ViewBag.RegError;
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h3 class="text-center mb-4 text-success">
-                        <i class="bi bi-person-plus-fill me-2"></i> Đăng ký tài khoản
-                    </h3>
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đăng ký — Tạp hóa Thanh Nhàn</title>
 
-                    @using (Html.BeginForm("DangKy", "TaiKhoan", FormMethod.Post))
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --accent: #0b6b5f;
+            --accent2: #1c8f7a;
+            --accent3: #f2a528;
+            --ink: #0b1120;
+            --ink-soft: #3f4a5a;
+            --panel: #ffffff;
+            --panel-soft: rgba(255,255,255,0.78);
+            --border: rgba(15, 23, 42, 0.08);
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            color: var(--ink);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 12% 18%, rgba(28,143,122,0.14), transparent 42%),
+                radial-gradient(circle at 86% 12%, rgba(242,165,40,0.14), transparent 46%),
+                radial-gradient(circle at 84% 84%, rgba(11,107,95,0.1), transparent 44%),
+                linear-gradient(180deg, #f9fbfa 0%, #f2f6f4 60%, #eef2f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(15,23,42,0.06) 1px, transparent 1px);
+            background-size: 26px 26px;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page-shell {
+            width: 1240px;
+            max-width: 96vw;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-shell {
+            display: grid;
+            grid-template-columns: minmax(300px, 0.9fr) minmax(520px, 1.3fr);
+            border-radius: 24px;
+            overflow: hidden;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px) saturate(120%);
+            animation: cardIn 0.6s ease;
+        }
+
+        .left-panel {
+            padding: 52px 48px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
+            border-right: 1px solid rgba(15,23,42,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100%;
+        }
+
+        .left-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(0);
+            opacity: 0.7;
+            z-index: 0;
+        }
+
+        .orb.one {
+            width: 180px;
+            height: 180px;
+            left: -60px;
+            top: -60px;
+            background: radial-gradient(circle at 30% 30%, rgba(20,184,166,0.35), transparent 65%);
+        }
+
+        .orb.two {
+            width: 220px;
+            height: 220px;
+            right: -80px;
+            bottom: -90px;
+            background: radial-gradient(circle at 30% 30%, rgba(245,158,11,0.32), transparent 65%);
+        }
+
+        .left-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform: translateY(20vh);
+        }
+
+        .scene {
+            width: 408px;
+            height: 264px;
+            perspective: 1200px;
+            position: relative;
+            align-self: center;
+        }
+
+        .scene-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .pos-card {
+            width: 324px;
+            height: 192px;
+            position: absolute;
+            left: 0;
+            top: 8px;
+            padding: 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0f172a, #10263a);
+            color: #e2e8f0;
+            box-shadow: 0 20px 50px rgba(2,6,23,0.25);
+            transform: translateZ(50px) rotateY(-10deg);
+        }
+
+        .pos-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.14), transparent 50%);
+            opacity: 0.7;
+        }
+
+        .pos-title {
+            font-weight: 800;
+            letter-spacing: 1px;
+            font-size: 15px;
+            text-transform: uppercase;
+            color: #d1fae5;
+        }
+
+        .pos-chip {
+            width: 68px;
+            height: 44px;
+            margin-top: 22px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            box-shadow: inset 0 2px 6px rgba(255,255,255,0.3);
+        }
+
+        .pos-lines {
+            margin-top: 22px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .pos-lines span {
+            flex: 1;
+            height: 6px;
+            border-radius: 6px;
+            background: rgba(148,163,184,0.4);
+        }
+
+        .receipt-card {
+            width: 216px;
+            height: 150px;
+            position: absolute;
+            right: -6px;
+            bottom: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+            box-shadow: 0 18px 40px rgba(2,6,23,0.12);
+            transform: translateZ(20px) rotateY(10deg) rotateX(6deg);
+        }
+
+        .receipt-head {
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--text-dark);
+        }
+
+        .receipt-line {
+            height: 6px;
+            margin-top: 10px;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .receipt-line.short {
+            width: 70%;
+        }
+
+        .left-copy {
+            max-width: 320px;
+            color: var(--ink-soft);
+            font-weight: 600;
+            font-size: 1.14rem;
+        }
+
+        .left-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .left-pills span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(15,23,42,0.08);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .left-pills i {
+            color: var(--accent2);
+        }
+
+        .right-panel {
+            padding: 56px 64px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .form-head {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            text-align: center;
+            margin-top: 6vh;
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 46px;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+            font-family: "DM Serif Display", serif;
+        }
+
+        .form-sub {
+            color: rgba(15,23,42,0.62);
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 1.15rem;
+            text-align: center;
+        }
+
+        .login-link {
+            text-align: right;
+            color: var(--ink-soft);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .login-link a {
+            color: var(--accent2);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .form-card {
+            margin-top: 8px;
+            padding: 24px 24px 18px;
+            border-radius: 20px;
+            background: var(--panel-soft);
+            border: 1px solid var(--border);
+            box-shadow: 0 16px 34px rgba(15,23,42,0.08);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 4px;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(15,23,42,0.08);
+            margin: 14px 0 10px;
+        }
+
+        .field {
+            margin-bottom: 0;
+        }
+
+        .field label {
+            display: block;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(15,23,42,0.08);
+            background: rgba(255,255,255,0.96);
+            font-size: 16px;
+            color: var(--ink);
+            transition: box-shadow .15s, border-color .12s;
+        }
+
+        .field.position-relative input {
+            padding-right: 44px;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 12px 36px rgba(15,118,110,0.14);
+        }
+
+        .pwd-btn {
+            position: absolute;
+            right: 12px;
+            top: 40px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 6px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease, max-height 0.2s ease;
+        }
+
+        .input-error {
+            border-color: #dc2626;
+        }
+
+        .password-meter {
+            height: 8px;
+            border-radius: 6px;
+            background: #e6e9ef;
+            overflow: hidden;
+        }
+
+        .password-meter > i {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f43f5e, #f97316);
+            transition: width .18s ease, background .18s ease;
+        }
+
+        .strength-text {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: var(--text-soft);
+        }
+
+        .terms {
+            font-size: 14px;
+        }
+
+        .terms a {
+            color: var(--accent2);
+            font-weight: 700;
+        }
+
+        .btn-register {
+            position: relative;
+            overflow: hidden;
+            border: 0;
+            cursor: pointer;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 900;
+            font-size: 17px;
+            color: white;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+            box-shadow: 0 12px 34px rgba(15,118,110,0.24);
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .btn-register::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.24), transparent 55%);
+            opacity: 0;
+            transition: opacity .25s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 46px rgba(15,118,110,0.28);
+        }
+
+        .btn-register:hover::after {
+            opacity: 1;
+        }
+
+        .notice-danger {
+            background: #fff5f5;
+            border: 1px solid #fecaca;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .notice-success {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #065f46;
+            font-weight: 700;
+        }
+
+        .validation-summary-errors {
+            background: #fff5f5;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(8px);
+            animation: fieldIn 0.6s ease forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        .left-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            text-align: center;
+            color: #5b6572;
+            font-weight: 700;
+            line-height: 1.4;
+            font-size: 15px;
+        }
+
+        .phone-group {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .phone-prefix {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255,255,255,0.96);
+            font-weight: 700;
+            color: var(--ink);
+            min-height: 44px;
+            font-size: 15px;
+        }
+
+        .phone-prefix .flag {
+            font-size: 16px;
+        }
+
+        .phone-note {
+            font-size: 13px;
+            color: var(--ink-soft);
+            margin-top: 6px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease, max-height 0.2s ease;
+        }
+
+        .field.has-value .hint,
+        .field.has-value .phone-note {
+            opacity: 1;
+            max-height: 60px;
+        }
+
+        .address-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .map-btn {
+            height: 44px;
+            min-width: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(15,23,42,0.1);
+            background: #fff;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+        }
+
+        .map-btn:hover {
+            transform: translateY(-1px);
+            color: var(--accent2);
+            box-shadow: 0 12px 24px rgba(15,23,42,0.12);
+        }
+
+        .map-modal .modal-content {
+            border-radius: 16px;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 360px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(15,23,42,0.1);
+        }
+
+        .map-hint {
+            font-size: 14px;
+            color: var(--ink-soft);
+        }
+
+        .map-selected {
+            font-size: 14px;
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        @@keyframes cardIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @@keyframes float {
+            0% { transform: translateY(0) rotateY(0deg); }
+            50% { transform: translateY(-8px) rotateY(4deg); }
+            100% { transform: translateY(0) rotateY(0deg); }
+        }
+
+        @@keyframes fieldIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@media (max-width: 920px) {
+            .card-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                padding: 36px 24px;
+            }
+
+            .right-panel {
+                padding: 32px 24px;
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .card-shell,
+            .scene-inner,
+            .reveal {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="card-shell" role="main" aria-label="Register card">
+            <div class="left-panel">
+                <div class="orb one" aria-hidden="true"></div>
+                <div class="orb two" aria-hidden="true"></div>
+                <div class="left-stack">
+                    <div class="scene" aria-hidden="true">
+                        <div class="scene-inner">
+                            <div class="pos-card">
+                                <div class="pos-title">POS | THANH NHAN</div>
+                                <div class="pos-chip"></div>
+                                <div class="pos-lines">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                            <div class="receipt-card" aria-hidden="true">
+                                <div class="receipt-head">#REG-001</div>
+                                <div class="receipt-line"></div>
+                                <div class="receipt-line short"></div>
+                                <div class="receipt-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="left-copy">
+                        Quản lý bán hàng nhanh chóng. Tạo tài khoản để bắt đầu - quản lý sản phẩm, hóa đơn và khách hàng.
+                    </div>
+                    <div class="left-pills">
+                        <span><i class="fa-solid fa-shield-halved"></i> Bảo mật</span>
+                        <span><i class="fa-solid fa-bolt"></i> Nhanh</span>
+                        <span><i class="fa-solid fa-chart-line"></i> Thống kê</span>
+                    </div>
+                </div>
+                <div class="left-footer">
+                    <div>© @DateTime.Now.Year - Hệ thống quản lý cửa hàng tạp hóa</div>
+                    <div>Apollo Dev</div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                @if (regError != null)
+                {
+                    <div class="notice-danger" role="alert">@regError</div>
+                }
+
+                <div class="form-head">
+                    <div>
+                        <div class="form-title">ĐĂNG KÝ</div>
+                        <div class="form-sub">Tạo tài khoản để trải nghiệm</div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    @using (Html.BeginForm("DangKy", "TaiKhoan", FormMethod.Post, new { id = "regForm" }))
                     {
                         @Html.AntiForgeryToken()
 
-                        <!-- Tên đăng nhập -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.TenDangNhap, new { @class = "form-label fw-semibold" })
-                            @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", placeholder = "Tên đăng nhập" })
-                            @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
+                        @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
+
+                        <div class="section-title reveal" style="--delay:.02s;">Thông tin tài khoản</div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 field reveal" style="--delay:.04s;">
+                                @Html.LabelFor(m => m.TenDangNhap)
+                                @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", id = "TenDangNhap", placeholder = "Tên đăng nhập", autocomplete = "username", spellcheck = "false", required = "required" })
+                                @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="col-md-6 field reveal" style="--delay:.06s;">
+                                @Html.LabelFor(m => m.Email)
+                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", id = "Email", type = "email", placeholder = "Địa chỉ email", autocomplete = "email", spellcheck = "false", required = "required" })
+                                <div class="hint">Vui lòng nhập email hợp lệ. Dùng để phục hồi mật khẩu.</div>
+                                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="col-md-6 field position-relative reveal" style="--delay:.08s;">
+                                @Html.LabelFor(m => m.MatKhau)
+                                @Html.PasswordFor(m => m.MatKhau, new { @class = "form-control", id = "MatKhau", placeholder = "Mật khẩu", autocomplete = "new-password", required = "required" })
+                                <button type="button" class="pwd-btn" id="pwdToggleReg" aria-label="Hiện/ẩn mật khẩu"><i class="fa-solid fa-eye"></i></button>
+                                <div class="hint">Mật khẩu từ 6-128 ký tự. Nên có chữ hoa, chữ thường và số.</div>
+                                @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
+
+                                <div class="mt-2">
+                                    <div class="password-meter" id="pwdMeter"><i></i></div>
+                                    <div class="strength-text" id="pwdStrength">&nbsp;</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 field position-relative reveal" style="--delay:.10s;">
+                                @Html.LabelFor(m => m.XacNhanMatKhau)
+                                @Html.PasswordFor(m => m.XacNhanMatKhau, new { @class = "form-control", id = "XacNhanMatKhau", placeholder = "Nhập lại mật khẩu", autocomplete = "new-password", required = "required" })
+                                <button type="button" class="pwd-btn" id="pwdToggleConfirm" aria-label="Hiện/ẩn mật khẩu xác nhận"><i class="fa-solid fa-eye"></i></button>
+                                @Html.ValidationMessageFor(m => m.XacNhanMatKhau, "", new { @class = "text-danger" })
+                            </div>
                         </div>
 
-                        <!-- Email -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.Email, new { @class = "form-label fw-semibold" })
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Địa chỉ email" })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                        </div>
+                        <div class="divider reveal" style="--delay:.12s;"></div>
+                        <div class="section-title reveal" style="--delay:.14s;">Thông tin liên hệ</div>
 
-                        <!-- Mật khẩu -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.MatKhau, new { @class = "form-label fw-semibold" })
-                            @Html.PasswordFor(m => m.MatKhau, new { @class = "form-control", placeholder = "Mật khẩu" })
-                            @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
-                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 field reveal" style="--delay:.16s;">
+                                @Html.LabelFor(m => m.TenKH)
+                                @Html.TextBoxFor(m => m.TenKH, new { @class = "form-control", id = "TenKH", placeholder = "Họ và tên", autocomplete = "name", required = "required" })
+                                @Html.ValidationMessageFor(m => m.TenKH, "", new { @class = "text-danger" })
+                            </div>
 
-                        <!-- Nhập lại mật khẩu -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.XacNhanMatKhau, new { @class = "form-label fw-semibold" })
-                            @Html.PasswordFor(m => m.XacNhanMatKhau, new { @class = "form-control", placeholder = "Nhập lại mật khẩu" })
-                            @Html.ValidationMessageFor(m => m.XacNhanMatKhau, "", new { @class = "text-danger" })
-                        </div>
+                            <div class="col-md-6 field reveal" style="--delay:.18s;">
+                                @Html.LabelFor(m => m.SoDT)
+                                <div class="phone-group">
+                                    <div class="phone-prefix" aria-hidden="true">
+                                        <span class="flag">🇻🇳</span>
+                                        <span>+84</span>
+                                    </div>
+                                    @Html.TextBoxFor(m => m.SoDT, new { @class = "form-control", id = "SoDT", type = "tel", inputmode = "numeric", placeholder = "Ví dụ: 398329567", autocomplete = "tel" })
+                                </div>
+                                <div class="phone-note">Nhập số điện thoại Việt Nam. Bạn có thể gõ bắt đầu bằng 0, hệ thống sẽ tự đổi sang +84.</div>
+                                @Html.ValidationMessageFor(m => m.SoDT, "", new { @class = "text-danger" })
+                            </div>
 
-                        <!-- Tên khách hàng -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.TenKH, new { @class = "form-label fw-semibold" })
-                            @Html.TextBoxFor(m => m.TenKH, new { @class = "form-control", placeholder = "Họ và tên (nếu có)" })
-                            @Html.ValidationMessageFor(m => m.TenKH, "", new { @class = "text-danger" })
-                        </div>
+                            <div class="col-12 field reveal" style="--delay:.20s;">
+                                @Html.LabelFor(m => m.DiaChi)
+                                <div class="address-group">
+                                    @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control", id = "DiaChi", placeholder = "Địa chỉ liên hệ (tùy chọn)", autocomplete = "street-address" })
+                                    <button type="button" class="map-btn" id="mapBtn" aria-label="Chọn vị trí trên bản đồ">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    </button>
+                                </div>
+                                @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "text-danger" })
+                            </div>
 
-                        <!-- ✅ Số điện thoại -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.SoDT, new { @class = "form-label fw-semibold" })
-                            @Html.TextBoxFor(m => m.SoDT, new { @class = "form-control", placeholder = "Ví dụ: 0901234567" })
-                            @Html.ValidationMessageFor(m => m.SoDT, "", new { @class = "text-danger" })
-                        </div>
+                            <div class="col-12 reveal" style="--delay:.22s;">
+                                <div class="form-check terms-check">
+                                    <input class="form-check-input" type="checkbox" value="1" id="agreeTerms" required>
+                                    <label class="form-check-label terms" for="agreeTerms">
+                                        Tôi đồng ý với các <a href="#">Điều khoản & Chính sách</a>
+                                    </label>
+                                </div>
+                            </div>
 
-                        <!-- ✅ Địa chỉ -->
-                        <div class="mb-3">
-                            @Html.LabelFor(m => m.DiaChi, new { @class = "form-label fw-semibold" })
-                            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control", placeholder = "Địa chỉ liên hệ (tùy chọn)" })
-                            @Html.ValidationMessageFor(m => m.DiaChi, "", new { @class = "text-danger" })
-                        </div>
-
-                        <!-- Nút đăng ký -->
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-brand btn-lg">
-                                <i class="bi bi-person-check-fill me-2"></i> Đăng ký
-                            </button>
-                        </div>
-
-                        <!-- Link đăng nhập -->
-                        <div class="text-center mt-3">
-                            <span>Đã có tài khoản? </span>
-                            <a href="@Url.Action("DangNhap", "TaiKhoan")" class="text-success fw-semibold">Đăng nhập</a>
+                            <div class="col-12 reveal" style="--delay:.24s;">
+                                <button class="btn-register" type="submit" id="btnRegister">
+                                    <i class="fa-solid fa-user-plus me-2"></i> Đăng ký
+                                </button>
+                            </div>
+                            <div class="col-12 reveal" style="--delay:.26s;">
+                                <div class="login-link text-center mt-2">
+                                    Đã có tài khoản? <a href="@Url.Action("DangNhap","TaiKhoan")">Đăng nhập</a>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+    <div class="modal fade map-modal" id="mapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-location-dot me-2 text-success"></i>Chọn vị trí</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="map-canvas" id="mapCanvas" aria-label="Bản đồ chọn vị trí"></div>
+                    <div class="mt-3 map-hint">Bấm trên bản đồ để chọn vị trí, địa chỉ sẽ tự nhận.</div>
+                    <div class="mt-2 map-selected" id="mapSelectedText">Chưa chọn vị trí.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success" id="applyMapBtn">Chọn địa chỉ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function(){
+            const pwdToggle = document.getElementById('pwdToggleReg');
+            const pwdToggleConfirm = document.getElementById('pwdToggleConfirm');
+            const pwdField = document.getElementById('MatKhau');
+            const confirmField = document.getElementById('XacNhanMatKhau');
+            const btn = document.getElementById('btnRegister');
+            const form = document.getElementById('regForm');
+            const pwdMeter = document.getElementById('pwdMeter');
+            const pwdStrength = document.getElementById('pwdStrength');
+            const agree = document.getElementById('agreeTerms');
+            const phoneInput = document.getElementById('SoDT');
+            const addressInput = document.getElementById('DiaChi');
+            const mapBtn = document.getElementById('mapBtn');
+            const mapModalEl = document.getElementById('mapModal');
+            const mapSelectedText = document.getElementById('mapSelectedText');
+            const applyMapBtn = document.getElementById('applyMapBtn');
+            let mapInstance = null;
+            let mapMarker = null;
+            let selectedAddress = '';
+
+            function toggleInputVisibility(button, input){
+                if(!button || !input) return;
+                button.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const isHidden = input.type === 'password';
+                    input.type = isHidden ? 'text' : 'password';
+                    this.innerHTML = isHidden
+                        ? '<i class="fa-solid fa-eye-slash"></i>'
+                        : '<i class="fa-solid fa-eye"></i>';
+                });
+            }
+
+            toggleInputVisibility(pwdToggle, pwdField);
+            toggleInputVisibility(pwdToggleConfirm, confirmField);
+
+            // password strength
+            function scorePassword(pass){
+                if(!pass) return 0;
+                let score = 0;
+                if(pass.length >= 6) score++;
+                if(/[A-Z]/.test(pass)) score++;
+                if(/[0-9]/.test(pass)) score++;
+                if(/[^A-Za-z0-9]/.test(pass)) score++;
+                if(pass.length >= 12) score++;
+                return score; // 0-5
+            }
+
+            function updateMeter(){
+                if(!pwdField) return;
+                const val = pwdField.value || '';
+                const sc = scorePassword(val);
+                const bar = pwdMeter && pwdMeter.querySelector('i');
+                if(bar){
+                    const pct = Math.min(100, Math.round((sc / 5) * 100));
+                    bar.style.width = pct + '%';
+                    if(pct < 34) bar.style.background = 'linear-gradient(90deg,#f43f5e,#f97316)';
+                    else if(pct < 67) bar.style.background = 'linear-gradient(90deg,#f59e0b,#f97316)';
+                    else bar.style.background = 'linear-gradient(90deg,#10b981,#06b6d4)';
+                }
+                if(pwdStrength){
+                    let txt = '';
+                    if(sc === 0) txt = '&nbsp;';
+                    else if(sc <= 1) txt = 'Rất yếu';
+                    else if(sc === 2) txt = 'Yếu';
+                    else if(sc === 3) txt = 'Trung bình';
+                    else if(sc === 4) txt = 'Mạnh';
+                    else txt = 'Rất mạnh';
+                    pwdStrength.innerHTML = txt;
+                }
+            }
+
+            if(pwdField){
+                pwdField.addEventListener('input', updateMeter);
+                updateMeter();
+            }
+
+            function bindHintVisibility(input){
+                if(!input) return;
+                const field = input.closest('.field');
+                const update = function(){
+                    if(!field) return;
+                    if((input.value || '').trim() !== ''){
+                        field.classList.add('has-value');
+                    } else {
+                        field.classList.remove('has-value');
+                    }
+                };
+                input.addEventListener('input', update);
+                input.addEventListener('blur', update);
+                update();
+            }
+
+            if(phoneInput){
+                phoneInput.addEventListener('blur', function(){
+                    const raw = phoneInput.value || '';
+                    const digits = raw.replace(/\D/g, '');
+                    if(!digits) return;
+                    let normalized = digits;
+                    if(normalized.startsWith('84')) normalized = normalized.slice(2);
+                    if(normalized.startsWith('0')) normalized = normalized.slice(1);
+                    phoneInput.value = normalized;
+                });
+            }
+
+            function initMap(){
+                if(mapInstance || !window.L) return;
+                mapInstance = L.map('mapCanvas', { zoomControl: true }).setView([21.028511, 105.804817], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(mapInstance);
+
+                mapInstance.on('click', function(e){
+                    const lat = e.latlng.lat;
+                    const lon = e.latlng.lng;
+
+                    if(mapMarker){
+                        mapMarker.setLatLng(e.latlng);
+                    } else {
+                        mapMarker = L.marker(e.latlng).addTo(mapInstance);
+                    }
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        selectedAddress = data.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                        if(mapSelectedText) mapSelectedText.textContent = selectedAddress;
+                    })
+                    .catch(() => {
+                        selectedAddress = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                        if(mapSelectedText) mapSelectedText.textContent = selectedAddress;
+                    });
+                });
+            }
+
+            if(mapBtn && mapModalEl){
+                mapBtn.addEventListener('click', function(){
+                    const modal = new bootstrap.Modal(mapModalEl);
+                    modal.show();
+                });
+
+                mapModalEl.addEventListener('shown.bs.modal', function(){
+                    initMap();
+                    setTimeout(function(){
+                        if(mapInstance){
+                            mapInstance.invalidateSize();
+                        }
+                    }, 150);
+                });
+            }
+
+            if(applyMapBtn){
+                applyMapBtn.addEventListener('click', function(){
+                    if(addressInput && selectedAddress){
+                        addressInput.value = selectedAddress;
+                        if(addressInput.closest('.field')){
+                            addressInput.closest('.field').classList.add('has-value');
+                        }
+                    }
+                    const modal = bootstrap.Modal.getInstance(mapModalEl);
+                    if(modal) modal.hide();
+                });
+            }
+
+            // client-side validation using jquery.validate
+            if(window.jQuery && $.fn && form){
+                const hintInputs = ['Email', 'MatKhau', 'SoDT'].map(id => document.getElementById(id));
+                hintInputs.forEach(bindHintVisibility);
+                $.validator.addMethod('phoneVN', function(value, element){
+                    if(!value) return true; // optional
+                    const cleaned = value.replace(/\s+/g, '');
+                    if (/^\+84\d{8,10}$/.test(cleaned)) return true;
+                    if (/^0\d{8,10}$/.test(cleaned)) return true;
+                    return /^\d{8,10}$/.test(cleaned);
+                }, 'Số điện thoại không hợp lệ');
+
+                $.validator.setDefaults({
+                    normalizer: function(value){
+                        return $.trim(value);
+                    }
+                });
+
+                $(form).validate({
+                    onfocusout: function(element){ $(element).valid(); },
+                    rules: {
+                        TenDangNhap: { required: true, maxlength: 60 },
+                        Email: { required: true, email: true, maxlength: 150 },
+                        MatKhau: { required: true, minlength: 6, maxlength: 128 },
+                        XacNhanMatKhau: { required: true, equalTo: '#MatKhau' },
+                        TenKH: { required: true, maxlength: 100 },
+                        SoDT: { minlength: 9, maxlength: 15, phoneVN: true },
+                        DiaChi: { maxlength: 180 }
+                    },
+                    messages: {
+                        TenDangNhap: { required: 'Tên đăng nhập không được để trống' },
+                        Email: { required: 'Email không được để trống', email: 'Email không hợp lệ' },
+                        MatKhau: { required: 'Mật khẩu không được để trống', minlength: 'Mật khẩu ít nhất 6 ký tự' },
+                        XacNhanMatKhau: { required: 'Vui lòng nhập lại mật khẩu', equalTo: 'Mật khẩu nhập lại không khớp' },
+                        TenKH: { required: 'Họ tên không được để trống' },
+                        SoDT: { minlength: 'Số điện thoại tối thiểu 9 chữ số' }
+                    },
+                    errorPlacement: function(error, element){
+                        $(error).addClass('text-danger');
+                        error.insertAfter(element);
+                    },
+                    highlight: function(element){ $(element).addClass('input-error'); },
+                    unhighlight: function(element){ $(element).removeClass('input-error'); }
+                });
+
+                function clearAgreeError(){
+                    const el = document.getElementById('agreeError');
+                    if(el){ el.remove(); }
+                }
+
+                if(agree){
+                    agree.addEventListener('change', function(){
+                        if(this.checked){
+                            clearAgreeError();
+                        }
+                    });
+                }
+
+                // intercept submit to check terms and show spinner if valid
+                $(form).on('submit', function(e){
+                    if(!$(form).valid()){
+                        return false;
+                    }
+                    if(!agree || !agree.checked){
+                        e.preventDefault();
+                        if(agree && !document.getElementById('agreeError')){
+                            const el = document.createElement('div');
+                            el.id = 'agreeError';
+                            el.className = 'text-danger mt-2';
+                            el.innerText = 'Bạn cần đồng ý với Điều khoản để tiếp tục.';
+                            agree.parentNode.appendChild(el);
+                        }
+                        if(agree){
+                            agree.focus();
+                        }
+                        return false;
+                    }
+                    if(btn){
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...';
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -3,13 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using System.Data.Entity;
 using WebQuanLiCuaHangTapHoa.Models;
 using Rotativa;
 using Rotativa.MVC;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class ThuChiController : Controller
+    public class ThuChiController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db =
             new QuanLyTapHoaThanhNhanEntities1();
@@ -43,10 +44,12 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         // Hàm tính tổng theo ngày + loại
         private int GetSum(string loai, DateTime start, DateTime end)
         {
+            DateTime startDate = start.Date;
+            DateTime endDate = end.Date;
             return _db.ThuChi
                 .Where(tc => tc.Loai == loai &&
-                             tc.Ngay >= start &&
-                             tc.Ngay <= end)
+                             DbFunctions.TruncateTime(tc.Ngay) >= startDate &&
+                             DbFunctions.TruncateTime(tc.Ngay) <= endDate)
                 .Select(tc => (int?)tc.SoTien)
                 .Sum() ?? 0;
         }
@@ -58,24 +61,46 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         {
             DateTime today = DateTime.Today;
             DateTime start = GetStartDate(range, today);
+            DateTime startDate = start.Date;
+            DateTime endDate = today.Date;
 
             var data = _db.ThuChi
-                .Where(tc => tc.Ngay >= start && tc.Ngay <= today)
-                .GroupBy(tc => tc.Ngay)
+                .Where(tc => DbFunctions.TruncateTime(tc.Ngay) >= startDate &&
+                             DbFunctions.TruncateTime(tc.Ngay) <= endDate)
+                .GroupBy(tc => DbFunctions.TruncateTime(tc.Ngay))
                 .Select(g => new
                 {
-                    Ngay = g.Key,
+                    Ngay = g.Key.Value,
                     Thu = g.Where(x => x.Loai == "Thu").Sum(x => (int?)x.SoTien) ?? 0,
                     Chi = g.Where(x => x.Loai == "Chi").Sum(x => (int?)x.SoTien) ?? 0
                 })
                 .OrderBy(x => x.Ngay)
                 .ToList();
 
+            var map = data.ToDictionary(x => x.Ngay.Date, x => x);
+            var labels = new List<string>();
+            var thuValues = new List<int>();
+            var chiValues = new List<int>();
+            for (var d = startDate; d <= endDate; d = d.AddDays(1))
+            {
+                labels.Add(d.ToString("dd/MM"));
+                if (map.TryGetValue(d.Date, out var row))
+                {
+                    thuValues.Add(row.Thu);
+                    chiValues.Add(row.Chi);
+                }
+                else
+                {
+                    thuValues.Add(0);
+                    chiValues.Add(0);
+                }
+            }
+
             return Json(new
             {
-                labels = data.Select(x => x.Ngay.ToString("dd/MM")).ToList(),
-                thu = data.Select(x => x.Thu).ToList(),
-                chi = data.Select(x => x.Chi).ToList()
+                labels = labels,
+                thu = thuValues,
+                chi = chiValues
             }, JsonRequestBehavior.AllowGet);
         }
 
@@ -86,13 +111,16 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         {
             DateTime today = DateTime.Today;
             DateTime start = GetStartDate(range, today);
+            DateTime startDate = start.Date;
+            DateTime endDate = today.Date;
 
             var data = _db.ThuChi
-                .Where(tc => tc.Ngay >= start && tc.Ngay <= today)
-                .GroupBy(tc => tc.Ngay)
+                .Where(tc => DbFunctions.TruncateTime(tc.Ngay) >= startDate &&
+                             DbFunctions.TruncateTime(tc.Ngay) <= endDate)
+                .GroupBy(tc => DbFunctions.TruncateTime(tc.Ngay))
                 .Select(g => new
                 {
-                    Ngay = g.Key,
+                    Ngay = g.Key.Value,
                     LoiNhuan = (
                         (g.Where(x => x.Loai == "Thu").Sum(x => (int?)x.SoTien) ?? 0)
                         -
@@ -102,10 +130,19 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 .OrderBy(x => x.Ngay)
                 .ToList();
 
+            var map = data.ToDictionary(x => x.Ngay.Date, x => x.LoiNhuan);
+            var labels = new List<string>();
+            var values = new List<int>();
+            for (var d = startDate; d <= endDate; d = d.AddDays(1))
+            {
+                labels.Add(d.ToString("dd/MM"));
+                values.Add(map.TryGetValue(d.Date, out var v) ? v : 0);
+            }
+
             return Json(new
             {
-                labels = data.Select(x => x.Ngay.ToString("dd/MM")).ToList(),
-                values = data.Select(x => x.LoiNhuan).ToList(),
+                labels = labels,
+                values = values,
             }, JsonRequestBehavior.AllowGet);
         }
 
@@ -124,13 +161,51 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         // ================================================================
         // 4) TAB DANH SÁCH THU – CHI
         // ================================================================
-        public ActionResult DanhSach(int? page)
+        public ActionResult DanhSach(int? page, DateTime? from, DateTime? to, string loai, int? money)
         {
             int pageNumber = page ?? 1;
             int pageSize = 12;
 
-            var list = _db.ThuChi
-                .OrderBy(tc => tc.Ngay)
+            var query = _db.ThuChi.AsQueryable();
+
+            if (from.HasValue)
+            {
+                DateTime fromDate = from.Value.Date;
+                query = query.Where(tc => DbFunctions.TruncateTime(tc.Ngay) >= fromDate);
+                ViewBag.From = fromDate.ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                ViewBag.From = "";
+            }
+
+            if (to.HasValue)
+            {
+                DateTime toDate = to.Value.Date;
+                query = query.Where(tc => DbFunctions.TruncateTime(tc.Ngay) <= toDate);
+                ViewBag.To = toDate.ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                ViewBag.To = "";
+            }
+
+            if (!string.IsNullOrEmpty(loai))
+            {
+                query = query.Where(tc => tc.Loai == loai);
+            }
+
+            if (money.HasValue)
+            {
+                query = query.Where(tc => tc.SoTien >= money.Value);
+            }
+
+            ViewBag.Loai = loai;
+            ViewBag.Money = money;
+
+            var list = query
+                .OrderByDescending(tc => tc.Ngay)
+                .ThenByDescending(tc => tc.MaTC)
                 .ToList();
 
             return PartialView("_DanhSachThuChi", list.ToPagedList(pageNumber, pageSize));
@@ -261,13 +336,19 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         {
             DateTime today = DateTime.Today;
             DateTime start = GetStartDate(range, today);
+            DateTime startDate = start.Date;
+            DateTime endDate = today.Date;
 
             int thu = _db.ThuChi
-                .Where(x => x.Loai == "Thu" && x.Ngay >= start && x.Ngay <= today)
+                .Where(x => x.Loai == "Thu" &&
+                            DbFunctions.TruncateTime(x.Ngay) >= startDate &&
+                            DbFunctions.TruncateTime(x.Ngay) <= endDate)
                 .Select(x => (int?)x.SoTien).Sum() ?? 0;
 
             int chi = _db.ThuChi
-                .Where(x => x.Loai == "Chi" && x.Ngay >= start && x.Ngay <= today)
+                .Where(x => x.Loai == "Chi" &&
+                            DbFunctions.TruncateTime(x.Ngay) >= startDate &&
+                            DbFunctions.TruncateTime(x.Ngay) <= endDate)
                 .Select(x => (int?)x.SoTien).Sum() ?? 0;
 
             int loinhuan = thu - chi;

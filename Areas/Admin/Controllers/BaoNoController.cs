@@ -10,7 +10,7 @@ using WebQuanLiCuaHangTapHoa.Models.ViewModels;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class BaoNoController : Controller
+    public class BaoNoController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
 

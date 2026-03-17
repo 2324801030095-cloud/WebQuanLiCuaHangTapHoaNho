@@ -1,0 +1,119 @@
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.ViewModels.Testimonial>
+
+<style>
+    .testi-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+        transition: 0.25s ease;
+        height: 100%;
+        position: relative;
+    }
+
+        .testi-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+    .testi-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    }
+
+    .testi-stars i {
+        color: #facc15; /* yellow-400 */
+        font-size: 1.1rem;
+        margin-right: 2px;
+    }
+
+    .testi-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #064e3b;
+    }
+
+    .testi-role {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .testi-content {
+        font-style: italic;
+        color: #374151;
+        opacity: 0.9;
+        line-height: 1.55;
+    }
+
+    .testi-date {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 6px;
+        text-align: right;
+    }
+</style>
+
+<div class="swiper" id="homeTestimonials">
+    <div class="swiper-wrapper">
+
+        @foreach (var t in Model)
+        {
+            <div class="swiper-slide">
+                <div class="testi-card">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="https://i.pravatar.cc/150?u=@t.MaKH"
+                             class="testi-avatar" />
+
+                        <div>
+                            <div class="testi-name">@t.TenKH</div>
+                            <div class="testi-role">Khách hàng</div>
+                        </div>
+                    </div>
+
+                    <div class="testi-stars mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= t.Diem)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star"></i>
+                            }
+                        }
+                    </div>
+
+                    <p class="testi-content">"@t.NoiDung"</p>
+
+                    <div class="testi-date">
+                        @t.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <div class="swiper-pagination mt-3"></div>
+</div>
+
+<script>
+    new Swiper('#homeTestimonials', {
+        slidesPerView: 1,
+        spaceBetween: 25,
+        loop: true,
+        autoplay: { delay: 4500 },
+        breakpoints: {
+            768: { slidesPerView: 2 },
+            1200: { slidesPerView: 3 }
+        },
+        pagination: { el: '.swiper-pagination', clickable: true }
+    });
+</script>

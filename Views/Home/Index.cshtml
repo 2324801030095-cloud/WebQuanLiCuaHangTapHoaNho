@@ -67,30 +67,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
-    /* --- HERO SECTION --- */
-    .tn-hero {
-        height: 530px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-    }
 
-    .tn-hero-bg {
-        position: absolute;
-        inset: 0;
-        background-image: url('https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=1920');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        filter: brightness(0.35);
-        z-index: 1;
-    }
-
-    .tn-hero-content {
-        position: relative;
-        z-index: 2;
-    }
 
     /* --- USP SECTION --- */
     .usp .icon {
@@ -155,7 +132,7 @@
     }
 
     .flip:hover .flip-inner {
-        transform: rotateY(180deg);
+        transform: none;
     }
 
     .flip-face {
@@ -416,6 +393,7 @@
         align-items: center;
         max-width: 900px;
     }
+
     .tn-hero-content {
         position: relative;
         z-index: 2;
@@ -427,23 +405,20 @@
         max-width: 900px;
     }
 
-    /* --- THANH DỌC TRANG TRÍ (Mới thêm) --- */
-    .tn-hero-content::after {
-        content: '';
-        position: absolute;
-
-        /* Vị trí: nằm bên phải nội dung */
-        right: 225px; /* Cách mép phải của khối content 40px */
-
-        /* Kích thước thanh */
-        width: 20px;   /* Độ dày thanh */
-        height: 100%;  /* Chiều cao thanh (80% so với khối chữ) */
-
-        /* Màu sắc & Kiểu dáng */
-        background-color: white; /* Màu xanh lá chủ đạo (hoặc màu vàng cam: #ca8a04) */
-        border-radius: 10px;       /* Bo tròn 2 đầu */
-        box-shadow: 0 0 15px rgba(22, 163, 74, 0.6); /* Hiệu ứng phát sáng nhẹ */
-    }
+        /* --- THANH DỌC TRANG TRÍ (Mới thêm) --- */
+        .tn-hero-content::after {
+            content: '';
+            position: absolute;
+            /* Vị trí: nằm bên phải nội dung */
+            right: 225px; /* Cách mép phải của khối content 40px */
+            /* Kích thước thanh */
+            width: 20px; /* Độ dày thanh */
+            height: 100%; /* Chiều cao thanh (80% so với khối chữ) */
+            /* Màu sắc & Kiểu dáng */
+            background-color: white; /* Màu xanh lá chủ đạo (hoặc màu vàng cam: #ca8a04) */
+            border-radius: 10px; /* Bo tròn 2 đầu */
+            box-shadow: 0 0 15px rgba(22, 163, 74, 0.6); /* Hiệu ứng phát sáng nhẹ */
+        }
 
     /* Ẩn thanh dọc trên mobile để đỡ chật */
     @@media (max-width: 992px) {
@@ -497,38 +472,306 @@
             font-size: 1.4rem;
         }
     }
+
+
+
+    /* Nền sáng mạnh hơn */
+    .top-bg-glow {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1100px;
+        height: 280px;
+        background: radial-gradient(circle, rgba(34,197,94,0.35), transparent 75%);
+        filter: blur(70px);
+        z-index: 0;
+    }
+
+    /* -----------------------------
+
+     /* -----------------------------
+        ICON TẠP HÓA – SIZE LỚN HƠN
+        ----------------------------- */
+    .icon-wrap {
+        font-size: 4.2rem; /* tăng kích thước icon */
+        display: flex;
+        justify-content: center;
+        gap: 22px;
+        animation: fadeUp 0.8s ease-out;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+    }
+
+    .emoji {
+        display: inline-block;
+        transition: transform 0.2s ease;
+    }
+
+        .emoji:hover {
+            transform: scale(1.25);
+        }
+
+    /* icon animations */
+    .bounce {
+        animation: bounce 1.6s infinite;
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    .sparkle {
+        animation: sparkle 2.4s infinite ease-in-out;
+    }
+
+    @@keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-12px);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: .9;
+        }
+
+        50% {
+            transform: scale(1.22);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes sparkle {
+        0%, 100% {
+            opacity: .55;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.3);
+        }
+    }
+
+    /* -----------------------------
+        LASER LINE VIP
+        ----------------------------- */
+    .line-anim {
+        width: 180px;
+        height: 7px;
+        background: linear-gradient(90deg, transparent, #16a34a, transparent);
+        margin: auto;
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 14px rgba(22,163,74,0.65);
+    }
+
+        .line-anim::after {
+            content: "";
+            position: absolute;
+            width: 55%;
+            height: 100%;
+            top: 0;
+            left: -50%;
+            background: #22c55e;
+            box-shadow: 0 0 20px #22c55e, 0 0 35px #86efac, 0 0 50px rgba(34,197,94,0.9);
+            animation: slide-laser 1.6s infinite linear;
+        }
+
+    @@keyframes slide-laser {
+        0% {
+            left: -50%;
+        }
+
+        100% {
+            left: 100%;
+        }
+    }
+
+    .section-heading {
+        font-size: 2.4rem;
+        font-weight: 900;
+        color: #0a3320;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    }
+
+    /* Fade up */
+    .top-title-animate {
+        animation: fadeUp 0.8s ease-out;
+        position: relative;
+        z-index: 3;
+    }
+
+    @@keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .footer-classic {
+        background: linear-gradient(180deg, #F9FBF5 0%, #E8F7ED 100%);
+        color: #166534;
+    }
+
+        .footer-classic h2,
+        .footer-classic p,
+        .footer-classic label {
+            color: #166534;
+        }
+
+        .footer-classic input {
+            background-color: white;
+            color: #14532d;
+        }
+
+            .footer-classic input::placeholder {
+                color: #617a68;
+            }
+
+
+    /* ===========================
+    BEST SELLERS – FIX CĂN GIỮA
+    =========================== */
+
+    /* Bọc tiêu đề + mô tả về dạng block căn giữa */
+    #best-sellers .d-flex.justify-content-between {
+        display: block !important;
+        text-align: center !important;
+        margin-bottom: 40px !important;
+    }
+
+    /* Ẩn nút "Xem tất cả" về cuối */
+    #best-sellers a.text-success {
+        display: none !important;
+    }
+
+    /* Tiêu đề */
+    #best-sellers h2 {
+        font-size: 2.6rem;
+        font-weight: 900;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 10px;
+        text-shadow: 0 2px 8px rgba(34, 197, 94, 0.35);
+        margin: 0 auto; /* CHÌA KHÓA – căn giữa tuyệt đối */
+    }
+
+        /* Gạch chân neon */
+        #best-sellers h2::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 420px;
+            height: 5px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #16a34a, #ca8a04, #16a34a);
+            box-shadow: 0 0 12px rgba(22,163,74,0.55);
+            animation: underlineGlow 2.4s infinite linear;
+        }
+
+    /* Icon lửa lớn + glow + không lệch dòng */
+    .icon-fire {
+        font-size: 2.2rem !important;
+        margin-right: 10px;
+        filter: drop-shadow(0 0 8px rgba(255, 78, 0, 0.85));
+        vertical-align: middle;
+    }
+
+    /* Mô tả */
+    /* Tăng khoảng cách giữa tiêu đề và mô tả */
+    #best-sellers p.text-muted {
+        text-align: center !important;
+        margin-top: 14px !important; /* tăng khoảng cách thêm */
+        font-size: 1.3rem;
+        opacity: 0.75;
+    }
+
+    /* Fix lỗi chữ bị ĐÈ LÊN SP */
+    #best-sellers {
+        padding-top: 40px !important;
+    }
+
+
+
+
+    /* Tiêu đề HÀNG MỚI VỀ (không đụng gì tới căn giữa của Bootstrap) */
+    #featured h2 {
+        font-size: 2.6rem; /* tăng kích thước */
+        font-weight: 1200;
+        color: #0a4b2f; /* màu xanh đậm */
+        letter-spacing: 1.2px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+        /* Gạch chân trang trí */
+        #featured h2::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%); /* giữ đúng tâm */
+            width: 900px;
+            height: 4px;
+            background: #16a34a;
+            border-radius: 4px;
+            opacity: 0.8;
+        }
+
+        /* "tháng này" → màu đen */
+        #featured h2 span {
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+        }
 </style>
 
 <section class="hero p-0">
-    <section class="tn-hero position-relative text-white">
-        <div class="tn-hero-bg"></div>
-        <div class="tn-hero-content">
-            <h1 class="tn-hero-title">Tạp Hóa <br /> Thanh Nhàn</h1>
-            <p class="tn-hero-desc">Tươi – Sạch – Giá tốt <br /> Phục vụ tận tâm hơn 15 năm</p>
-        </div>
-    </section>
-</section>
-<div class="container py-5">
-    <div class="row align-items-center g-4">
-        <div class="col-lg-6">
-            <span class="badge text-bg-success mb-2" style="background:linear-gradient(135deg,var(--g1),var(--g2));">Tươi mỗi ngày</span>
-            <h1 class="fw-bold display-5">
-                Chọn thực phẩm <br />
-                <span class="gtext">xanh &amp; an toàn</span>
-            </h1>
-            <p class="lead mt-3 text-muted">Sản phẩm hữu cơ, nguồn gốc rõ ràng. Cam kết giao hàng nhanh trong ngày.</p>
-            <div class="mt-4 d-flex gap-3">
-                <a class="btn btn-brand btn-lg px-4" href="@Url.Action("TatCa", "DanhMuc")">
-                    <i class="bi bi-cart-plus me-1"></i> Mua ngay
-                </a>
+
+    <!-- HERO SLIDER ĐƯỢC TÁCH THÀNH PARTIAL VIEW -->
+    @Html.Partial("_HeroSlider")
+
+    <!-- BỘ PHẦN GIỚI THIỆU BÊN DƯỚI VẪN GIỮ NGUYÊN -->
+    <div class="container py-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <span class="badge text-bg-success mb-2" style="background:linear-gradient(135deg,var(--g1),var(--g2));">Tươi mỗi ngày</span>
+                <h1 class="fw-bold display-5">
+                    Chọn thực phẩm <br />
+                    <span class="gtext">xanh &amp; an toàn</span>
+                </h1>
+                <p class="lead mt-3 text-muted">Sản phẩm hữu cơ, nguồn gốc rõ ràng. Cam kết giao hàng nhanh trong ngày.</p>
+                <div class="mt-4 d-flex gap-3">
+                    <a class="btn btn-brand btn-lg px-4" href="@Url.Action("TatCa", "DanhMuc")">
+                        <i class="bi bi-cart-plus me-1"></i> Mua ngay
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <img class="img-fluid rounded-4 shadow-lg"
+                     src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200" alt="Hero Image">
             </div>
         </div>
-        <div class="col-lg-6">
-            <img class="img-fluid rounded-4 shadow-lg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200" alt="Hero Image">
-        </div>
     </div>
-</div>
+
 </section>
+
 
 <section class="section-alt">
     <div class="container">
@@ -553,156 +796,70 @@
     </div>
 </section>
 
-<section>
+
+
+
+
+
+
+
+<div id="search-result-container">
+    @Html.Partial("_SearchResult", (IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>)ViewBag.SearchResult)
+</div>
+
+
+
+<!-- ======================= FLASH SALE (DỮ LIỆU real===================== -->
+<section id="flash-sale">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h3 fw-bold m-0 text-success">Ưu đãi hấp dẫn</h2>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-success btn-sm rounded-circle" id="promoPrev" style="width:36px;height:36px"><i class="bi bi-chevron-left"></i></button>
-                <button class="btn btn-outline-success btn-sm rounded-circle" id="promoNext" style="width:36px;height:36px"><i class="bi bi-chevron-right"></i></button>
-            </div>
         </div>
-        <div class="swiper" id="promoSwiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div class="promo-slide p-4 d-flex flex-column" style="background:#fff7ed;">
-                        <div class="mb-auto">
-                            <div class="badge bg-danger mb-2">GIẢM 50%</div>
-                            <h3 class="h4 mb-3 fw-bold">Nước ép trái cây</h3>
-                        </div>
-                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=601" alt="">
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="promo-slide p-4 d-flex flex-column" style="background:#f0fdf4;">
-                        <div class="mb-auto">
-                            <div class="badge bg-success mb-2">COMBO</div>
-                            <h3 class="h4 mb-3 fw-bold">Rau củ VietGap</h3>
-                        </div>
-                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=602" alt="">
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="promo-slide p-4 d-flex flex-column" style="background:#eff6ff;">
-                        <div class="mb-auto">
-                            <div class="badge bg-primary mb-2">MỚI</div>
-                            <h3 class="h4 mb-3 fw-bold">Hải sản tươi sống</h3>
-                        </div>
-                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=603" alt="">
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="promo-slide p-4 d-flex flex-column" style="background:#faf5ff;">
-                        <div class="mb-auto">
-                            <div class="badge bg-warning text-dark mb-2">HOT</div>
-                            <h3 class="h4 mb-3 fw-bold">Trái cây nhập khẩu</h3>
-                        </div>
-                        <img class="img-fluid promo-cover mt-3" src="https://picsum.photos/1000/420?random=604" alt="">
-                    </div>
-                </div>
-            </div>
-        </div>
+
+        @Html.Action("KhuyenMai", "Home")
+
     </div>
 </section>
 
-<section id="top-products" class="section-alt">
+
+<!-- ======================= TOP TODAY (DỮ LIỆU THẬT) ======================= -->
+<section id="top-products" class="section-alt position-relative top-today-section">
+
+    <div class="top-bg-glow"></div>
+
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="text-success fw-bold text-uppercase ls-1">Tiêu điểm</span>
-            <h2 class="h3 fw-bold">Top sản phẩm hôm nay</h2>
-            <div class="mx-auto bg-success mt-2" style="width: 60px; height: 3px;"></div>
+
+        <div class="text-center mb-5 top-title-animate">
+            <div class="icon-wrap mb-3">
+                <span class="emoji bounce">🧃</span>
+                <span class="emoji sparkle">🍪</span>
+                <span class="emoji pulse">🥫</span>
+                <span class="emoji sparkle">🥬</span>
+                <span class="emoji bounce">🧺</span>
+            </div>
+
+            <span class="text-success fw-bold text-uppercase ls-1 section-label">
+                Tiêu điểm
+            </span>
+
+            <h2 class="h3 fw-bold section-heading">
+                Top sản phẩm hôm nay
+            </h2>
+
+            <div class="line-anim mt-3"></div>
         </div>
 
-        <div class="swiper pb-5" id="topCarousel">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide top-slide">
-                    <div class="flip">
-                        <div class="flip-inner">
-                            <div class="flip-face flip-front">
-                                <img src="https://picsum.photos/600/800?random=1001" alt="Top 1">
-                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
-                            </div>
-                            <div class="flip-face flip-back">
-                                <span class="badge bg-danger mb-3">🔥 TOP 1 SELLING</span>
-                                <h6>Cải Kale Hữu Cơ</h6>
-                                <p class="text-center px-2">Giàu chất xơ.<br><strong>35.000₫ / 500g</strong></p>
-                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide top-slide">
-                    <div class="flip">
-                        <div class="flip-inner">
-                            <div class="flip-face flip-front">
-                                <img src="https://picsum.photos/600/800?random=1002" alt="Top 2">
-                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
-                            </div>
-                            <div class="flip-face flip-back">
-                                <span class="badge bg-warning text-dark mb-3">⭐ YÊU THÍCH</span>
-                                <h6>Sữa Hạt Óc Chó</h6>
-                                <p class="text-center px-2">Tốt cho tim mạch.<br><strong>135.000₫ / Lốc</strong></p>
-                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide top-slide">
-                    <div class="flip">
-                        <div class="flip-inner">
-                            <div class="flip-face flip-front">
-                                <img src="https://picsum.photos/600/800?random=1003" alt="Top 3">
-                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
-                            </div>
-                            <div class="flip-face flip-back">
-                                <span class="badge bg-success mb-3">FREESHIP</span>
-                                <h6>Khoai Tây Đà Lạt</h6>
-                                <p class="text-center px-2">Dẻo, vàng ươm.<br><strong>25.000₫ / kg</strong></p>
-                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide top-slide">
-                    <div class="flip">
-                        <div class="flip-inner">
-                            <div class="flip-face flip-front">
-                                <img src="https://picsum.photos/600/800?random=1004" alt="Top 4">
-                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
-                            </div>
-                            <div class="flip-face flip-back">
-                                <span class="badge bg-info text-dark mb-3">NHẬP KHẨU</span>
-                                <h6>Dầu Oliu Extra</h6>
-                                <p class="text-center px-2">Nguyên chất ép lạnh.<br><strong>210.000₫ / chai</strong></p>
-                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide top-slide">
-                    <div class="flip">
-                        <div class="flip-inner">
-                            <div class="flip-face flip-front">
-                                <img src="https://picsum.photos/600/800?random=1005" alt="Top 5">
-                                <div class="flip-hint"><i class="bi bi-arrow-repeat"></i> Lật thẻ</div>
-                            </div>
-                            <div class="flip-face flip-back">
-                                <span class="badge bg-primary mb-3">MỚI</span>
-                                <h6>Táo Envy Mỹ</h6>
-                                <p class="text-center px-2">Giòn ngọt.<br><strong>180.000₫ / kg</strong></p>
-                                <button class="btn btn-brand btn-sm mt-3 px-3 rounded-pill">Thêm ngay</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
+        <!-- BỌC SWIPER ĐÚNG CHUẨN (bắt buộc) -->
+        @Html.Action("TopToday", "Home")
+
     </div>
 </section>
 
+
+<!-- ======================= TOP SELLING (DỮ LIỆU THẬT) ======================= -->
 <section id="best-sellers">
     <div class="container">
+
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
                 <h2 class="h3 fw-bold mb-1 d-flex align-items-center">
@@ -711,23 +868,48 @@
                 </h2>
                 <p class="text-muted m-0 ms-1">Được khách hàng tin dùng nhất tuần qua</p>
             </div>
-            <a href="@Url.Action("TatCa","DanhMuc")" class="text-success text-decoration-none fw-semibold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            <a href="@Url.Action("TatCa","DanhMuc")" class="text-success text-decoration-none fw-semibold">
+                Xem tất cả <i class="bi bi-arrow-right"></i>
+            </a>
         </div>
 
-        @Html.Action("TopSelling", "Home", new { take = 9 })
+        <div id="topSellingWrap">
+            @Html.Action("TopSelling", "Home", new { take = 100 }) <!-- Lấy toàn bộ SP -->
+        </div>
 
         <div class="text-center mt-4">
-            <button id="btnMoreBest" class="btn btn-outline-success px-4 rounded-pill">
-                <i class="bi bi-chevron-down me-1"></i> Xem thêm sản phẩm
+            <button id="tsMore" class="btn btn-outline-success px-4 rounded-pill">
+                <i class="bi bi-chevron-double-down me-1"></i> Hiện thêm
+            </button>
+            <button id="tsLess" class="btn btn-outline-secondary px-4 rounded-pill d-none">
+                <i class="bi bi-chevron-double-up me-1"></i> Thu gọn
             </button>
         </div>
+
+
     </div>
 </section>
 
+
+<!-- ======================= HÀNG MỚI VỀ ======================= -->
 <section id="featured" class="section-alt">
     <div class="container">
         <h2 class="h3 fw-bold mb-4 text-center">Hàng mới về <span class="text-success">tháng này</span></h2>
-        @Html.Action("NewProducts", "Home", new { kw = ViewBag.Keyword as string, maDM = (int?)ViewBag.MaDM, take = 12 })
+
+        <div id="newProWrap">
+            @Html.Action("NewProducts", "Home", new { take = 100 })
+        </div>
+
+        <div class="text-center mt-4">
+            <button id="npMore" class="btn btn-outline-success px-4 rounded-pill">
+                <i class="bi bi-chevron-double-down me-1"></i> Xem thêm
+            </button>
+            <button id="npLess" class="btn btn-outline-secondary px-4 rounded-pill d-none">
+                <i class="bi bi-chevron-double-up me-1"></i> Thu gọn
+            </button>
+        </div>
+
+
         <div class="text-center mt-4">
             <button class="btn btn-brand px-5 rounded-pill shadow-sm">
                 Khám phá kho hàng mới
@@ -736,52 +918,63 @@
     </div>
 </section>
 
-<section>
+
+<!-- ======================= KIẾN THỨC TIÊU DÙNG ======================= -->
+<section id="knowledge" class="py-5">
     <div class="container">
-        <h2 class="text-center mb-5 fw-bold" style="color:#0a4b2f;">Khách hàng nói gì về chúng tôi?</h2>
-        <div class="swiper p-1" id="testiSwiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div class="card card-soft p-4 h-100">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <img src="https://i.pravatar.cc/150?img=31" class="rounded-circle" width="60" height="60">
-                            <div><div class="fw-bold">Chị Lan Anh</div><div class="small text-muted">Nội trợ</div></div>
-                        </div>
-                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-                        <p class="text-muted fst-italic">"Rau củ ở đây tươi hơn siêu thị nhiều. Đặt sáng là chiều có ngay."</p>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="card card-soft p-4 h-100">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <img src="https://i.pravatar.cc/150?img=12" class="rounded-circle" width="60" height="60">
-                            <div><div class="fw-bold">Anh Minh Tuấn</div><div class="small text-muted">Kỹ sư</div></div>
-                        </div>
-                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
-                        <p class="text-muted fst-italic">"Thịt cá luôn tươi, không bị đông đá lâu ngày. Rất hài lòng."</p>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="card card-soft p-4 h-100">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <img src="https://i.pravatar.cc/150?img=44" class="rounded-circle" width="60" height="60">
-                            <div><div class="fw-bold">Bạn Ngọc Mai</div><div class="small text-muted">Sinh viên</div></div>
-                        </div>
-                        <div class="text-warning mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div>
-                        <p class="text-muted fst-italic">"Đổi trả nhanh gọn lẹ. Nhân viên tư vấn nhiệt tình."</p>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-pagination mt-4 position-relative"></div>
+
+        <h2 class="mb-4 fw-bold" style="color:#0a4b2f;">
+            Kiến thức về nông trại
+        </h2>
+
+        <!-- Partial hiển thị danh sách bài viết -->
+        <div id="knowledge-wrap">
+            @Html.Action("KienThucHome", "Home")
         </div>
 
-        <div class="text-center mt-5">
-            <a href="@Url.Action("DanhGia", "Home")" class="btn btn-outline-dark rounded-pill px-4">
+    </div>
+</section>
+
+
+
+
+
+
+<!-- ==================================================
+     TESTIMONIALS SECTION — dành cho đánh giá khách hàng
+     ================================================== -->
+
+<section id="testimonials" class="py-5 section-alt">
+    <div class="container">
+
+        <h2 class="text-center mb-5 fw-bold" style="color:#0a4b2f;">
+            Khách hàng nói gì về chúng tôi?
+        </h2>
+
+        <!-- ===== LIST ĐÁNH GIÁ ===== -->
+        <div id="testimonialList">
+            @Html.Action("TestimonialList", "DanhGia", new { take = 10 })
+        </div>
+
+        <!-- ===== FORM GỬI ĐÁNH GIÁ ===== -->
+        <div class="mt-5" id="testimonialFormWrap">
+            @Html.Action("TestimonialForm", "DanhGia")
+        </div>
+
+        <!-- ===== NÚT XEM THÊM ===== -->
+        <div class="text-center mt-4">
+            <a href="@Url.Action("DanhSach", "DanhGia")"
+               class="btn btn-outline-dark rounded-pill px-4">
                 Xem thêm đánh giá <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
+
     </div>
 </section>
+
+
+
+
 
 <section id="newsletter" class="py-5 footer-classic">
     <div class="container">
@@ -805,8 +998,11 @@
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // 1. Promo Slider
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /* ================================
+           1) PROMO SLIDER
+           ================================ */
         new Swiper('#promoSwiper', {
             slidesPerView: 1,
             spaceBetween: 20,
@@ -821,17 +1017,20 @@
             },
         });
 
-        // 2. Top Product Carousel (AUTO LOOP MƯỢT MÀ)
+
+        /* ================================
+           2) TOP TODAY – 3D FLIP (Swiper)
+           ================================ */
         new Swiper('#topCarousel', {
-            effect: 'coverflow', // Giữ hiệu ứng 3D
+            effect: 'coverflow',
             grabCursor: true,
             centeredSlides: true,
-            slidesPerView: 'auto', // Tự động tính toán số lượng slide
-            loop: true,           // BẬT VÒNG LẶP VÔ HẠN
-            speed: 800,           // Tốc độ chuyển cảnh mượt hơn (800ms)
+            slidesPerView: 'auto',
+            loop: true,
+            speed: 800,
             autoplay: {
-                delay: 2000,      // Tự chạy sau 2 giây
-                disableOnInteraction: false, // Vẫn chạy tiếp khi chạm vào
+                delay: 2000,
+                disableOnInteraction: false,
             },
             coverflowEffect: {
                 rotate: 50,
@@ -843,11 +1042,13 @@
             pagination: {
                 el: '.swiper-pagination',
                 clickable: true
-            },
-            // initialSlide: 1 // Không cần thiết khi đã loop
+            }
         });
 
-        // 3. Testimonial Slider
+
+        /* ================================
+           3) TESTIMONIAL SLIDER
+           ================================ */
         new Swiper('#testiSwiper', {
             slidesPerView: 1,
             spaceBetween: 30,
@@ -865,5 +1066,69 @@
                 clickable: true
             }
         });
+
+
+        /* ======================================================
+            4) HIỆN THÊM / THU GỌN - TOP SELLING
+           ====================================================== */
+        let tsShow = 8;
+        const tsCards = Array.from(document.querySelectorAll(
+            '#topSellingWrap .col-12.col-sm-6.col-md-4.col-lg-3'
+        ));
+
+        function renderTopSelling() {
+            tsCards.forEach((el, i) => {
+                el.style.display = (i < tsShow) ? "" : "none";
+            });
+
+            document.getElementById("tsMore").classList.toggle("d-none", tsShow >= tsCards.length);
+            document.getElementById("tsLess").classList.toggle("d-none", tsShow <= 8);
+        }
+
+        renderTopSelling();
+
+        document.getElementById("tsMore").addEventListener("click", () => {
+            tsShow = Math.min(tsShow + 8, tsCards.length);
+            renderTopSelling();
+        });
+
+        document.getElementById("tsLess").addEventListener("click", () => {
+            tsShow = 8;
+            renderTopSelling();
+            document.getElementById("topSellingWrap").scrollIntoView({ behavior: "smooth" });
+        });
+
+
+        /* ======================================================
+            5) HIỆN THÊM / THU GỌN - NEW PRODUCTS
+           ====================================================== */
+        let npShow = 8;
+        const npCards = Array.from(document.querySelectorAll(
+            '#newProWrap .col-12.col-sm-6.col-md-4.col-lg-3'
+        ));
+
+        function renderNewProducts() {
+            npCards.forEach((el, i) => {
+                el.style.display = (i < npShow) ? "" : "none";
+            });
+
+            document.getElementById("npMore").classList.toggle("d-none", npShow >= npCards.length);
+            document.getElementById("npLess").classList.toggle("d-none", npShow <= 8);
+        }
+
+        renderNewProducts();
+
+        document.getElementById("npMore").addEventListener("click", () => {
+            npShow = Math.min(npShow + 8, npCards.length);
+            renderNewProducts();
+        });
+
+        document.getElementById("npLess").addEventListener("click", () => {
+            npShow = 8;
+            renderNewProducts();
+            document.getElementById("newProWrap").scrollIntoView({ behavior: "smooth" });
+        });
+
     });
 </script>
+

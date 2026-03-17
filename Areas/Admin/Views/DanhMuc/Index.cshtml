@@ -188,12 +188,11 @@
 
         const html = await (await fetch(url)).text();
         const container = document.getElementById("modalContainer");
-        container.innerHTML = html;
-
-        // kích hoạt script trong modal
-        container.querySelectorAll("script").forEach(s => {
-            const n = document.createElement("script"); n.text = s.text; document.body.appendChild(n);
-        });
+        if (window.renderHtml) {
+            window.renderHtml(container, html);
+        } else {
+            container.innerHTML = html;
+        }
 
         // mở modal
         const modal = document.getElementById(modalId);
@@ -222,11 +221,16 @@
         if (view) loadModal(`/Admin/DanhMuc/ChiTietDanhMuc/${view.dataset.id}`, "modalDMCT");
         if (del) {
             if (!confirm("Xóa danh mục này?")) return;
+            const params = new URLSearchParams();
+            params.append('id', del.dataset.id);
             fetch("/Admin/DanhMuc/Xoa", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: del.dataset.id })
-            }).then(r => r.json()).then(d => { alert(d.message); if (d.success) location.reload(); });
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                body: params.toString()
+            }).then(r => r.json()).then(d => { 
+                alert(d.message); 
+                if (d.success) location.reload(); 
+            });
         }
     });
 </script>

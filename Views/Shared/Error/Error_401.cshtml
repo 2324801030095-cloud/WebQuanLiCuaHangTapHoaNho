@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "~/Views/Shared/_ErrorLayout.cshtml";
+    ViewBag.Title = "Lỗi 401";
+    ViewBag.StatusCode = 401;
+}
+
+@section ErrorIcon{
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z" fill="#0f172a"/>
+        <path d="M12 7v6" stroke="#2f7cf6" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="17" r="1" fill="#2f7cf6"/>
+    </svg>
+}
+
+@section ErrorBadge{Unauthorized}
+@section ErrorCode{401}
+@section ErrorTitle{Cần xác thực đăng nhập}
+@section ErrorMessage{Bạn cần đăng nhập để tiếp tục truy cập tính năng này.}
+@section ErrorActions{
+    <a class="btn primary" href="@Url.Action("DangNhap", "TaiKhoan")">Đăng nhập</a>
+    <a class="btn ghost" href="@Url.Action("Index", "Home")">Về trang chủ</a>
+}
+@section ErrorNote{Mã lỗi: 401 • Thời gian: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")}

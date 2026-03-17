@@ -1,216 +1,597 @@
 ﻿@model List<WebQuanLiCuaHangTapHoa.Models.CartItem>
+
+@using System
+@using System.Reflection
+
 @{
     ViewBag.Title = "Thanh toán";
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
+
     decimal tongTien = ViewBag.TongTien ?? 0;
+
+    object sessionObj = Session["KH"];
+    string hoTen = "";
+    string tenDangNhap = "";
+    string email = "";
+    bool loggedIn = false;
+
+    if (sessionObj != null)
+    {
+        loggedIn = true;
+        Type t = sessionObj.GetType();
+
+        PropertyInfo pHoTen = t.GetProperty("HoTen") ?? t.GetProperty("TenKH");
+        if (pHoTen != null)
+        {
+            hoTen = pHoTen.GetValue(sessionObj)?.ToString() ?? "";
+        }
+
+        PropertyInfo pUser = t.GetProperty("TenDangNhap") ?? t.GetProperty("UserName");
+        if (pUser != null)
+        {
+            tenDangNhap = pUser.GetValue(sessionObj)?.ToString() ?? "";
+        }
+
+        PropertyInfo pEmail = t.GetProperty("Email");
+        if (pEmail != null)
+        {
+            email = pEmail.GetValue(sessionObj)?.ToString() ?? "";
+        }
+    }
 }
 
-<section class="py-4">
+<section class="py-4 shopee-page">
     <div class="container">
-        <h2 class="fw-bold text-success mb-4">
-            <i class="bi bi-wallet2"></i> Chọn phương thức thanh toán
-        </h2>
 
-        <div class="row">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold shopee-title mb-0">
+                <i class="bi bi-bag-check-fill"></i> Thanh toán
+            </h2>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-success rounded-pill px-4">
+                <i class="bi bi-house-door me-1"></i> Trang chủ
+            </a>
+        </div>
+
+        <div class="row mt-4">
+            <!-- LEFT: Giỏ hàng -->
             <div class="col-md-7">
-                <div class="card p-3">
-                    <h5 class="mb-3">Các sản phẩm trong giỏ</h5>
-                    <ul class="list-group mb-3">
-                        @foreach (var it in Model)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>@it.TenSP</strong><br />
-                                    <small>Số lượng: @it.SoLuong</small>
-                                </div>
-                                <div class="text-end">
-                                    <div>@String.Format("{0:N0} ₫", it.DonGia)</div>
-                                    <div class="fw-bold text-success">@String.Format("{0:N0} ₫", it.ThanhTien)</div>
-                                </div>
-                            </li>
-                        }
-                    </ul>
+                <div class="card shopee-card p-3">
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>Tổng tiền</div>
-                        <div class="fw-bold text-success">@String.Format("{0:N0} ₫", tongTien)</div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold">Sản phẩm trong giỏ</h5>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearAllShopee()">
+                            <i class="bi bi-trash"></i> Xóa tất cả
+                        </button>
                     </div>
+
+                    <div id="miniCart" class="shopee-cart-scroll">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var it in Model)
+                            {
+                                <div class="shopee-item d-flex align-items-center"
+                                     data-id="@it.MaSP">
+
+                                    <img src="@Url.Content("~/Content/Images/" + it.HinhAnh)"
+                                         class="shopee-item-img" />
+
+                                    <div class="flex-grow-1">
+                                        <h6 class="shopee-item-title">@it.TenSP</h6>
+                                        <div class="shopee-item-price">
+                                            @String.Format("{0:N0} ₫", it.DonGia)
+                                        </div>
+
+                                        <div class="shopee-qty-box mt-1">
+                                            <button class="shopee-qty-btn"
+                                                    onclick="updateQty(@it.MaSP, -1)">
+                                                −
+                                            </button>
+
+                                            <span class="shopee-qty-value">@it.SoLuong</span>
+
+                                            <button class="shopee-qty-btn"
+                                                    onclick="updateQty(@it.MaSP, 1)">
+                                                +
+                                            </button>
+
+                                            <button class="shopee-delete-btn ms-2"
+                                                    onclick="deleteItem(@it.MaSP)">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="shopee-subtotal text-end">
+                                        @String.Format("{0:N0} ₫", it.ThanhTien)
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Nếu load trang mà giỏ trống (phòng hờ) -->
+                            <div class="checkout-empty-box text-center py-5">
+                                <i class="bi bi-emoji-frown display-5 text-muted"></i>
+                                <h5 class="mt-3 mb-2">Giỏ hàng đang trống</h5>
+                                <p class="text-muted mb-3">Hãy thêm sản phẩm để tiến hành thanh toán.</p>
+                                <a href="@Url.Action("Index","Home")"
+                                   class="btn btn-success rounded-pill px-4">
+                                    Tiếp tục mua hàng
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <hr />
+                    <div class="d-flex justify-content-between fs-5 fw-bold">
+                        <span>Tổng tiền:</span>
+                        <span id="totalPrice" class="shopee-total">
+                            @String.Format("{0:N0} ₫", tongTien)
+                        </span>
+                    </div>
+
                 </div>
             </div>
 
+            <!-- RIGHT: Phương thức thanh toán -->
             <div class="col-md-5">
-                <div class="card p-3">
-                    <h5>Chọn phương thức</h5>
+                <div class="card shopee-card p-3">
+                    <h5 class="fw-bold mb-3">Phương thức thanh toán</h5>
 
-                    <div class="d-grid gap-2 mt-3">
-                        <button class="btn btn-outline-success payment-btn" data-type="qr">
-                            <i class="bi bi-qr-code"></i> Thanh toán bằng QR (Techcombank)
-                        </button>
-                        <button class="btn btn-outline-primary payment-btn" data-type="bank">
-                            <i class="bi bi-bank"></i> Chuyển khoản ngân hàng
-                        </button>
-                        <button class="btn btn-outline-warning payment-btn" data-type="momo">
-                            <img src="/Content/momo.png" style="height:20px;" /> Thanh toán MoMo
-                        </button>
-                        <button class="btn btn-outline-secondary payment-btn" data-type="cod">
-                            <i class="bi bi-cash-stack"></i> Tiền mặt khi nhận hàng (COD)
-                        </button>
+                    <div class="payment-options" id="paymentOptions">
+                        <div class="payment-option" data-type="vnpay">
+                            <img src="~/Content/Images/vnpay.jpg" style="height:21px; margin-right:6px;">
+                            VNPay – Cổng thanh toán điện tử
+                        </div>
+
+                        <div class="payment-option" data-type="bank">
+                            <i class="bi bi-bank text-danger"></i> QR Techcombank
+                        </div>
+
+                        <div class="payment-option" data-type="momo">
+                            <img src="~/Content/Images/momo.png" style="height:21px; margin-right:6px;">
+                            Ví MoMo
+                        </div>
+
+                        <div class="payment-option" data-type="cod">
+                            <i class="bi bi-shop text-success"></i> Thanh toán tại cửa hàng
+                        </div>
                     </div>
 
-                    <div id="paymentArea" class="mt-4">
-                        <div class="alert alert-info">Chọn phương thức để hiển thị hướng dẫn thanh toán.</div>
+                    <div id="paymentArea" class="payment-area mt-3">
+                        Chọn phương thức thanh toán để hiển thị nội dung.
                     </div>
 
                     <hr />
 
-                    <form id="formCheckout" method="post" action="@Url.Action("DatHang","GioHang")">
+                    <!-- SUBMIT -->
+                    <form id="orderForm" action="/GioHang/DatHang" method="post">
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="tenKH" value="@hoTen" />
+                        <input type="hidden" name="sdt" value="@tenDangNhap" />
+                        <input type="hidden" id="paymentMethodInput" name="paymentMethod" value="" />
 
-                        <input type="hidden" name="paymentMethod" id="paymentMethod" value="" />
-                        <input type="hidden" name="paymentNote" id="paymentNote" value="" />
-
-                        <div class="mb-2">
-                            <label>Họ tên</label>
-                            <input name="tenKH" class="form-control" required />
-                        </div>
-                        <div class="mb-2">
-                            <label>Số điện thoại</label>
-                            <input name="sdt" class="form-control" required />
-                        </div>
-                        <div class="mb-2">
-                            <label>Địa chỉ</label>
-                            <textarea name="diaChi" class="form-control" rows="2"></textarea>
-                        </div>
-
-                        <div class="d-grid gap-2 mt-3">
-                            <button type="submit" class="btn btn-success btn-lg" id="btnPlaceOrder">Xác nhận và Lưu đơn</button>
-                        </div>
+                        <button id="btnConfirmOrder"
+                                type="button"
+                                class="btn btn-success w-100 fw-bold"
+                                onclick="handleSubmitOrder()"
+                                @(Model == null || !Model.Any() ? "disabled" : "")>
+                            <i class="bi bi-check2-circle me-2"></i> Xác nhận đặt hàng
+                        </button>
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
 
-<!-- QR modal / area -->
-<div id="qrBox" class="text-center p-3" style="display:none;">
-    <h5 class="mb-3">Quét mã QR để chuyển vào tài khoản Techcombank</h5>
-    <div>
-        <img id="qrImg" src="#" alt="QR Code" style="width:260px;height:260px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.15)" />
-    </div>
-    <div class="mt-2">
-        <small><strong>Ngân hàng:</strong> Techcombank</small><br />
-        <small><strong>Số TK:</strong> 3398329567</small><br />
-        <small><strong>Chủ TK:</strong> Thanh Nhàn</small>
-    </div>
-    <div class="mt-3">
-        <button id="btnIHavePaid" class="btn btn-primary">Tôi đã thanh toán (Xác nhận)</button>
+<!-- Modal yêu cầu đăng nhập -->
+<div class="modal fade" id="loginRequiredModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <h4 class="text-danger fw-bold">Bạn cần đăng nhập để đặt hàng</h4>
+            <p class="text-secondary">Vui lòng đăng nhập để tiếp tục</p>
+            <div class="mt-3 d-flex justify-content-center gap-2">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <a class="btn btn-primary" href="/TaiKhoan/DangNhap?returnUrl=/GioHang/ThanhToan">
+                    Đăng nhập
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Robot popup -->
-<div id="robotPopup" class="robot-popup hidden">
-    <img src="/Content/robot.gif" style="height:120px" />
-    <p class="mt-2 fw-bold" id="robotMsg">Đã xử lý thao tác!</p>
+<!-- Modal QR -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">Thanh toán QR</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" id="qrBody"></div>
+        </div>
+    </div>
 </div>
 
-@section scripts{
-    <script>
-    var selectedMethod = null;
-    var amount = @tongTien;
+<script>
+    let isLoggedIn = '@(loggedIn ? "1" : "0")' === "1";
+    let totalAmount = @tongTien;
 
-    $(".payment-btn").click(function(){
-        $(".payment-btn").removeClass("active");
-        $(this).addClass("active");
-        selectedMethod = $(this).data("type");
-        $("#paymentMethod").val(selectedMethod);
+    const miniCart = document.getElementById("miniCart");
+    const totalPriceEl = document.getElementById("totalPrice");
+    const btnConfirmOrder = document.getElementById("btnConfirmOrder");
 
-        // Reset area
-        $("#paymentArea").html("");
-        $("#qrBox").hide();
+    // =============================
+    // Chọn phương thức thanh toán
+    // =============================
+    document.addEventListener("click", function (e) {
+        const option = e.target.closest(".payment-option");
+        if (!option) return;
 
-        if(selectedMethod === "qr"){
-            // Show QR image generated from server
-            $("#paymentArea").html($("#qrBox"));
-            $("#qrBox").show();
-            $("#qrImg").attr("src", "/GioHang/QrCode?amount=" + amount + "&_=" + new Date().getTime());
-            $("#paymentNote").val("QR chuyển khoản Techcombank 3398329567");
+        document.querySelectorAll(".payment-option").forEach(o => o.classList.remove("active"));
+        option.classList.add("active");
+        document.getElementById("paymentMethodInput").value = option.dataset.type;
+
+        if (option.dataset.type === "bank") {
+            paymentArea.innerHTML = "<b>Quét QR Techcombank để thanh toán.</b>";
         }
-        else if(selectedMethod === "bank"){
-            var bankHtml = `<div class="p-2 border rounded">
-                                <p><strong>Chuyển khoản tới:</strong></p>
-                                <p>Techcombank - TK: <strong>3398329567</strong><br/>Chủ TK: <strong>Thanh Nhàn</strong></p>
-                                <p>Ghi chú: Vui lòng nhập Mã đơn (sau khi tạo đơn) hoặc SĐT để chúng tôi đối soát.</p>
-                            </div>`;
-            $("#paymentArea").html(bankHtml);
-            $("#paymentNote").val("Chuyển khoản Techcombank 3398329567");
+        else if (option.dataset.type === "momo") {
+            paymentArea.innerHTML = "<b>Quét QR Ví MoMo để thanh toán.</b>";
         }
-        else if(selectedMethod === "momo"){
-            var momoHtml = `<div class="p-2 border rounded">
-                                <p>Quét MoMo hoặc chuyển khoản tới: <strong>3398329567 (Techcombank)</strong> - hoặc dùng ví MoMo chuyển tiền</p>
-                            </div>`;
-            $("#paymentArea").html(momoHtml);
-            $("#paymentNote").val("Thanh toán qua MoMo (tham chiếu: sđt)");
+        else if (option.dataset.type === "vnpay") {
+            paymentArea.innerHTML = "<b>Bạn sẽ được chuyển sang cổng thanh toán VNPay.</b>";
         }
-        else if(selectedMethod === "cod"){
-            var codHtml = `<div class="p-2 border rounded">
-                                <p>Thanh toán khi nhận hàng (COD). Vui lòng chuẩn bị tiền mặt đủ số tiền.</p>
-                           </div>`;
-            $("#paymentArea").html(codHtml);
-            $("#paymentNote").val("Thanh toán COD");
+        else {
+            paymentArea.innerHTML = "<b>Thanh toán trực tiếp tại cửa hàng.</b>";
         }
+
     });
 
-    // Xác nhận đã thanh toán (nếu dùng QR) - gọi ajax để mark, hoặc khách bấm xác nhận rồi submit form
-    $("#btnIHavePaid").click(function(){
-        // Hiển thị robot popup
-        $("#robotMsg").text("Đang xác nhận thanh toán...");
-        $("#robotPopup").removeClass("hidden");
-
-        // Thực tế: bạn có thể kiểm tra giao dịch ngân hàng ở đây.
-        setTimeout(function(){
-            $("#robotMsg").text("Thanh toán đã được ghi nhận (giả lập).");
-            setTimeout(function(){
-                $("#robotPopup").addClass("hidden");
-                // Sau khi xác nhận, submit form để lưu đơn (chúng ta có thông tin khách)
-                $("#btnPlaceOrder").click();
-            }, 900);
-        }, 1000);
-    });
-
-    // Khi submit form, đảm bảo đã chọn phương thức
-    $("#formCheckout").submit(function(e){
-        if(!$("#paymentMethod").val()){
-            e.preventDefault();
-            alert("Vui lòng chọn phương thức thanh toán trước khi xác nhận.");
-            return false;
-        }
-        // form sẽ gửi về Action DatHang với fields: tenKH, sdt, diaChi, paymentMethod, paymentNote
-    });
-
-    </script>
-
-    <style>
-        .payment-btn.active {
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-            transform: translateY(-2px);
+    // =============================
+    // Submit đặt hàng
+    // =============================
+    function handleSubmitOrder() {
+        if (!isLoggedIn) {
+            new bootstrap.Modal(document.getElementById("loginRequiredModal")).show();
+            return;
         }
 
-        .robot-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%,-50%);
-            z-index: 99999;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        if (!btnConfirmOrder || btnConfirmOrder.disabled) {
+            alert("Giỏ hàng đang trống, không thể đặt hàng.");
+            return;
         }
 
-        .hidden {
-            display: none !important;
+        const type = document.getElementById("paymentMethodInput").value;
+        if (!type) {
+            alert("Vui lòng chọn phương thức thanh toán!");
+            return;
         }
-    </style>
-}
+
+        showPaymentModal(type);
+    }
+
+    // =============================
+    // Hiển thị modal QR nếu cần
+    // =============================
+    function showPaymentModal(type) {
+        let html = "";
+
+        if (type === "bank") {
+            html = `
+        <img src="/GioHang/QrCode?amount=${totalAmount}" class="img-fluid" style="max-width:260px;">
+        <p class="text-muted mt-2">Techcombank - STK: 3398329567<br>Chủ TK: Thanh Nhan</p>`;
+        }
+        else if (type === "momo") {
+            html = `
+        <img src="/GioHang/QrCodeMomo?amount=${totalAmount}" class="img-fluid" style="max-width:240px;">
+        <p class="text-muted mt-2">Ví MoMo: Nguyễn Quang Long - 0398329567</p>`;
+        }
+        else if (type === "vnpay") {
+            window.location.href = "/GioHang/PaymentVNPay";
+            return;
+        }
+        else {
+            return confirmPaymentAndSubmit();
+        }
+
+
+        document.getElementById("qrBody").innerHTML = html;
+        new bootstrap.Modal(document.getElementById("qrModal")).show();
+    }
+
+    function confirmPaymentAndSubmit() {
+        document.getElementById("orderForm").submit();
+    }
+
+    // ===================================================================
+    // HOẠT ĐỘNG CHO – / + / XÓA / XÓA TẤT CẢ GIỎ HÀNG
+    // ===================================================================
+
+    // Render giao diện giỏ trống ngay tại trang thanh toán
+    function renderEmptyCartUI() {
+        if (!miniCart) return;
+
+        miniCart.innerHTML = `
+            <div class="checkout-empty-box text-center py-5">
+                <i class="bi bi-emoji-frown display-5 text-muted"></i>
+                <h5 class="mt-3 mb-2">Giỏ hàng đang trống</h5>
+                <p class="text-muted mb-3">Hãy thêm sản phẩm để tiếp tục thanh toán.</p>
+                <a href="@Url.Action("Index","Home")"
+                   class="btn btn-success rounded-pill px-4">
+                    Tiếp tục mua hàng
+                </a>
+            </div>`;
+
+        // Tổng tiền = 0
+        updateTotal(0);
+
+        // Disable nút xác nhận đặt hàng
+        if (btnConfirmOrder) {
+            btnConfirmOrder.disabled = true;
+        }
+
+        // Bỏ chọn phương thức thanh toán
+        document.getElementById("paymentMethodInput").value = "";
+        paymentArea.innerHTML = "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi chọn phương thức thanh toán.";
+    }
+
+    // Cập nhật badge giỏ hàng trên header
+    function refreshCartBadge(count) {
+        if (typeof updateCartBadge === "function") {
+            // Hàm global trong Layout: tự gọi API và set lại badge
+            updateCartBadge();
+        } else {
+            const badge = document.getElementById("cartCount");
+            if (badge) {
+                badge.innerText = (typeof count === "number") ? count : 0;
+            }
+        }
+    }
+
+    async function updateQty(maSP, delta) {
+        const row = document.querySelector(`[data-id="${maSP}"]`);
+        if (!row) return;
+
+        const qtySpan = row.querySelector(".shopee-qty-value");
+        const current = parseInt(qtySpan.textContent);
+        const newQty = Math.max(1, current + delta);
+
+        try {
+            let res = await fetch("/GioHang/CapNhat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: `maSP=${maSP}&soLuong=${newQty}`
+            });
+
+            let data = await res.json();
+
+            qtySpan.textContent = newQty;
+            row.querySelector(".shopee-subtotal").textContent =
+                data.itemSubtotal.toLocaleString() + " ₫";
+            updateTotal(data.total);
+            refreshCartBadge(data.count);
+
+            // Nếu server trả về tổng = 0 hoặc số lượng = 0 → cập nhật offcanvas và render trang
+            if (data.total === 0 || data.count === 0) {
+                renderEmptyCartUI();
+                try { if (typeof reloadCartOffcanvas === 'function') await reloadCartOffcanvas(); } catch(e) { console.warn(e); }
+            } else {
+                // always refresh offcanvas to keep UI in sync
+                try { if (typeof reloadCartOffcanvas === 'function') await reloadCartOffcanvas(); } catch(e) { console.warn(e); }
+            }
+        } catch (e) {
+            console.error("updateQty error:", e);
+        }
+    }
+
+    async function deleteItem(maSP) {
+        try {
+            let res = await fetch(`/GioHang/Xoa?maSP=${maSP}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            let data = await res.json();
+
+            const row = document.querySelector(`[data-id='${maSP}']`);
+            if (row) row.remove();
+
+            updateTotal(data.total);
+            refreshCartBadge(data.count);
+
+            // reload offcanvas so server-side partial reflects deletion
+            try { if (typeof reloadCartOffcanvas === 'function') await reloadCartOffcanvas(); } catch(e) { console.warn(e); }
+
+            if (data.total === 0 || data.count === 0) {
+                renderEmptyCartUI();
+            }
+        } catch (e) {
+            console.error("deleteItem error:", e);
+        }
+    }
+
+    async function clearAllShopee() {
+        if (!confirm("Bạn có chắc muốn xóa toàn bộ giỏ hàng?")) return;
+
+        try {
+            let res = await fetch("/GioHang/XoaTatCa", {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            let data = await res.json();
+            renderEmptyCartUI();
+            refreshCartBadge(data.count);
+
+            // reload offcanvas so server-side partial is refreshed
+            try { if (typeof reloadCartOffcanvas === 'function') await reloadCartOffcanvas(); } catch(e) { console.warn(e); }
+        } catch (e) {
+            console.error("clearAllShopee error:", e);
+        }
+    }
+
+    function updateTotal(total) {
+        totalAmount = total;
+        if (totalPriceEl) {
+            totalPriceEl.textContent = total.toLocaleString() + " ₫";
+        }
+    }
+</script>
+
+<style>
+    .shopee-title {
+        color: #28a745;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .shopee-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.05);
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .shopee-item {
+        padding: 12px;
+        border-bottom: 1px solid #f1f1f1;
+        display: flex;
+        gap: 12px;
+    }
+
+    .shopee-item-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .shopee-item-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #222;
+    }
+
+    .shopee-item-price {
+        font-size: 14px;
+        color: #1ea63b;
+        font-weight: bold;
+    }
+
+    .shopee-subtotal {
+        color: #1d9234;
+        font-weight: bold;
+        min-width: 90px;
+    }
+
+    .shopee-qty-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .shopee-qty-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #bde5cd;
+        background: #e9f7ef;
+        color: #28a745;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+        .shopee-qty-btn:hover {
+            background: #d4f3df;
+        }
+
+    .shopee-qty-value {
+        min-width: 26px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .shopee-delete-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #ffcccc;
+        background: #fff1f1;
+        color: #c62828;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .shopee-delete-btn:hover {
+            background: #ffe0e0;
+        }
+
+    .shopee-cart-scroll {
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+        .shopee-cart-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .shopee-cart-scroll::-webkit-scrollbar-thumb {
+            background: #28a745;
+            border-radius: 10px;
+        }
+
+    .shopee-total {
+        color: #28a745;
+        font-weight: 700;
+    }
+
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .payment-option {
+        border: 1px solid #c9e7d2;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: .2s;
+        background: #fff;
+    }
+
+        .payment-option:hover {
+            background: #e9f7ef;
+        }
+
+        .payment-option.active {
+            border-color: #28a745;
+            background: #dff9ea;
+            box-shadow: 0 4px 12px rgba(40,167,69,0.25);
+        }
+
+    .payment-area {
+        border: 1px solid #d7eadf;
+        border-radius: 10px;
+        padding: 14px;
+        min-height: 70px;
+        font-size: 14px;
+    }
+
+    .checkout-empty-box {
+        border-radius: 16px;
+        border: 1px dashed #cbd5e1;
+        background: #f8fafc;
+    }
+</style>

@@ -12,981 +12,692 @@
     <!-- Bootstrap & FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
-                /* --- CSS GỐC CỦA BẠN GIỮ NGUYÊN 100% --- */
-                body {
-                    background-color: #f1f5f9;
-                    font-family: "Segoe UI", sans-serif;
-                    color: #1e293b;
-                    transition: all 0.3s ease;
-                }
-
-                /* ===== Sidebar ===== */
-                .sidebar {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100vh;
-                    width: 200px;
-                    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-                    color: #e2e8f0;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    transition: all 0.3s ease;
-                    z-index: 1000;
-                }
-
-                    .sidebar.collapsed {
-                        width: 80px;
-                    }
-
-                        .sidebar.collapsed a span,
-                        .sidebar.collapsed .sidebar-user h6,
-                        .sidebar.collapsed h4 {
-                            display: none;
-                        }
-
-                        .sidebar.collapsed a i {
-                            margin-right: 0;
-                            text-align: center;
-                            width: 100%;
-                            font-size: 20px;
-                        }
-
-                .sidebar-user {
-                    text-align: center;
-                    padding: 20px 10px;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-                }
-
-                    .sidebar-user img {
-                        width: 70px;
-                        height: 70px;
-                        border-radius: 50%;
-                        border: 3px solid #3b82f6;
-                        margin-bottom: 10px;
-                        transition: all 0.3s;
-                    }
-
-                .sidebar h4 {
-                    text-align: center;
-                    font-size: 22px;
-                    margin-top: 15px;
-                    margin-bottom: 15px;
-                    font-weight: 600;
-                }
-
-                .sidebar a {
-                    display: flex;
-                    align-items: center;
-                    padding: 14px 25px;
-                    text-decoration: none;
-                    color: #cbd5e1;
-                    transition: all 0.25s;
-                    border-left: 4px solid transparent;
-                    font-size: 17px;
-                }
-
-                    .sidebar a:hover {
-                        background-color: rgba(255, 255, 255, 0.1);
-                        border-left: 4px solid #3b82f6;
-                        color: white;
-                    }
-
-                    .sidebar a i {
-                        margin-right: 12px;
-                        width: 22px;
-                        text-align: center;
-                    }
-
-                /* ===== Logout Button ===== */
-                .sidebar-bottom {
-                    padding: 15px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.15);
-                }
-
-                .logout-btn {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    width: 100%;
-                    text-align: center;
-                    background: #ef4444;
-                    color: white;
-                    font-weight: 600;
-                    border-radius: 10px;
-                    padding: 10px 0;
-                    text-decoration: none;
-                    transition: 0.25s;
-                }
-
-                    .logout-btn i {
-                        font-size: 18px;
-                    }
-
-                    .logout-btn:hover {
-                        background: #dc2626;
-                        transform: scale(1.03);
-                    }
-
-                .sidebar.collapsed .logout-btn span {
-                    display: none;
-                }
-
-                .sidebar.collapsed .logout-btn {
-                    justify-content: center;
-                    padding: 12px 0;
-                }
-
-                /* ===== Header bar ===== */
-                .header-bar {
-                    position: fixed;
-                    top: 0;
-                    left: 260px;
-                    width: calc(100% - 290px);
-                    padding: 12px 25px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    background: rgba(255, 255, 255, 0.75);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                    border-radius: 0 0 20px 20px;
-                    transition: all 0.4s ease-in-out;
-                    z-index: 999;
-                }
-
-                /* ... (TOÀN BỘ CSS CŨ GIỮ NGUYÊN, KHÔNG BỎ 1 DÒNG) ... */
-
-
-
-
-
-                /* ======================================================================
-           +++ INSERTED 1: MENU SCROLLING + FIXED LOGOUT BUTTON
-        ====================================================================== */
-
-                /* Tạo vùng cuộn riêng cho menu */
-                .sidebar-menu {
-                    flex: 1;
-                    overflow-y: auto;
-                    padding-bottom: 10px;
-                }
-
-                    /* Thanh cuộn đẹp */
-                    .sidebar-menu::-webkit-scrollbar {
-                        width: 6px;
-                    }
-
-                    .sidebar-menu::-webkit-scrollbar-thumb {
-                        background: rgba(255,255,255,0.2);
-                        border-radius: 10px;
-                    }
-
-                /* Khi thu nhỏ menu: chiều cao cuộn vẫn chuẩn */
-                .sidebar.collapsed .sidebar-menu {
-                    overflow-y: auto;
-                }
-
-
-
-
-
-                /* ======================================================================
-           +++ INSERTED 2: THU NHỎ NÚT LOGOUT + GHIM DƯỚI CÙNG
-        ====================================================================== */
-
-                .sidebar-bottom {
-                    position: sticky;
-                    bottom: 0;
-                    background: inherit;
-                    padding: 12px !important;
-                    margin-top: auto;
-                }
-
-                .logout-btn {
-                    padding: 6px 0 !important;
-                    font-size: 14px;
-                    border-radius: 8px;
-                }
-
-                .sidebar.collapsed .logout-btn {
-                    padding: 10px 0 !important;
-                }
-
-                    .sidebar.collapsed .logout-btn i {
-                        font-size: 18px;
-                    }
-
-                /* ======================================================================
-           +++ INSERTED 3: HOVER HIỆU ỨNG XỊN CHO SIDEBAR MENU
-        ====================================================================== */
-
-                /* Hiệu ứng tổng */
-                .sidebar-menu a {
-                    position: relative;
-                    overflow: hidden;
-                    z-index: 1;
-                }
-
-                    /* Hiệu ứng nền trượt từ trái sang */
-                    .sidebar-menu a::before {
-                        content: "";
-                        position: absolute;
-                        top: 0;
-                        left: -100%;
-                        width: 100%;
-                        height: 100%;
-                        background: linear-gradient(90deg, rgba(59,130,246,0.35), rgba(37,99,235,0.45));
-                        transition: all 0.35s ease;
-                        z-index: -1;
-                        border-radius: 6px;
-                    }
-
-                    /* Khi hover: nền trượt vào */
-                    .sidebar-menu a:hover::before {
-                        left: 0;
-                    }
-
-                    /* Hiệu ứng icon sáng + phóng nhẹ */
-                    .sidebar-menu a:hover i {
-                        transform: scale(1.18);
-                        filter: drop-shadow(0 0 6px rgba(96,165,250,0.8));
-                        transition: 0.25s ease;
-                    }
-
-                    /* Hiệu ứng chữ sáng mượt */
-                    .sidebar-menu a:hover span {
-                        color: #ffffff;
-                        text-shadow: 0 0 6px rgba(96,165,250,0.8);
-                        transition: 0.25s ease;
-                    }
-
-                    /* Hiệu ứng glow tổng thể */
-                    .sidebar-menu a:hover {
-                        transform: translateX(4px);
-                        transition: 0.25s ease;
-                    }
-
-                /* ===== Header bar ===== */
-                .header-bar {
-                    position: fixed;
-                    top: 0;
-                    left: 260px;
-                    width: calc(100% - 260px);
-                    padding: 12px 25px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    background: rgba(255, 255, 255, 0.75);
-                    backdrop-filter: blur(12px);
-                    -webkit-backdrop-filter: blur(12px);
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                    border-radius: 0 0 20px 20px;
-                    transition: all 0.4s ease-in-out;
-                    z-index: 999;
-                }
-
-                .collapsed + .header-bar {
-                    left: 80px !important;
-                    width: calc(100% - 80px);
-                }
-
-                .header-bar.hidden {
-                    transform: translateY(-100%);
-                    opacity: 0;
-                }
-
-                .header-bar.show {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-
-                .toggle-btn {
-                    background: none;
-                    border: none;
-                    color: #1e3a8a;
-                    font-size: 24px;
-                    cursor: pointer;
-                }
-
-
-                /* ======================================================================
-           +++ INSERTED 4: ACTIVE STATE CHO SIDEBAR
-        ====================================================================== */
-
-                .sidebar-menu a.active {
-                    color: #ffffff;
-                    font-weight: 600;
-                    border-left: 4px solid #3b82f6;
-                    background: linear-gradient(90deg, rgba(59,130,246,0.25), rgba(37,99,235,0.35));
-                    box-shadow: inset 0 0 10px rgba(37,99,235,0.35);
-                    position: relative;
-                }
-
-                    .sidebar-menu a.active i {
-                        color: #3b82f6;
-                        transform: scale(1.15);
-                        filter: drop-shadow(0 0 5px rgba(96,165,250,0.7));
-                    }
-
-
-                /* ======================================================================
-           +++ INSERTED 5: RIPPLE EFFECT CHO SIDEBAR
-        ====================================================================== */
-
-                .sidebar-menu a {
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                    .sidebar-menu a::after {
-                        content: "";
-                        position: absolute;
-                        width: 10px;
-                        height: 10px;
-                        background: rgba(255,255,255,0.4);
-                        opacity: 0;
-                        border-radius: 50%;
-                        transform: scale(1);
-                        transition: transform 0.45s ease, opacity 0.45s ease;
-                        pointer-events: none;
-                    }
-
-                    /* Khi click */
-                    .sidebar-menu a.ripple::after {
-                        opacity: 1;
-                        transform: scale(25);
-                    }
-
-
-                /* ======================================================================
-           +++ INSERTED 6: HOVER & ACTIVE KHI SIDEBAR COLLAPSED
-        ====================================================================== */
-
-                /* Hover trong trạng thái collapsed */
-                .sidebar.collapsed .sidebar-menu a {
-                    justify-content: center;
-                    padding: 14px 0;
-                }
-
-                    .sidebar.collapsed .sidebar-menu a:hover {
-                        background: rgba(255,255,255,0.12);
-                        border-left: 4px solid #3b82f6;
-                    }
-
-                    /* Tooltip hiện tên menu */
-                    .sidebar.collapsed .sidebar-menu a span {
-                        position: absolute;
-                        left: 100%;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        background: #0f172a;
-                        padding: 6px 12px;
-                        border-radius: 6px;
-                        white-space: nowrap;
-                        opacity: 0;
-                        pointer-events: none;
-                        margin-left: 12px;
-                        transition: opacity 0.25s ease, transform 0.25s ease;
-                        box-shadow: 0 0 10px rgba(0,0,0,0.35);
-                    }
-
-                    .sidebar.collapsed .sidebar-menu a:hover span {
-                        opacity: 1;
-                        transform: translateY(-50%) translateX(4px);
-                    }
-
-                    /* Active trong collapsed mode */
-                    .sidebar.collapsed .sidebar-menu a.active {
-                        background: rgba(37,99,235,0.35);
-                    }
-                /* ======================================================================
-           ACTIVE ULTRA PRO – NEON GREEN (FINAL CLEAN VERSION)
-        ====================================================================== */
-
-                .sidebar-menu a.active {
-                    position: relative;
-                    overflow: visible;
-                    z-index: 2;
-                }
-
-                    /* Border xanh lá neon + nhịp thở nhẹ */
-                    .sidebar-menu a.active::before {
-                        content: "";
-                        position: absolute;
-                        left: -2px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        width: 6px;
-                        height: 70%;
-                        border-radius: 10px;
-                        background: linear-gradient( 180deg, #00ff77, #00e766, #00ff77 );
-                        background-size: 200% 200%;
-                        animation: borderBreathGreen 3s ease-in-out infinite;
-                        box-shadow: 0 0 8px rgba(0,255,120,0.55), 0 0 14px rgba(0,255,160,0.45);
-                    }
-
-                /* Viền thở nhẹ – TINH TẾ */
-                @@keyframes borderBreathGreen {
-                    0% {
-                        box-shadow: 0 0 6px rgba(0,255,120,0.4), 0 0 10px rgba(0,255,160,0.35);
-                    }
-
-                    50% {
-                        box-shadow: 0 0 14px rgba(0,255,120,0.85), 0 0 24px rgba(0,255,160,0.75);
-                    }
-
-                    100% {
-                        box-shadow: 0 0 6px rgba(0,255,120,0.4), 0 0 10px rgba(0,255,160,0.35);
-                    }
-                }
-
-                /* CHỮ neon: chỉ phát sáng – KHÔNG nhịp thở */
-                .sidebar-menu a.active span {
-                    background: linear-gradient(90deg, #00ff99, #00ff55);
-                    -webkit-background-clip: text;
-                    color: transparent !important;
-                    font-weight: 700;
-                    /* Glow cố định – không chuyển động */
-                    text-shadow: 0 0 10px rgba(0,255,160,0.75), 0 0 20px rgba(0,255,160,0.45);
-                    transition: .25s ease;
-                }
-
-                /* ICON neon cố định – KHÔNG thở */
-                .sidebar-menu a.active i {
-                    background: linear-gradient(90deg, #00ffbb, #00ff55);
-                    -webkit-background-clip: text;
-                    color: transparent !important;
-                    transform: scale(1.0);
-                    filter: drop-shadow(0 0 10px rgba(0,255,120,0.7)) drop-shadow(0 0 16px rgba(0,255,140,0.5));
-                    transition: .25s ease;
-                }
-
-                /* Hover active – không phóng to, chỉ sáng nhẹ */
-                .sidebar-menu a.active:hover span,
-                .sidebar-menu a.active:hover i {
-                    transform: scale(1.0); /* Không phóng to */
-                    text-shadow: 0 0 12px rgba(0,255,160,0.85), 0 0 22px rgba(0,255,160,0.55);
-                }
-
-
-
-                /* ===== Main Content ===== */
-                .content {
-                    margin-left: 260px;
-                    padding: 100px 40px 40px;
-                    transition: all 0.3s ease;
-                }
-
-                .collapsed ~ .content {
-                    margin-left: 80px;
-                }
-
-                footer {
-                    text-align: center;
-                    color: #6b7280;
-                    font-size: 16px;
-                    margin-top: 40px;
-                }
-
-                /* DARK MODE (chỉ thêm, không thay đổi CSS gốc) */
-                body.dark {
-                    background-color: #0f172a;
-                    color: #e2e8f0;
-                }
-                    /* === Fix chữ “Xin chào, Admin!” trong Dark Mode === */
-                    body.dark .header-bar h5 {
-                        color: #f8fafc !important; /* chữ chính sáng */
-                    }
-
-                        body.dark .header-bar h5 span {
-                            color: #f8fafc !important; /* chữ Admin sáng */
-                        }
-                    /* === Fix màu nút 3 gạch (toggle button) trong Dark Mode === */
-                    body.dark .toggle-btn {
-                        color: #f8fafc !important; /* màu sáng */
-                    }
-
-                        body.dark .toggle-btn:hover {
-                            color: #93c5fd !important; /* hiệu ứng hover sáng */
-                        }
-
-                    body.dark footer {
-                        color: #e2e8f0;
-                    }
-
-                    body.dark .header-bar {
-                        background: rgba(15, 23, 42, 0.8);
-                        border-bottom-color: rgba(255, 255, 255, 0.15);
-                    }
-
-                    body.dark .sidebar {
-                        background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-                    }
-
-                    body.dark .content {
-                        color: #e2e8f0;
-                    }
-
-                @@media (max-width: 992px) {
-                    .sidebar {
-                        left: -260px;
-                    }
-
-                        .sidebar.active {
-                            left: 0;
-                        }
-
-                    .header-bar {
-                        left: 0;
-                        width: 100%;
-                        border-radius: 0;
-                    }
-
-                    .content {
-                        margin-left: 0;
-                    }
-                }
-
-
-
-
-                /* ===================================================================
-              DARK MODE – COMBO EFFECT (EASY-READ + NEON GRADIENT GLOW)
-           =================================================================== */
-
-                /* Vùng tiêu đề của trang (áp dụng .page-title) */
-                body.dark .page-title {
-                    color: #f8fafc !important; /* Chữ sáng dễ nhìn */
-                    text-shadow: 0 0 6px rgba(255,255,255,0.35), 0 0 10px rgba(255,255,255,0.35);
-                    /* Hiệu ứng gradient nhẹ */
-                    background: linear-gradient(90deg, #93c5fd, #34d399, #a78bfa);
-                    -webkit-background-clip: text;
-                    color: transparent;
-                }
-
-                    /* Icon trong tiêu đề */
-                    body.dark .page-title i {
-                        /* Gradient neon */
-                        background: linear-gradient(90deg, #60a5fa, #34d399);
-                        -webkit-background-clip: text;
-                        color: transparent;
-                        /* Light neon glow */
-                        text-shadow: 0 0 6px rgba(147,197,253,0.7), 0 0 12px rgba(34,197,94,0.7), 0 0 18px rgba(147,197,253,0.5);
-                    }
-
-                        /* Làm icon mượt hơn khi hover dark mode */
-                        body.dark .page-title i:hover {
-                            text-shadow: 0 0 10px rgba(147,197,253,0.9), 0 0 20px rgba(34,197,94,0.9), 0 0 25px rgba(147,197,253,0.7);
-                            transform: scale(1.1);
-                            transition: .25s ease;
-                        }
-
-
-
-
-                /* === ULTRA GLOW V3 — DRIBBBLE SWITCH NEXT-GEN === */
-                .dribbble-switch {
-                    --w: 86px;
-                    --h: 38px;
-                    position: relative;
-                    width: var(--w);
-                    height: var(--h);
-                    border-radius: 50px;
-                    cursor: pointer;
-                    user-select: none;
-                    padding: 4px;
-                    display: inline-flex;
-                    align-items: center;
-                    transition: 0.25s ease;
-                    transform-style: preserve-3d; /* 3D GPU */
-                    backface-visibility: hidden;
-                    will-change: transform, filter;
-                }
-
-                    /* 🌈 MULTI-LAYER NEON BORDER + HDR BLOOM */
-                    .dribbble-switch::before {
-                        content: "";
-                        position: absolute;
-                        inset: -4px;
-                        border-radius: 50px;
-                        background: conic-gradient( from 0deg, #ffef62, #ff66c4, #9b5cff, #5cb8ff, #34d399, #ffef62 );
-                        background-size: 250% 250%;
-                        animation: v3BorderFlow 6s linear infinite;
-                        filter: drop-shadow(0 0 18px rgba(255,255,255,0.85)) drop-shadow(0 0 28px rgba(255,255,255,0.45));
-                        z-index: 0;
-                        pointer-events: none;
-                    }
-
-                @@keyframes v3BorderFlow {
-                    0% {
-                        background-position: 0% 50%;
-                    }
-
-                    50% {
-                        background-position: 100% 50%;
-                    }
-
-                    100% {
-                        background-position: 0% 50%;
-                    }
-                }
-
-                /* ⭐ GLASS REFLECTION */
-                .dribbble-switch::after {
-                    content: "";
-                    position: absolute;
-                    inset: 0;
-                    border-radius: 50px;
-                    background: radial-gradient( circle at 30% 20%, rgba(255,255,255,0.35), transparent 60% );
-                    z-index: 1;
-                    pointer-events: none;
-                }
-
-                /* TRACK */
-                .dribbble-switch .track {
-                    position: absolute;
-                    inset: 0;
-                    border-radius: 50px;
-                    background: linear-gradient(145deg, #ffffff, #e5e8ee);
-                    box-shadow: inset 1px 1px 6px rgba(0,0,0,0.12), inset -2px -2px 6px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.5);
-                    z-index: 1;
-                    transition: 0.35s ease;
-                }
-
-                /* DARK MODE TRACK */
-                body.dark .dribbble-switch .track {
-                    background: linear-gradient(145deg, #0b1324, #111c2f);
-                    box-shadow: inset 0 0 14px rgba(110,130,255,0.25), inset -1px -1px 4px rgba(255,255,255,0.05), 0 0 16px rgba(100,130,255,0.6);
-                }
-
-                /* ICONS */
-                .dribbble-switch .icons {
-                    position: absolute;
-                    inset: 0 12px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    font-size: 15px;
-                    color: #6b7280;
-                    z-index: 3;
-                    pointer-events: none;
-                }
-
-                body.dark .dribbble-switch .icons {
-                    color: #bad5ff;
-                }
-
-                /* === KNOB (3D + Depth + Liquid Motion) === */
-                .dribbble-switch .knob {
-                    position: absolute;
-                    width: calc(var(--h) - 8px);
-                    height: calc(var(--h) - 8px);
-                    border-radius: 50%;
-                    left: 4px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 15px;
-                    background: radial-gradient(circle at 30% 30%, #ffffff, #e9edf3 60%, #d4d8df 100% );
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.25), inset -2px -2px 6px rgba(255,255,255,0.9), inset 2px 2px 6px rgba(120,120,150,0.25);
-                    transition: 0.35s cubic-bezier(.25, .8, .25, 1);
-                    z-index: 4;
-                    transform-style: preserve-3d;
-                }
-
-                /* Knob neon glow modes */
-                .dribbble-switch[data-mode="light"] .knob {
-                    filter: drop-shadow(0 0 12px rgba(255, 210, 0, 1));
-                }
-
-                .dribbble-switch[data-mode="dark"] .knob {
-                    filter: drop-shadow(0 0 16px rgba(110, 130, 255, 1));
-                    transform: translateX(calc(var(--w) - var(--h)));
-                }
-
-                /* Hover — FLOATING 3D EFFECT */
-                .dribbble-switch:hover .knob {
-                    transform: scale(1.08) translateZ(12px);
-                }
-
-                /* Ripple when clicking */
-                .dribbble-switch.ripple::after {
-                    background: rgba(255,255,255,0.4);
-                    animation: v3Ripple 0.45s ease-out forwards;
-                }
-
-                @@keyframes v3Ripple {
-                    0% {
-                        opacity: 0.7;
-                        transform: scale(0.8);
-                    }
-
-                    100% {
-                        opacity: 0;
-                        transform: scale(1.9);
-                    }
-                }
-
-                /* Knob elastic pulse when mode changes */
-                .switch-animate .knob {
-                    animation: v3KnobPulse .35s ease;
-                }
-
-                @@keyframes v3KnobPulse {
-                    0% {
-                        transform: scale(1);
-                    }
-
-                    35% {
-                        transform: scale(1.18);
-                    }
-
-                    100% {
-                        transform: scale(1);
-                    }
-                }
-
-                /* Shine sweep */
-                .dribbble-switch .knob::before {
-                    content: "";
-                    position: absolute;
-                    width: 120%;
-                    height: 120%;
-                    border-radius: 50%;
-                    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 70% );
-                    opacity: 0.0;
-                    animation: shineSweep 3s linear infinite;
-                }
-
-                @@keyframes shineSweep {
-                    0% {
-                        opacity: 0.15;
-                        transform: translateX(-30%) translateY(-30%);
-                    }
-
-                    50% {
-                        opacity: 0.4;
-                        transform: translateX(20%) translateY(20%);
-                    }
-
-                    100% {
-                        opacity: 0.15;
-                        transform: translateX(-30%) translateY(-30%);
-                    }
-                }
-
-
-                /* === LIGHT MODE OVERRIDES – V2 (điều chỉnh theo yêu cầu) === */
-                body:not(.dark) .sidebar {
-                    background: #FFFFFF !important; /* slider bar màu trắng */
-                    border-right: 1px solid #E5E7EB; /* viền phân cách với nội dung chính */
-                }
-
-                body:not(.dark) .sidebar-user {
-                    border-bottom: 1px solid #D1D5DB !important; /* viền ngăn cách user với menu (mỏng hơn) */
-                }
-
-                body:not(.dark) .sidebar-menu {
-                    border-top: 1px solid #D1D5DB !important; /* viền ngăn cách menu với user */
-                    border-bottom: 1px solid #D1D5DB !important; /* viền ngăn cách menu với footer logout */
-                }
-
-                    body:not(.dark) .sidebar-menu a {
-                        color: #1E293B !important; /* chữ & icon màu đen mặc định */
-                        font-size: 15px !important; /* giảm kích thước chữ */
-                        border: 1px solid transparent; /* chuẩn viền mặc định */
-                    }
-
-                        body:not(.dark) .sidebar-menu a:hover {
-                            background-color: #F3F4F6 !important; /* hover nền xám nhạt */
-                            border-left: 4px solid #22C55E !important; /* hover border xanh lá */
-                            border: 1px solid #D1D5DB !important; /* viền mỏng hơn khi hover */
-                            color: #1E293B !important; /* chữ vẫn đen */
-                        }
-
-                        body:not(.dark) .sidebar-menu a.active {
-                            background-color: #E5E7EB !important; /* active nền xám nhẹ */
-                            border-left: 4px solid #3B82F6 !important; /* active border màu xanh dương */
-                            color: #3B82F6 !important; /* chữ active màu xanh dương phù hợp với icon */
-                            font-size: 17px !important; /* chữ to hơn một chút */
-                            border: 1px solid #D1D5DB !important; /* viền mỏng quanh nút active */
-                        }
-
-                            body:not(.dark) .sidebar-menu a.active i {
-                                color: #3B82F6 !important; /* icon active màu xanh dương */
-                            }
-
-                body:not(.dark) .logout-btn {
-                    background: #EF4444 !important; /* nút logout nền đỏ khi không hover */
-                    color: #FFFFFF !important; /* chữ trắng mặc định */
-                    border: 1px solid #D1D5DB !important; /* viền mỏng quanh nút logout */
-                }
-
-                    body:not(.dark) .logout-btn:hover {
-                        background: #22C55E !important; /* hover nền xanh lá */
-                        border: 1px solid #D1D5DB !important; /* viền mỏng khi hover */
-                    }
-
-                body:not(.dark) .sidebar-user img {
-                    border: 3px solid #22C55E !important; /* viền quanh ảnh user màu xanh lá nhẹ */
-                }
-
-                body:not(.dark) .header-bar {
-                    background: #FFFFFF !important; /* nav bar nền trắng */
-                }
-
-
-                /* === LIGHT MODE OVERRIDES – V4 === */
-                body:not(.dark) .sidebar-user h6 {
-                    color: #1E293B !important; /* chữ username màu đen */
-                }
-
-
-                body:not(.dark) .sidebar-menu a.active span,
-                body:not(.dark) .sidebar-menu a.active i {
-                    color: #3B82F6 !important;
-                    text-shadow: none !important; /* loại bỏ hiệu ứng phát sáng nếu có */
-                }
-
-
-
-                /* === FIX: LOẠI BỎ HIỆU ỨNG RUNG KHI SIDEBAR COLLAPSED === */
-                .sidebar.collapsed .sidebar-menu a:hover {
-                    /* Ngắt chuyển dịch sang phải */
-                    transform: none !important;
-                    /* Hoặc nếu bạn muốn vẫn background change nhưng không dịch chuyển */
-                    /* background-color giữ nguyên hover, nhưng bỏ translateX */
-                }
-
-                    .sidebar.collapsed .sidebar-menu a:hover i,
-                    .sidebar.collapsed .sidebar-menu a:hover span {
-                        /* Bỏ scale khi hover icon/text trong collapsed mode */
-                        transform: none !important;
-                    }
-
-                .sidebar {
-                    transition: none !important;
-                }
-
-        window.addEventListener('DOMContentLoaded', () => {
-          document.querySelector('.sidebar').style.transition = '';
-
-
-        });
-        /* === OVERRIDE: Sidebar width 200px & Header bar sát mép === */
+        /* ====================== BASE (GIỮ NGUYÊN) + TÙY CHỈNH THU GỌN ====================== */
+        :root {
+            --bg: #f3f6fb;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --border: #e5e7eb;
+            --text: #0f172a;
+            --muted: #64748b;
+            --accent: #2563eb;
+            --accent-2: #3b82f6;
+            --success: #16a34a;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            transition: all 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        * {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
-            width: 200px !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 200px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            padding-top: 12px;
+            box-shadow: 0 4px 18px rgba(2,6,23,0.08);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        /* Remove large sidebar-user, we place avatar in header */
+        .sidebar-user { display: none; }
+
+        .sidebar h4 {
+            text-align: center;
+            font-size: 18px;
+            margin: 8px 0;
+            font-weight: 600;
+            color: #e6eefb;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 10px 18px !important; /* thu nhỏ padding */
+            text-decoration: none;
+            color: #cbd5e1;
+            transition: all 0.20s;
+            border-left: 4px solid transparent;
+            font-size: 14px !important; /* thu nhỏ chữ menu */
+            gap: 12px;
+        }
+
+        .sidebar a i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+            font-size: 16px !important;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.06);
+            border-left: 4px solid #3b82f6;
+            color: #ffffff;
+        }
+
+        /* Sidebar menu scroll region */
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 10px;
+            margin-top: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar { width:6px; }
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.12);
+            border-radius: 10px;
+        }
+
+        /* Sticky logout at bottom */
+        .sidebar-bottom {
+            position: sticky;
+            bottom: 0;
+            padding: 10px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            background: transparent;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            text-align: center;
+            background: #ef4444;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 0;
+            text-decoration: none;
+            transition: transform .18s ease, background .18s ease;
+            font-size: 14px;
+        }
+
+        .logout-btn i { font-size: 16px; }
+        .logout-btn:hover { background: #dc2626; transform: translateY(-1px); }
+
+        .sidebar.collapsed .logout-btn span { display: none; }
+        .sidebar.collapsed .logout-btn { padding: 10px 0; }
+
+        /* ====================== Header Bar (compact) ====================== */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 200px;
+            width: calc(100% - 200px);
+            padding: 8px 18px; /* giảm padding cho header nhỏ gọn */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+            border-radius: 0 0 12px 12px;
+            transition: all 0.25s ease;
+            z-index: 999;
+            height: 56px;
+        }
+
+        .header-bar .left-group { display:flex; align-items:center; gap:10px; }
+        .header-bar .right-group { display:flex; align-items:center; gap:12px; }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #1e293b;
+            font-size: 26px;
+            cursor: pointer;
+            padding:12px 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: -6px;
+        }
+
+        .header-bar h5 {
+            margin:0;
+            font-size:15px;
+            color: #0f172a;
+        }
+
+        /* Avatar nhỏ trong header */
+        .user-mini-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #3b82f6;
+            transition: .20s;
+        }
+        .user-mini-avatar:hover { transform: scale(1.06); }
+
+        /* Dribbble-style switch smaller */
+        .dribbble-switch {
+            --w: 72px;
+            --h: 32px;
+            position: relative;
+            width: var(--w);
+            height: var(--h);
+            border-radius: 50px;
+            cursor: pointer;
+            user-select: none;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            transition: 0.25s ease;
+        }
+        .dribbble-switch .track {
+            position:absolute; inset:0; border-radius:50px;
+            background: linear-gradient(145deg, #ffffff, #e6eefb);
+            box-shadow: inset 1px 1px 6px rgba(0,0,0,0.06);
+            z-index:1;
+        }
+        .dribbble-switch .icons { position:absolute; inset:0 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#6b7280; z-index:3; pointer-events:none; }
+        .dribbble-switch .knob {
+            position:absolute; width: calc(var(--h) - 8px); height: calc(var(--h) - 8px); border-radius:50%;
+            left:4px; display:flex; align-items:center; justify-content:center; font-size:13px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #eef3fb 60%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            transition: .32s cubic-bezier(.25,.8,.25,1);
+            z-index:4;
+        }
+        .dribbble-switch[data-mode="dark"] .knob { transform: translateX(calc(var(--w) - var(--h))); filter: drop-shadow(0 0 14px rgba(110,130,255,0.9)); }
+
+        /* ====================== Sidebar Hover / Ripple / Active (retain effects) ====================== */
+
+        .sidebar-menu a { position: relative; overflow: hidden; z-index:1; }
+        .sidebar-menu a::before {
+            content: ""; position:absolute; top:0; left:-100%; width:100%; height:100%;
+            background: linear-gradient(90deg, rgba(59,130,246,0.18), rgba(37,99,235,0.22));
+            transition: all .30s ease; z-index:-1; border-radius:6px;
+        }
+        .sidebar-menu a:hover::before { left:0; }
+
+        .sidebar-menu a:hover i { filter: drop-shadow(0 0 6px rgba(96,165,250,0.6)); transition: .20s; }
+        .sidebar-menu a:hover span { color: #fff; }
+
+        /* Active state - neon green border (kept) */
+        .sidebar-menu a.active {
+            color: #ffffff;
+            font-weight: 600;
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(37,99,235,0.08));
+            box-shadow: inset 0 0 12px rgba(37,99,235,0.08);
+        }
+        .sidebar-menu a.active i {
+            color: #3b82f6;
+            transform: scale(1.10);
+            filter: drop-shadow(0 0 5px rgba(96,165,250,0.6));
+        }
+
+        /* Ripple effect */
+        .sidebar-menu a::after {
+            content: "";
+            position: absolute;
+            width: 10px; height: 10px;
+            background: rgba(255,255,255,0.4);
+            opacity: 0;
+            border-radius: 50%;
+            transform: scale(1);
+            transition: transform .45s ease, opacity .45s ease;
+            pointer-events: none;
+        }
+        .sidebar-menu a.ripple::after { opacity: 1; transform: scale(25); transition: none; }
+
+        /* Hover behavior when collapsed */
+        .sidebar.collapsed .sidebar-menu a { justify-content:center; padding: 12px 0 !important; }
+        .sidebar.collapsed .sidebar-menu a span {
+            position:absolute; left:100%; top:50%; transform: translateY(-50%);
+            background: #0f172a; padding:6px 10px; border-radius:6px; white-space:nowrap;
+            opacity:0; pointer-events:none; margin-left: 10px; transition: .20s;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.28); color:#fff;
+        }
+        .sidebar.collapsed .sidebar-menu a:hover span { opacity:1; transform: translateY(-50%) translateX(6px); }
+
+        /* Prevent translateX in collapsed hover (fix jitter) */
+        .sidebar.collapsed .sidebar-menu a:hover { transform: none !important; }
+        .sidebar { transition: none !important; }
+
+        /* ====================== Content area ====================== */
+        .content {
+            margin-left: 200px;
+            padding: 60px 30px 40px;
+            transition: all .25s ease;
+        }
+        .collapsed ~ .content, .sidebar.collapsed ~ .content {
+            margin-left: 80px;
+        }
+
+        footer { text-align: center; color: #6b7280; font-size: 14px; margin-top: 28px; }
+
+        /* ====================== Dark mode adjustments (kept) ====================== */
+        body.dark {
+            --bg: #0b1220;
+            --surface: #0f172a;
+            --surface-2: #0b1528;
+            --border: #1f2a44;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        body.dark .header-bar { background: rgba(15,23,42,0.82); border-bottom-color: rgba(255,255,255,0.06); }
+        body.dark .sidebar { background: linear-gradient(180deg,#0f172a 0%, #020617 100%); }
+        body.dark .content { color: var(--text); }
+        body.dark .user-greeting-name { color: #e2e8f0 !important; }
+        body.dark .stat-card,
+        body.dark .kpi-box {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark .stat-card h4,
+        body.dark .stat-card h6,
+        body.dark .kpi-box h3,
+        body.dark .kpi-box h4,
+        body.dark .kpi-box h6 {
+            color: #e2e8f0 !important;
+        }
+
+        body.dark .stat-card .text-dark,
+        body.dark .kpi-box .text-dark,
+        body.dark .stat-card .text-secondary,
+        body.dark .kpi-box .text-secondary {
+            color: #cbd5e1 !important;
+        }
+
+        body:not(.dark) .sidebar {
+            background: var(--surface) !important;
+            border-right: 1px solid #E5E7EB;
+            color: #1E293B;
+        }
+        body:not(.dark) .sidebar-menu a { color:#1E293B !important; }
+        body:not(.dark) .sidebar-menu a:hover { background-color: #F3F4F6 !important; border-left:4px solid #22C55E !important; }
+        body:not(.dark) .logout-btn { background: #EF4444 !important; color: #fff !important; }
+
+        /* Page title compact */
+        .page-title { color:#2563eb; font-size:1.375rem; font-weight:700; margin:0; }
+
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .sidebar { left:-260px; }
+            .sidebar.active { left:0; }
+            .header-bar { left:0; width:100%; border-radius:0; }
+            .content { margin-left:0; padding-top:80px; }
+        }
+
+        /* small helpers */
+        .ms-2 { margin-left:.5rem; }
+
+        /* ---------------- FIX HEADER WIDTH WHEN SIDEBAR COLLAPSED ---------------- */
+        .header-bar.collapsed {
+            left: 80px !important;
+            width: calc(100% - 80px) !important;
         }
 
         .header-bar {
             left: 200px !important;
             width: calc(100% - 200px) !important;
         }
+        /* ========================= MENU SIZE UPGRADE ============================= */
 
-        .content {
-            margin-left: 200px !important;
-        }
-
-        .sidebar.collapsed {
-            width: 80px !important;
-        }
-
-            .sidebar.collapsed ~ .header-bar,
-            .header-bar.collapsed {
-                left: 80px !important;
-                width: calc(100% - 80px) !important;
-            }
-
-            .sidebar.collapsed ~ .content {
-                margin-left: 80px !important;
-            }
-
-
-        /* === OVERRIDE: Đồng nhất kích thước chữ & icon menu cho cả Light và Dark === */
+        /* Tăng chiều cao item menu */
         .sidebar a {
-            font-size: 15px !important; /* chữ menu thường */
+            padding: 14px 20px !important;
+            font-size: 15.5px !important;
         }
 
+            /* Icon lớn hơn */
             .sidebar a i {
-                font-size: 17px !important; /* icon menu thường */
+                font-size: 20px !important;
+                width: 26px;
             }
 
-        /* Nếu muốn kích thước khác cho menu “active” */
-        .sidebar-menu a.active,
-        .sidebar-menu a.active span,
-        .sidebar-menu a.active i {
-            font-size: 17px !important; /* chữ menu active */
+        /* ========================= Ô ĐẶC BIỆT (HOME BOX) ========================= */
+
+        .sidebar-home-box {
+            width: 100%;
+            height: 110px; /* gấp đôi item menu */
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-bottom: 14px;
+            transition: transform .15s ease;
         }
 
-            .sidebar-menu a.active i {
-                font-size: 19px !important; /* icon menu active */
+            .sidebar-home-box i {
+                font-size: 42px; /* icon lớn */
+                color: #fff;
             }
 
+            .sidebar-home-box:hover {
+                transform: scale(1.03);
+                /* không có hover màu sắc */
+            }
+
+        /* Khi sidebar collapsed: box thu nhỏ nhưng icon vẫn đẹp */
+        .sidebar.collapsed .sidebar-home-box {
+            height: 90px;
+        }
+
+            .sidebar.collapsed .sidebar-home-box i {
+                font-size: 36px;
+            }
+        /* Nút HOME nổi bật hơn */
+        .sidebar-menu .home-btn {
+            color: white !important;
+            font-weight: 600;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.25s ease;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.5);
+        }
+
+            .sidebar-menu .home-btn i {
+                font-size: 1.3rem;
+            }
+
+            .sidebar-menu .home-btn:hover {
+                opacity: 0.9;
+                transform: translateY(-2px);
+            }
+
+            /* Khi active (đang ở trang Home) */
+            .sidebar-menu .home-btn.active {
+                box-shadow: 0 0 12px rgba(59, 130, 246, 0.45);
+                filter: brightness(1.15);
+            }
+
+        /* ====================== UNIFIED TABLE + PAGINATION ====================== */
+        .content .card,
+        .content .table-container,
+        .content .card-pro {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+        }
+
+        .content .table {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+        }
+
+        .content .table thead th {
+            background: var(--surface-2) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+            font-weight: 600 !important;
+        }
+
+        .content .table td,
+        .content .table th {
+            border-color: var(--border) !important;
+        }
+
+        .content .pagination {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            padding: 12px 8px !important;
+            flex-wrap: wrap !important;
+        }
+
+        .content .pagination li a,
+        .content .pagination li span {
+            display: block !important;
+            padding: 8px 12px !important;
+            border-radius: 10px !important;
+            background: var(--surface-2) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text) !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .content .pagination li a:hover {
+            background: #e0f2fe !important;
+            color: #1d4ed8 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.18) !important;
+        }
+
+        .content .pagination li.active a,
+        .content .pagination li.active span {
+            background: linear-gradient(90deg, #2563eb, #3b82f6) !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.35) !important;
+        }
+
+        .content .pagination li.disabled a,
+        .content .pagination li.disabled span {
+            opacity: 0.5 !important;
+            pointer-events: none !important;
+        }
+
+        /* ====================== BTN GROUP HOVER FIX ====================== */
+        .content .btn-group {
+            gap: 6px;
+        }
+
+        .content .btn-group > .btn {
+            border-radius: 10px !important;
+            margin-left: 0 !important;
+        }
+
+        .content .btn-group > .btn:hover,
+        .content .btn-group > .btn:focus {
+            z-index: 1;
+        }
+
+        /* ====================== FRIENDLY TOAST ====================== */
+        #appToast {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        #appToast.show { opacity: 1; }
+
+        .app-toast-card {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: 0 16px 40px rgba(2,6,23,0.18);
+            min-width: 320px;
+            max-width: 520px;
+        }
+
+        .app-toast-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: #eff6ff;
+            color: #2563eb;
+            flex: 0 0 44px;
+            font-size: 20px;
+        }
+
+        .app-toast-card.success .app-toast-icon { background: #ecfdf3; color: #16a34a; }
+        .app-toast-card.error .app-toast-icon { background: #fef2f2; color: #ef4444; }
+        .app-toast-card.warning .app-toast-icon { background: #fffbeb; color: #f59e0b; }
+
+        .app-toast-title {
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .app-toast-message {
+            color: var(--muted);
+            font-size: 14px;
+        }
     </style>
 </head>
-
-
-<body>
+<body class="@(Request.Cookies["theme"]?.Value == "dark" ? "dark" : "")">
 
     <!-- ===== Sidebar ===== -->
     <div class="sidebar" id="sidebar">
 
-        <!-- User luôn nằm trên cùng -->
-        <div class="sidebar-user">
-            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Avatar" />
-            <h6><i class="fa-solid fa-circle-user me-2 text-primary"></i>@userName</h6>
-        </div>
-
+        <!-- Removed large user block per request (kept empty top padding) -->
         <!-- Vùng CUỘN dành cho các nút menu -->
-        <div class="sidebar-menu">
+        <div class="sidebar-menu" id="sidebarMenu">
+            <!-- Nút HOME -->
+            <a href="@Url.Action("Index","Admin", new { area = "Admin" })">
+                <i class="fa-solid fa-house-chimney"></i><span>Trang chủ</span>
+            </a>
 
-            <a href="@Url.Action("Index","Admin") " class="@(ViewContext.RouteData.Values["controller"].ToString() == "Admin" ? "active" : "")">
+
+            <a href="@Url.Action("Index","Admin", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")">
                 <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
             </a>
 
-            <a href="@Url.Action("Index","SanPham")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "SanPham" ? "active" : "")">
+            <a href="@Url.Action("Index","SanPham", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "")">
                 <i class="fa-solid fa-box"></i><span>Sản phẩm</span>
             </a>
 
-            <a href="@Url.Action("Index","DanhMuc")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "DanhMuc" ? "active" : "")">
+            <a href="@Url.Action("Index","DanhMuc", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
                 <i class="fa-solid fa-tags"></i><span>Danh mục</span>
             </a>
 
-            <a href="@Url.Action("Index","KhachHang")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "KhachHang" ? "active" : "")">
+            <a href="@Url.Action("Index","KhachHang", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "")">
                 <i class="fa-solid fa-users"></i><span>Khách hàng</span>
             </a>
 
-            <a href="@Url.Action("Index","HoaDon")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "HoaDon" ? "active" : "")">
+            <a href="@Url.Action("Index","HoaDon", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "HoaDon" ? "active" : "")">
                 <i class="fa-solid fa-file-invoice"></i><span>Hóa đơn</span>
             </a>
 
-            <a href="@Url.Action("Index","PhieuNhap")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "PhieuNhap" ? "active" : "")">
+            <a href="@Url.Action("Index","PhieuNhap", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "PhieuNhap" ? "active" : "")">
                 <i class="fa-solid fa-truck"></i><span>Phiếu nhập</span>
             </a>
 
-            <a href="@Url.Action("Index","ThuChi")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "ThuChi" ? "active" : "")">
+            <a href="@Url.Action("Index","ThuChi", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "ThuChi" ? "active" : "")">
                 <i class="fa-solid fa-money-bill-wave"></i><span>Thu - Chi</span>
             </a>
 
-            <a href="@Url.Action("Index","NhaCungCap")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "NhaCungCap" ? "active" : "")">
+            <a href="@Url.Action("Index","NhaCungCap", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhaCungCap" ? "active" : "")">
                 <i class="fa-solid fa-building"></i><span>Nhà cung cấp</span>
             </a>
 
-            <a href="@Url.Action("Index","NhanVien")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "NhanVien" ? "active" : "")">
+            <a href="@Url.Action("Index","NhanVien", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "NhanVien" ? "active" : "")">
                 <i class="fa-solid fa-user-tie"></i><span>Nhân viên</span>
             </a>
 
-            <a href="@Url.Action("Index","BaoNo")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "BaoNo" ? "active" : "")">
+            <a href="@Url.Action("Index","BaoNo", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoNo" ? "active" : "")">
                 <i class="fa-solid fa-book"></i><span>Báo Nợ</span>
             </a>
+
+
+            <!-- Thêm chức năng -->
+            <a href="@Url.Action("Index","Luong", new { area = "Admin" })" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Luong" ? "active" : "")">
+                <i class="fa-solid fa-coins"></i><span>Lương</span>
+            </a>
+
+
+
+            <a href="@Url.Action("Index","KhuyenMai", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KhuyenMai" ? "active" : "")">
+                <i class="fa-solid fa-tags"></i><span>Khuyến mãi</span>
+            </a>
+
+
+            <!-- Quản lý Menu -->
+            <a href="@Url.Action("Menu","Admin", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Menu" ? "active" : "")">
+                <i class="fa-solid fa-bars"></i><span>Menu</span>
+            </a>
+
+            <!-- Bình luận / Đánh giá -->
+            <a href="@Url.Action("Index","BinhLuan", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "BinhLuan" ? "active" : "")">
+                <i class="fa-solid fa-comments"></i><span>Bình luận</span>
+            </a>
+
+            <!-- Kiến thức -->
+            <a href="@Url.Action("Index","KienThuc", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "KienThuc" ? "active" : "")">
+                <i class="fa-solid fa-lightbulb"></i><span>Kiến thức</span>
+            </a>
+
+            <!-- Tin nhắn -->
+            <a href="@Url.Action("Index","TinNhan", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "TinNhan" ? "active" : "")">
+                <i class="fa-solid fa-envelope"></i><span>Tin nhắn</span>
+            </a>
+
+            <!-- Tài khoản khách hàng -->
+            <a href="@Url.Action("Index","TaiKhoanKH", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "TaiKhoanKH" ? "active" : "")">
+                <i class="fa-solid fa-id-card"></i><span>Tài Khoản KH</span>
+            </a>
+
+            <!-- Thông tin cửa hàng -->
+            <a href="@Url.Action("ThongTinHeThong","Admin", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["action"]?.ToString() == "ThongTinHeThong" ? "active" : "")">
+                <i class="fa-solid fa-store"></i><span>Thông tin cửa hàng</span>
+            </a>
+
+            <!-- Cài đặt -->
+            <a href="@Url.Action("CaiDat","Admin", new { area = "Admin" })"
+               class="@(ViewContext.RouteData.Values["action"]?.ToString() == "CaiDat" ? "active" : "")">
+                <i class="fa-solid fa-gear"></i><span>Cài đặt</span>
+            </a>
+
+
+
 
         </div>
 
@@ -1000,21 +711,21 @@
 
     </div>
 
-
     <!-- ===== Header ===== -->
     <div class="header-bar show d-flex align-items-center justify-content-between">
 
-        <!-- Toggle Sidebar: Giữ nguyên vị trí -->
-        <button id="toggleBtn" class="toggle-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        <div class="left-group d-flex align-items-center">
+            <!-- Toggle Sidebar -->
+            <button id="toggleBtn" class="toggle-btn" aria-label="Toggle sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
 
-        <!-- Cụm bên phải: Dark/Light + Xin chào -->
-        <div class="d-flex align-items-center gap-3">
+           
+        </div>
 
-            <!-- Nút Dark/Light Mode -->
-            <!-- Dribbble Style Switch -->
-            <div id="themeSwitch" class="dribbble-switch" data-mode="light">
+        <div class="right-group d-flex align-items-center">
+            <!-- Theme switch -->
+            <div id="themeSwitch" class="dribbble-switch" data-mode="light" role="button" aria-label="Theme switch">
                 <div class="track"></div>
                 <div class="icons">
                     <i class="fa-solid fa-sun"></i>
@@ -1023,16 +734,18 @@
                 <div class="knob"><i class="fa-solid fa-sun"></i></div>
             </div>
 
-
-            <!-- Xin chào Admin -->
-            <h5 class="m-0 fw-semibold text-primary">
+            <!-- Greeting -->
+            <h5 class="m-0 fw-semibold text-primary d-none d-sm-inline-flex align-items-center">
                 <i class="fa-solid fa-hand-peace me-2 text-warning"></i>
-                Xin chào, <span class="text-dark">@userName</span>!
+                Xin chào, <span class="text-dark ms-1 user-greeting-name">@userName</span>
             </h5>
 
+            <!-- Avatar small (on the right) -->
+            <div class="ms-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="user-mini-avatar" alt="User" />
+            </div>
         </div>
     </div>
-
 
     <!-- ===== Main Content ===== -->
     <div class="content">
@@ -1044,188 +757,243 @@
     </div>
 
     <div id="modalContainer"></div>
+    <div id="appToast" aria-live="polite" aria-atomic="true">
+        <div class="app-toast-card info">
+            <div class="app-toast-icon"><i class="fa-solid fa-robot"></i></div>
+            <div>
+                <div class="app-toast-title">Thông báo</div>
+                <div class="app-toast-message" id="appToastMessage"></div>
+            </div>
+        </div>
+    </div>
 
-    <!-- ===== Sidebar Toggle Script ===== -->
+    <!-- ====================== SCRIPTS ====================== -->
     <script>
-        // === Sidebar State Persistence ===
-        const sidebarElement = document.getElementById('sidebar');
-        const headerElement = document.querySelector('.header-bar');
-        const contentElement = document.querySelector('.content');
-
-        // Khi toggle sidebar
-        toggleBtn.addEventListener('click', () => {
-            if (window.innerWidth > 992) {
-                sidebarElement.classList.toggle('collapsed');
-                headerElement.classList.toggle('collapsed');
-                contentElement.classList.toggle('collapsed');
-
-                const isCollapsed = sidebarElement.classList.contains('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
-            } else {
-                sidebarElement.classList.toggle('active');
+        (function () {
+            // Helper: safe localStorage read
+            function lsGet(key, fallback) {
+                try { return localStorage.getItem(key) ?? fallback; } catch (e) { return fallback; }
             }
-        });
-
-        // Khi trang tải lại
-        window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('sidebarCollapsed');
-            if (saved === 'true') {
-                sidebarElement.classList.add('collapsed');
-                headerElement.classList.add('collapsed');
-                contentElement.classList.add('collapsed');
-            } else {
-                sidebarElement.classList.remove('collapsed');
-                headerElement.classList.remove('collapsed');
-                contentElement.classList.remove('collapsed');
+            function lsSet(key, val) {
+                try { localStorage.setItem(key, val); } catch (e) { /* ignore */ }
             }
-        });
 
+            // Elements
+            const sidebarElement = document.getElementById('sidebar');
+            const headerElement = document.querySelector('.header-bar');
+            const contentElement = document.querySelector('.content');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const themeSwitch = document.getElementById('themeSwitch');
 
-        // Hide/Show Header on Scroll
-        let lastScrollTop = 0;
-        let isHidden = false;
+            // --- Sidebar toggle + persistence ---
+            toggleBtn?.addEventListener('click', () => {
+                if (window.innerWidth > 992) {
+                    sidebarElement.classList.toggle('collapsed');
+                    headerElement.classList.toggle('collapsed');
+                    contentElement.classList.toggle('collapsed');
 
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-            if (currentScroll > lastScrollTop && currentScroll > 80) {
-                if (!isHidden) {
-                    header.classList.remove('show');
-                    header.classList.add('hidden');
-                    isHidden = true;
+                    const isCollapsed = sidebarElement.classList.contains('collapsed');
+                    lsSet('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+                } else {
+                    sidebarElement.classList.toggle('active');
                 }
-            } else {
-                if (isHidden) {
-                    header.classList.remove('hidden');
-                    header.classList.add('show');
-                    isHidden = false;
+            });
+
+            // On load: restore collapsed
+            window.addEventListener('DOMContentLoaded', () => {
+                const saved = lsGet('sidebarCollapsed', 'false');
+                if (saved === 'true') {
+                    sidebarElement.classList.add('collapsed');
+                    headerElement.classList.add('collapsed');
+                    contentElement.classList.add('collapsed');
+                } else {
+                    sidebarElement.classList.remove('collapsed');
+                    headerElement.classList.remove('collapsed');
+                    contentElement.classList.remove('collapsed');
                 }
-            }
-
-            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-        });
-    </script>
-
-
-
-    <!-- ===== DARK/LIGHT MODE SCRIPT — ULTRA GLOW V2 ===== -->
-    <script>
-        const sw = document.getElementById("themeSwitch");
-        const knob = sw.querySelector(".knob i");
-        const clickSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c139e5ce37.mp3");
-
-        // Load saved theme
-        const saved = localStorage.getItem("theme") || "light";
-        applyTheme(saved, false);
-
-        sw.addEventListener("click", () => {
-            const mode = document.body.classList.contains("dark") ? "light" : "dark";
-
-            // Sound
-            clickSound.currentTime = 0;
-            clickSound.play();
-
-            // Ripple
-            sw.classList.remove("ripple");
-            void sw.offsetWidth;
-            sw.classList.add("ripple");
-
-            applyTheme(mode, true);
-        });
-
-        function applyTheme(mode, animate = true) {
-            if (mode === "dark") {
-                document.body.classList.add("dark");
-                sw.dataset.mode = "dark";
-                knob.className = "fa-solid fa-moon";
-            } else {
-                document.body.classList.remove("dark");
-                sw.dataset.mode = "light";
-                knob.className = "fa-solid fa-sun";
-            }
-
-            if (animate) {
-                sw.classList.add("switch-animate");
-                setTimeout(() => sw.classList.remove("switch-animate"), 350);
-            }
-
-            localStorage.setItem("theme", mode);
-        }
-
-        document.querySelectorAll('.sidebar-menu a').forEach(item => {
-            item.addEventListener('click', function (e) {
-                this.classList.remove('ripple');
-                void this.offsetWidth;
-                const rect = this.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                this.style.setProperty('--ripple-x', `${x}px`);
-                this.style.setProperty('--ripple-y', `${y}px`);
-                this.style.setProperty('--ripple-size', `${rect.width}px`);
-                this.classList.add('ripple');
             });
-        });
 
-    </script>
+            // --- Header hide/show on scroll (compact) ---
+            (function headerScroll() {
+                let lastScrollTop = 0;
+                let isHidden = false;
+                const threshold = 80;
+                window.addEventListener('scroll', () => {
+                    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+                    if (currentScroll > lastScrollTop && currentScroll > threshold) {
+                        if (!isHidden) {
+                            headerElement.classList.remove('show');
+                            headerElement.classList.add('hidden');
+                            headerElement.style.transform = 'translateY(-110%)';
+                            headerElement.style.opacity = '0';
+                            isHidden = true;
+                        }
+                    } else {
+                        if (isHidden) {
+                            headerElement.classList.remove('hidden');
+                            headerElement.classList.add('show');
+                            headerElement.style.transform = 'translateY(0)';
+                            headerElement.style.opacity = '1';
+                            isHidden = false;
+                        }
+                    }
+                    lastScrollTop = Math.max(currentScroll, 0);
+                });
+            })();
 
-    <script>
-        const sw = document.getElementById("themeSwitch");
-        const knob = sw.querySelector(".knob i");
-        const clickSound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c139e5ce37.mp3");
-
-        // Load saved theme
-        const saved = localStorage.getItem("theme") || "light";
-        applyTheme(saved, false);
-
-        sw.addEventListener("click", () => {
-            const mode = document.body.classList.contains("dark") ? "light" : "dark";
-
-            // Sound
-            clickSound.currentTime = 0;
-            clickSound.play();
-
-            // Ripple
-            sw.classList.remove("ripple");
-            void sw.offsetWidth;
-            sw.classList.add("ripple");
-
-            applyTheme(mode, true);
-        });
-
-        function applyTheme(mode, animate = true) {
-            if (mode === "dark") {
-                document.body.classList.add("dark");
-                sw.dataset.mode = "dark";
-                knob.className = "fa-solid fa-moon";
-            } else {
-                document.body.classList.remove("dark");
-                sw.dataset.mode = "light";
-                knob.className = "fa-solid fa-sun";
-            }
-
-            if (animate) {
-                sw.classList.add("switch-animate");
-                setTimeout(() => sw.classList.remove("switch-animate"), 350);
-            }
-
-            localStorage.setItem("theme", mode);
-        }
-
-        document.querySelectorAll('.sidebar-menu a').forEach(item => {
-            item.addEventListener('click', function (e) {
-                this.classList.remove('ripple');
-                void this.offsetWidth;
-                const rect = this.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                this.style.setProperty('--ripple-x', `${x}px`);
-                this.style.setProperty('--ripple-y', `${y}px`);
-                this.style.setProperty('--ripple-size', `${rect.width}px`);
-                this.classList.add('ripple');
+            // --- Ripple on menu items ---
+            document.querySelectorAll('.sidebar-menu a').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    // Create ripple by toggling class (CSS handles ::after transform)
+                    this.classList.remove('ripple');
+                    void this.offsetWidth;
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    this.style.setProperty('--ripple-x', `${x}px`);
+                    this.style.setProperty('--ripple-y', `${y}px`);
+                    this.style.setProperty('--ripple-size', `${rect.width}px`);
+                    this.classList.add('ripple');
+                });
             });
-        });
 
+            // --- Theme switch behavior (single implementation) ---
+            (function themeInit() {
+                const knobIcon = themeSwitch.querySelector('.knob i');
+                const clickSound = (() => {
+                    try { return new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c139e5ce37.mp3"); } catch (e) { return null; }
+                })();
+
+                const savedTheme = lsGet('theme', 'light');
+                applyTheme(savedTheme, false);
+
+                themeSwitch.addEventListener('click', () => {
+                    const mode = document.body.classList.contains('dark') ? 'light' : 'dark';
+                    if (clickSound) { try { clickSound.currentTime = 0; clickSound.play(); } catch (e) { /* mute fallback */ } }
+                    // ripple visual
+                    themeSwitch.classList.remove('ripple');
+                    void themeSwitch.offsetWidth;
+                    themeSwitch.classList.add('ripple');
+                    applyTheme(mode, true);
+                });
+
+                function applyTheme(mode, animate) {
+                    if (mode === 'dark') {
+                        document.body.classList.add('dark');
+                        themeSwitch.dataset.mode = 'dark';
+                        knobIcon.className = 'fa-solid fa-moon';
+                    } else {
+                        document.body.classList.remove('dark');
+                        themeSwitch.dataset.mode = 'light';
+                        knobIcon.className = 'fa-solid fa-sun';
+                    }
+                    if (animate) {
+                        themeSwitch.classList.add('switch-animate');
+                        setTimeout(() => themeSwitch.classList.remove('switch-animate'), 350);
+                    }
+                    lsSet('theme', mode);
+                }
+            })();
+
+            // Expose a small helper to get localStorage theme from server-side (used in body class above)
+            window.localStorageTheme = function () {
+                try { return localStorage.getItem('theme') || 'light'; } catch (e) { return 'light'; }
+            };
+
+        })();
     </script>
+    <script>
+        // Render HTML and re-run inline/external scripts inside the container.
+        window.renderHtml = function (container, html) {
+            if (!container) return;
+            container.innerHTML = html;
+            container.querySelectorAll("script").forEach(oldScript => {
+                const newScript = document.createElement("script");
+                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.text = oldScript.textContent;
+                oldScript.replaceWith(newScript);
+            });
+        };
+    </script>
+    <script>
+        window.showAppToast = function (message, type) {
+            const toast = document.getElementById("appToast");
+            const card = toast?.querySelector(".app-toast-card");
+            const msg = document.getElementById("appToastMessage");
+            if (!toast || !card || !msg) return;
+
+            const safeType = type || "info";
+            card.classList.remove("success", "error", "warning", "info");
+            card.classList.add(safeType);
+            msg.textContent = message || "Đã xử lý";
+
+            const icon = card.querySelector(".app-toast-icon i");
+            if (icon) {
+                icon.className = safeType === "success"
+                    ? "fa-solid fa-user-check"
+                    : safeType === "error"
+                        ? "fa-solid fa-triangle-exclamation"
+                        : safeType === "warning"
+                            ? "fa-solid fa-robot"
+                            : "fa-solid fa-user-tie";
+            }
+
+            toast.classList.add("show");
+            clearTimeout(window.__appToastTimer);
+            window.__appToastTimer = setTimeout(() => toast.classList.remove("show"), 5000);
+        };
+
+        window.refreshContent = function (url) {
+            const target = document.querySelector(".content");
+            if (!target) return location.reload();
+            const fetchUrl = url || window.location.href;
+            document.querySelectorAll(".modal.show").forEach(m => {
+                const inst = bootstrap.Modal.getInstance(m);
+                if (inst) inst.hide();
+            });
+            document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+            document.body.classList.remove("modal-open");
+            document.body.style.removeProperty("padding-right");
+            fetch(fetchUrl, { credentials: "same-origin" })
+                .then(r => r.text())
+                .then(html => {
+                    const wrapper = document.createElement("div");
+                    wrapper.innerHTML = html;
+                    const next = wrapper.querySelector(".content");
+                    const newHtml = next ? next.innerHTML : html;
+                    if (window.renderHtml) {
+                        window.renderHtml(target, newHtml);
+                    } else {
+                        target.innerHTML = newHtml;
+                    }
+                })
+                .catch(() => location.reload());
+        };
+
+        try {
+            const originalAlert = window.alert;
+            window.alert = function (message) {
+                if (window.showAppToast) {
+                    window.showAppToast(message, "info");
+                } else {
+                    originalAlert(message);
+                }
+            };
+        } catch (e) { }
+
+        try {
+            const originalReload = window.location.reload.bind(window.location);
+            window.location.reload = function () {
+                if (window.refreshContent) {
+                    window.refreshContent();
+                } else {
+                    originalReload();
+                }
+            };
+        } catch (e) { }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
 </body>

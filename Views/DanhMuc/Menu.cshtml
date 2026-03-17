@@ -1,19 +1,5 @@
-﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>
-
-@{
-    // Bản đồ tên không dấu -> có dấu (tạm thời để hiển thị)
-    var mapTenCoDau = new Dictionary<string, string>
-    {
-        ["BanhKeo"] = "Bánh kẹo",
-        ["BoVaTrung"] = "Bơ & Trứng",
-        ["DoUong"] = "Đồ uống",
-        ["GaoVaNguCoc"] = "Gạo & Ngũ cốc",
-        ["GiaViVaDauAn"] = "Gia vị & Dầu ăn",
-        ["HoaPhamGiaDung"] = "Hóa phẩm gia dụng",
-        ["RauCuQua"] = "Rau củ quả",
-        ["SuaCacLoai"] = "Sữa các loại"
-    };
-}
+﻿@using WebQuanLiCuaHangTapHoa.Helpers
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>
 
 @if (Model == null || !Model.Any())
 {
@@ -21,19 +7,20 @@
 }
 else
 {
-    <ul class="list-unstyled">
+    <div class="tn-cat-grid">
         @foreach (var dm in Model)
         {
-            var tenHienThi = mapTenCoDau.ContainsKey(dm.TenDM) ? mapTenCoDau[dm.TenDM] : dm.TenDM;
+            // Lấy icon và tên hiển thị từ helper
+            var (displayName, icon) = CategoryIconHelper.GetCategoryInfo(dm.TenDM);
 
-            <li>
-                <a class="dropdown-item d-flex align-items-center"
-                   href="@Url.Action("TatCa", "DanhMuc")"
-                   title="@dm.MoTa">
-                    <i class="bi bi-tag text-success me-2"></i>
-                    <span>@tenHienThi</span>
-                </a>
-            </li>
+            <a class="dropdown-item d-flex align-items-center"
+               href="@Url.Action("DanhSach", "DanhMuc", new { maDM = dm.MaDM })"
+               title="@dm.MoTa">
+
+                <i class="bi @icon me-2 text-success"></i>
+                <span>@displayName</span>
+
+            </a>
         }
-    </ul>
+    </div>
 }

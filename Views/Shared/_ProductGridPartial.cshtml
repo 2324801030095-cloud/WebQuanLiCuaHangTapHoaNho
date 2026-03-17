@@ -1,29 +1,30 @@
-﻿@* ----------------------------------------------
-       _ProductGridPartial.cshtml
-       Vị trí: Views/Shared/_ProductGridPartial.cshtml
-       Nhiệm vụ: hiển thị nhiều sản phẩm dưới dạng lưới.
-       Mỗi sản phẩm gọi lại partial "_ProductCardPartial.cshtml"
-    ---------------------------------------------- *@
+﻿<style>
+    .product-img {
+        width: 100%;
+        height: 210px;
+        object-fit: contain;
+        padding: 8px;
+        background: #fff;
+        border-radius: 8px;
+    }
+</style>
 
-@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView> 
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>
 
-@* Kiểm tra nếu không có sản phẩm nào *@
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-warning">
-        Chưa có sản phẩm để hiển thị.
-    </div>
-}
-else
-{
-    @* Khung lưới sản phẩm dùng Bootstrap grid *@
-    <div class="row g-4">
-        @foreach (var sp in Model)
-        {
-            <div class="col-12 col-md-6 col-lg-4">
-                @* Gọi partial "_ProductCardPartial" cho từng sản phẩm *@
-                @Html.Partial("_ProductCardPartial", sp)
+<div class="row g-4">
+    @foreach (var sp in Model)
+    {
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <img src="@Url.Content("~/Content/Images/" + sp.HinhAnh)"
+                     class="product-img" />
+                <div class="card-body">
+                    <h6>@sp.TenSP</h6>
+                    <div class="fw-bold text-danger">@String.Format("{0:N0} ₫", sp.GiaBan)</div>
+                    <a href="@Url.Action("ChiTiet","SanPham", new { id = sp.MaSP })"
+                       class="btn btn-success btn-sm mt-2 w-100">Xem chi tiết</a>
+                </div>
             </div>
-        }
-    </div>
-}
+        </div>
+    }
+</div>

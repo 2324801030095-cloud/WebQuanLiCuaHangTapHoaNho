@@ -1,0 +1,274 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPham>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-inbox" style="font-size:2rem;"></i>
+        <div class="mt-2">Chưa có ưu đãi nào hôm nay.</div>
+    </div>
+}
+else
+{
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <div class="flash-wrapper container">
+        <div class="flash-header">
+            <div class="flash-title">🔥 Ưu đãi sốc hôm nay</div>
+
+            <div class="flash-nav">
+                <button class="flash-prev"><i class="bi bi-chevron-left"></i></button>
+                <button class="flash-next"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <div class="swiper flash-sale-swiper">
+            <div class="swiper-wrapper">
+
+                @foreach (var sp in Model)
+                {
+                    decimal giam = sp.KhuyenMai?.Giam ?? 0;
+                    decimal giaGiam = sp.GiaBan * (1 - giam / 100);
+
+                    <div class="swiper-slide flash-card">
+                        <div class="flash-inner">
+
+                            <div class="flash-badge">🔥 @giam%</div>
+
+                            <div class="flash-img-wrap">
+                                <img src="@Url.Content("~/Content/Images/" + sp.HinhAnh)"
+                                     class="flash-img"
+                                     alt="@sp.TenSP" />
+                            </div>
+
+                            <div class="flash-info">
+                                <h6 class="flash-name text-truncate">@sp.TenSP</h6>
+
+                                <div class="flash-price">
+                                    <span class="flash-price-new">
+                                        @String.Format("{0:N0}₫", giaGiam)
+                                    </span>
+                                    <span class="flash-price-old">
+                                        @String.Format("{0:N0}₫", sp.GiaBan)
+                                    </span>
+                                </div>
+
+                                <!-- Nút thêm giỏ AJAX -->
+                                <button type="button"
+                                        class="flash-btn btn-addcart"
+                                        data-id="@sp.MaSP"
+                                        data-img="@Url.Content("~/Content/Images/" + sp.HinhAnh)">
+                                    <i class="bi bi-bag-plus"></i> Thêm vào giỏ
+                                </button>
+
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            new Swiper(".flash-sale-swiper", {
+                loop: true,
+                centeredSlides: true,
+                slidesPerView: "auto",
+                spaceBetween: -30,   // giảm để tăng độ ổn định
+                speed: 500,          // tối ưu cho mobile
+
+                autoplay: {
+                    delay: 2500,
+                    disableOnInteraction: false,
+                },
+
+                effect: "coverflow",
+                coverflowEffect: {
+                    rotate: 0,
+                    stretch: 0,
+                    depth: 150,
+                    modifier: 1.8,
+                    slideShadows: false,
+                },
+
+                navigation: {
+                    nextEl: ".flash-next",
+                    prevEl: ".flash-prev",
+                }
+            });
+
+        });
+    </script>
+}
+
+<style>
+/* Wrapper */
+.flash-wrapper {
+    padding: 20px 0 50px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.flash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.flash-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0a4b2f;
+}
+
+/* Navigation buttons */
+.flash-nav button {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #16a34a;
+    background: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #16a34a;
+    font-size: 18px;
+    transition: .2s;
+}
+
+.flash-nav button:hover {
+    background: #16a34a;
+    color: #fff;
+}
+
+/* Main card */
+.flash-card {
+    width: 320px;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flash-inner {
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    transition: .35s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.flash-inner:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 35px rgba(0,0,0,.14);
+}
+
+/* Image */
+.flash-img-wrap {
+    padding: 15px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flash-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Discount badge */
+.flash-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(45deg,#ff3d00,#ff9500);
+    padding: 6px 14px;
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(255,80,0,.3);
+    font-size: .9rem;
+}
+
+/* Info block */
+.flash-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.flash-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-height: 48px;
+}
+
+/* Pricing */
+.flash-price-new {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #e11d48;
+}
+
+.flash-price-old {
+    text-decoration: line-through;
+    color: #a1a1a1;
+    font-size: .85rem;
+}
+
+/* ================================
+   FIX & TỐI ƯU HÓA NÚT THÊM GIỎ
+   ================================ */
+.flash-btn {
+    margin-top: 10px;
+    background: #16a34a;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+
+    /* button-ready */
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    outline: none;
+
+    transition: background .2s ease, transform .2s ease;
+}
+
+.flash-btn:hover {
+    background: #0f5e2c;
+    transform: translateY(-2px);
+}
+
+.flash-btn:active {
+    transform: scale(0.98);
+}
+
+.flash-btn:disabled {
+    background: #a7a7a7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Mobile improved */
+@@media (max-width: 768px) {
+    .flash-card {
+        width: 280px;
+        height: 400px;
+    }
+}
+
+</style>

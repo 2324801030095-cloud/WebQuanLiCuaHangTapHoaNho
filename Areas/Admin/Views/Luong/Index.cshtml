@@ -1,0 +1,150 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.NhanVien>
+@using PagedList.Mvc;
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Quản lý lương nhân viên";
+}
+
+<style>
+    /* Compact filter bar */
+    .filter-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .filter-bar .form-control, .filter-bar .form-select { height:40px; }
+    .page-title { font-weight:700; color: #0f172a; }
+    .card-pro { border-radius:12px; border:1px solid #e6eefb; }
+    /* Pagination style coherent with other admin pages */
+    .pagination { display:flex; gap:6px; justify-content:center; padding:12px; }
+    .pagination li a, .pagination li span { padding:8px 12px; border-radius:8px; background:#f8fafc; border:1px solid #e6eefb; color:#0f172a; }
+    .pagination li.active a { background:linear-gradient(90deg,#2563eb,#3b82f6); color:#fff; border-color:#2563eb; }
+    .table td, .table th { vertical-align:middle !important; }
+</style>
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="page-title"><i class="fa-solid fa-coins me-2"></i>Quản lý lương</h4>
+        <div>
+            <a href="@Url.Action("History", "Luong", new { area = "Admin" })" class="btn btn-outline-primary me-2">Lịch sử</a>
+            <a href="@Url.Action("BulkUpdate", "Luong", new { area = "Admin" })" class="btn btn-success">Bulk update</a>
+        </div>
+    </div>
+
+    <div class="card card-pro p-3 mb-3">
+        <form class="filter-bar" method="get" action="@Url.Action("Index","Luong", new { area = "Admin" })">
+            <input name="keyword" class="form-control" placeholder="Tìm tên hoặc mã..." value="@(ViewBag.Keyword ?? "")" style="min-width:220px;" />
+
+            <select name="chucVu" class="form-select" style="min-width:170px;">
+                <option value="">-- Chức vụ --</option>
+                @if (ViewBag.ChucVuList != null)
+                {
+                    foreach (var cv in (List<string>)ViewBag.ChucVuList)
+                    {
+                        var selected = string.Equals(cv, ViewBag.ChucVu as string, StringComparison.OrdinalIgnoreCase) ? "selected" : "";
+                        <option value="@cv" @Html.Raw(selected)>@cv</option>
+                    }
+                }
+            </select>
+
+            <select name="sort" class="form-select" style="width:220px;">
+                <option value="">-- Sắp xếp --</option>
+                <option value="salary_desc" @(ViewBag.Sort == "salary_desc" ? "selected" : "")>Lương: Cao → Thấp</option>
+                <option value="salary_asc" @(ViewBag.Sort == "salary_asc" ? "selected" : "")>Lương: Thấp → Cao</option>
+                <option value="ma_desc" @(ViewBag.Sort == "ma_desc" ? "selected" : "")>Mã: Cao → Thấp</option>
+                <option value="ma_asc" @(ViewBag.Sort == "ma_asc" ? "selected" : "")>Mã: Thấp → Cao</option>
+                <option value="ten_az" @(ViewBag.Sort == "ten_az" ? "selected" : "")>Tên: A → Z</option>
+                <option value="ten_za" @(ViewBag.Sort == "ten_za" ? "selected" : "")>Tên: Z → A</option>
+            </select>
+
+            <input name="minSalary" class="form-control" placeholder="Từ (VNĐ)" type="number" min="0" value="@(ViewBag.MinSalary ?? "")" style="width:140px;" />
+            <input name="maxSalary" class="form-control" placeholder="Đến (VNĐ)" type="number" min="0" value="@(ViewBag.MaxSalary ?? "")" style="width:140px;" />
+
+            <button class="btn btn-primary">Lọc</button>
+            <a href="@Url.Action("Index", "Luong", new { area = "Admin" })" class="btn btn-outline-secondary">Reset</a>
+        </form>
+    </div>
+
+    <div class="card card-pro shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:90px;">Mã</th>
+                        <th style="width:280px;">Tên</th>
+                        <th class="text-center" style="width:140px;">SĐT</th>
+                        <th style="width:200px;">Chức vụ</th>
+                        <th class="text-center" style="width:160px;">Lương</th>
+                        <th class="text-center" style="width:140px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">Không có dữ liệu</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var nv in Model)
+                        {
+                            <tr>
+                                <td class="text-center">@nv.MaNV</td>
+                                <td>@nv.TenNV</td>
+                                <td class="text-center">@nv.SoDT</td>
+                                <td>@nv.ChucVu</td>
+                                <td class="text-center">@String.Format("{0:N0} ₫", nv.MucLuong ?? 0)</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary" onclick="openEdit(@nv.MaNV)">
+                                        <i class="fa-solid fa-pen-to-square"></i> Chỉnh lương
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">@if(Model.TotalItemCount>0){<text>Hiển thị @Model.FirstItemOnPage - @Model.LastItemOnPage của @Model.TotalItemCount</text>} else {<text>Hiển thị 0</text>}}</div>
+                <div>
+                    @if(Model.PageCount > 1)
+                    {
+                        <nav class="d-flex justify-content-center">
+                            @Html.PagedListPager(Model, page => Url.Action("Index", "Luong", new { area = "Admin", page, keyword = Request["keyword"], chucVu = Request["chucVu"], minSalary = Request["minSalary"], maxSalary = Request["maxSalary"], sort = Request["sort"] }), new PagedListRenderOptions {
+                                UlElementClasses = new[] { "pagination" },
+                                MaximumPageNumbersToDisplay = 7,
+                                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                                DisplayLinkToLastPage = PagedListDisplayMode.Always
+                            })
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalContainer"></div>
+
+@section Scripts {
+<script>
+    async function loadModal(url, modalId) {
+        const resp = await fetch(url, { credentials: 'same-origin' });
+        const html = await resp.text();
+        const box = document.getElementById("modalContainer");
+        if (window.renderHtml) {
+            window.renderHtml(box, html);
+        } else {
+            box.innerHTML = html;
+        }
+
+        const el = document.getElementById(modalId);
+        if (el) new bootstrap.Modal(el).show();
+    }
+
+    function openEdit(id) {
+        // load edit modal
+        loadModal(`/Admin/Luong/Sua/${id}`, 'modalLuong');
+    }
+</script>
+}

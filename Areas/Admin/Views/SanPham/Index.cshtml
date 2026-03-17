@@ -377,7 +377,12 @@
             .then(res => res.text())
             .then(html => {
                 hideSkeleton();
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     });
@@ -388,7 +393,12 @@
             .then(res => res.text())
             .then(html => {
                 hideSkeleton();
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     }
@@ -399,7 +409,12 @@
             .then(res => res.text())
             .then(html => {
                 hideSkeleton();
-                document.getElementById("modalContainer").innerHTML = html;
+                const modalContainer = document.getElementById("modalContainer");
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalSP")).show();
             });
     }
@@ -407,14 +422,27 @@
     function deleteProduct(id) {
         if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
         showLoading();
+        
+        // Fix: Sử dụng form-encoded thay vì JSON để MVC model binder nhận được
+        const params = new URLSearchParams();
+        params.append('id', id);
+        
         fetch("/Admin/SanPham/Xoa", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
-        }).then(res => res.json()).then(data => {
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: params.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
             alert(data.message);
             hideSkeleton();
             if (data.success) location.reload();
+        })
+        .catch(err => {
+            hideSkeleton();
+            alert("Lỗi: " + err);
         });
     }
 </script>

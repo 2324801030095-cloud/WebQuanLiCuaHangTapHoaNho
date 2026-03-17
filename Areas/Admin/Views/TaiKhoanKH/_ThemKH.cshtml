@@ -1,0 +1,72 @@
+@model WebQuanLiCuaHangTapHoa.Models.TaiKhoanKH
+
+<div class="modal fade" id="modalThemTK" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus"></i> Thêm tài khoản khách hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            @using (Html.BeginForm("Them", "TaiKhoanKH", FormMethod.Post, new { id = "formThemTK" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Khách hàng <span class="text-danger">*</span></label>
+                        @Html.DropDownListFor(m => m.MaKH, ViewBag.KhachHangList as SelectList, "-- Chọn khách hàng --", new { @class = "form-select", required = "required" })
+                        @Html.ValidationMessageFor(m => m.MaKH, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên đăng nhập <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.TenDangNhap, new { @class = "form-control", required = "required", placeholder = "Nhập tên đăng nhập" })
+                        @Html.ValidationMessageFor(m => m.TenDangNhap, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật khẩu <span class="text-danger">*</span></label>
+                        @Html.PasswordFor(m => m.MatKhau, new { @class = "form-control", required = "required", placeholder = "Nhập mật khẩu" })
+                        @Html.ValidationMessageFor(m => m.MatKhau, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "Nhập email (tùy chọn)" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="form-check">
+                        @Html.CheckBoxFor(m => m.HoatDong, new { @class = "form-check-input", @checked = "checked" })
+                        <label class="form-check-label" for="HoatDong">Tài khoản hoạt động</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success">Thêm tài khoản</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("formThemTK").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        formData.set("HoatDong", document.querySelector("[name='HoatDong']").checked);
+
+        fetch("/Admin/TaiKhoanKH/Them", {
+            method: "POST",
+            body: formData
+        })
+        .then(r => r.json())
+        .then(d => {
+            alert(d.message);
+            if (d.success) {
+                bootstrap.Modal.getInstance(document.getElementById("modalThemTK")).hide();
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Có lỗi xảy ra khi thêm tài khoản.");
+        });
+    });
+</script>
+

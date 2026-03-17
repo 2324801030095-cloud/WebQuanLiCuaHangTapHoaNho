@@ -1,0 +1,74 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.NhanVien
+
+<div class="modal fade" id="modalLuong" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Chỉnh lương: @Model.TenNV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("Sua", "Luong", FormMethod.Post, new { id = "formEditLuong" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("MaNV", Model.MaNV)
+
+                    <div class="mb-3">
+                        <label class="form-label">Lương (số nguyên)</label>
+                        <input type="number" name="MucLuong" id="MucLuongField" class="form-control" min="0" value="@Model.MucLuong" required />
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" id="btnSaveLuong">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const btn = document.getElementById("btnSaveLuong");
+        const form = document.getElementById("formEditLuong");
+        if (!btn || !form) return;
+
+        btn.addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            // client-side basic validation
+            const newVal = parseInt(document.getElementById('MucLuongField').value || '0', 10);
+            if (isNaN(newVal) || newVal < 0) {
+                alert('Giá trị lương không hợp lệ.');
+                return;
+            }
+
+            btn.disabled = true;
+
+            const fd = new FormData(form);
+            const tokenEl = form.querySelector("input[name='__RequestVerificationToken']");
+            if (tokenEl) fd.set('__RequestVerificationToken', tokenEl.value);
+
+            try {
+                const resp = await fetch(form.action || '/Admin/Luong/Sua', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: fd
+                });
+
+                const data = await resp.json();
+                alert(data && data.message ? data.message : 'Đã xử lý');
+                if (data && data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalLuong'));
+                    if (modal) modal.hide();
+                    setTimeout(() => location.reload(), 300);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi khi cập nhật lương.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    })();
+</script>

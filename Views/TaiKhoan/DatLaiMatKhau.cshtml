@@ -1,0 +1,236 @@
+﻿@{
+    Layout = null;
+    var title = "Đặt lại mật khẩu";
+    var resetError = ViewBag.ResetError as string;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Thanh Nhàn Grocery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-1: #eaf2ff;
+            --bg-2: #fff2e6;
+            --bg-3: #e7fbf7;
+            --ink: #0c1720;
+            --muted: #5b6b78;
+            --brand: #2f7cf6;
+            --brand-2: #0ea5a6;
+            --stroke: rgba(13, 31, 45, 0.1);
+            --shadow: 0 30px 80px rgba(11, 24, 31, 0.15);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background:
+                radial-gradient(1200px 600px at 10% 10%, var(--bg-1), transparent 60%),
+                radial-gradient(900px 600px at 90% 20%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 800px at 50% 90%, var(--bg-3), transparent 55%),
+                #f6f8fb;
+            display: grid;
+            place-items: center;
+        }
+
+        .card {
+            width: min(520px, 92vw);
+            background: linear-gradient(155deg, rgba(255,255,255,0.82), rgba(255,255,255,0.6));
+            border: 1px solid var(--stroke);
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            padding: 34px;
+            backdrop-filter: blur(16px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            margin-bottom: 18px;
+        }
+
+        .brand .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-family: "Space Grotesk", "Outfit", sans-serif;
+            font-size: 28px;
+            margin: 8px 0 10px;
+        }
+
+        p.sub {
+            color: var(--muted);
+            margin: 0 0 22px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .label {
+            font-size: 0.92rem;
+            color: #1b2a34;
+            letter-spacing: 0.2px;
+        }
+
+        .input {
+            border-radius: 14px;
+            border: 1px solid rgba(12, 23, 32, 0.16);
+            padding: 14px 16px;
+            font-size: 1rem;
+            outline: none;
+            background: rgba(255,255,255,0.9);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input:focus {
+            border-color: rgba(47, 124, 246, 0.9);
+            box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15);
+        }
+
+        .match-hint {
+            position: absolute;
+            top: -10px;
+            right: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(47, 124, 246, 0.1);
+            color: #0f3b8f;
+            display: none;
+        }
+
+        .match-hint.ok {
+            display: inline-flex;
+            background: rgba(16, 185, 129, 0.15);
+            color: #0f5132;
+        }
+
+        .match-hint.bad {
+            display: inline-flex;
+            background: rgba(239, 68, 68, 0.15);
+            color: #7f1d1d;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(47, 124, 246, 0.22); }
+
+        .alert {
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.12);
+            color: #7f1d1d;
+        }
+
+        .note {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">
+            <div class="logo">TN</div>
+            <div>Thanh Nhàn Grocery</div>
+        </div>
+
+        <h1>Đặt lại mật khẩu</h1>
+        <p class="sub">Vui lòng nhập mật khẩu mới. Mật khẩu phải từ 6 đến 128 ký tự.</p>
+
+        @if (!string.IsNullOrWhiteSpace(resetError))
+        {
+            <div class="alert">@resetError</div>
+        }
+
+        @using (Html.BeginForm("DatLaiMatKhau", "TaiKhoan", FormMethod.Post, new { @autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="field">
+                <label class="label" for="matKhau">Mật khẩu mới</label>
+                <input class="input" id="matKhau" name="matKhau" type="password" placeholder="Nhập mật khẩu mới" />
+            </div>
+
+            <div class="field">
+                <span id="matchHint" class="match-hint">Chưa khớp</span>
+                <label class="label" for="xacNhanMatKhau">Nhập lại mật khẩu</label>
+                <input class="input" id="xacNhanMatKhau" name="xacNhanMatKhau" type="password" placeholder="Nhập lại mật khẩu" />
+            </div>
+
+            <button class="btn" type="submit">Cập nhật mật khẩu</button>
+        }
+
+        <div class="note">Sau khi cập nhật, hệ thống sẽ đưa bạn về trang chủ.</div>
+    </div>
+
+    <script>
+        (function(){
+            const pwd = document.getElementById('matKhau');
+            const confirm = document.getElementById('xacNhanMatKhau');
+            const hint = document.getElementById('matchHint');
+
+            function updateHint(){
+                const a = pwd.value.trim();
+                const b = confirm.value.trim();
+                if (!a && !b) {
+                    hint.style.display = 'none';
+                    hint.className = 'match-hint';
+                    return;
+                }
+                if (a && b && a === b) {
+                    hint.textContent = 'Mật khẩu khớp';
+                    hint.className = 'match-hint ok';
+                } else {
+                    hint.textContent = 'Mật khẩu chưa khớp';
+                    hint.className = 'match-hint bad';
+                }
+            }
+
+            pwd.addEventListener('input', updateHint);
+            confirm.addEventListener('input', updateHint);
+        })();
+    </script>
+</body>
+</html>

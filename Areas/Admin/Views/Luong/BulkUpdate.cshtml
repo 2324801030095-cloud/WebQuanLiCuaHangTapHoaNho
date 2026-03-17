@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Cập nhật lương hàng loạt";
+}
+
+<div class="container p-4">
+    <h4 class="page-title">Cập nhật lương hàng loạt</h4>
+    <div class="card p-3">
+        @using(Html.BeginForm("BulkUpdate","Luong",FormMethod.Post,new { id = "formBulk" })){
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Chức vụ</label>
+                    <select name="chucVu" class="form-select">
+                        <option value="">--- Tất cả ---</option>
+                        @foreach(var cv in ViewBag.ChucVuList as System.Collections.IEnumerable){
+                            <option value="@cv">@cv</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Chế độ</label>
+                    <select name="mode" class="form-select">
+                        <option value="amount">Cộng/Trừ tiền</option>
+                        <option value="percent">Tăng/Giảm phần trăm</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Giá trị</label>
+                    <input type="number" name="value" id="bulkValue" class="form-control" value="0" />
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="applyToAll" id="applyToAll">
+                        <label class="form-check-label" for="applyToAll">Áp dụng cho tất cả (bỏ qua chức vụ)</label>
+                    </div>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="button" id="btnDoBulk" class="btn btn-primary">Thực hiện</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts{
+<script>
+    (function(){
+        const btn = document.getElementById('btnDoBulk');
+        const form = document.getElementById('formBulk');
+        if(!btn || !form) return;
+
+        btn.addEventListener('click', async function(){
+            const val = parseInt(document.getElementById('bulkValue').value || '0', 10);
+            if (isNaN(val)) { alert('Giá trị không hợp lệ'); return; }
+
+            if (!confirm('Bạn có chắc muốn thực hiện cập nhật hàng loạt?')) return;
+
+            const fd = new FormData(form);
+            const tokenEl = form.querySelector("input[name='__RequestVerificationToken']");
+            if (tokenEl) fd.set('__RequestVerificationToken', tokenEl.value);
+
+            try {
+                const res = await fetch(form.action || '/Admin/Luong/BulkUpdate', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: fd
+                });
+                const data = await res.json();
+                alert(data && data.message ? data.message : 'Đã xử lý');
+                if (data && data.success) location.href = '/Admin/Luong/Index';
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi khi thực hiện cập nhật hàng loạt');
+            }
+        });
+    })();
+</script>
+}

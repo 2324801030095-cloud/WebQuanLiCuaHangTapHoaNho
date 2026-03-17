@@ -1,0 +1,88 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Models.KhuyenMai>
+@using PagedList.Mvc;
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Quản lý Khuyến mãi";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="page-title">Khuyến mãi</h4>
+    <div>
+        <button id="btnAddKm" class="btn btn-success"><i class="fa-solid fa-plus"></i> Thêm</button>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Tên</th>
+            <th>Giảm (%)</th>
+            <th>Tuần</th>
+            <th>Đến</th>
+            <th class="text-end">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var km in Model)
+        {
+            <tr>
+                <td>@km.TenKM</td>
+                <td>@km.Giam</td>
+                <td>@km.TuNgay.ToString("dd/MM/yyyy")</td>
+                <td>@km.DenNgay.ToString("dd/MM/yyyy")</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-primary btn-edit-km" data-id="@km.MaKM">Sửa</button>
+                    <button class="btn btn-sm btn-danger btn-del-km" data-id="@km.MaKM">Xóa</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-center">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+</div>
+
+<div id="modalArea"></div>
+
+@section Scripts {
+<script>
+    // load modal partial
+    function loadModal(url) {
+        fetch(url).then(r => r.text()).then(html => {
+            const modalArea = document.getElementById("modalArea");
+            if (window.renderHtml) {
+                window.renderHtml(modalArea, html);
+            } else {
+                modalArea.innerHTML = html;
+            }
+            new bootstrap.Modal(document.querySelector("#modalKM")).show();
+        });
+    }
+
+    document.getElementById("btnAddKm").addEventListener("click", function () {
+        loadModal("/Admin/KhuyenMai/Them");
+    });
+
+    document.addEventListener("click", function (e) {
+        const edit = e.target.closest(".btn-edit-km");
+        const del = e.target.closest(".btn-del-km");
+        if (edit) loadModal(`/Admin/KhuyenMai/Sua/${edit.dataset.id}`);
+        if (del) {
+            if (!confirm("Xóa khuyến mãi?")) return;
+            const params = new URLSearchParams();
+            params.append('id', del.dataset.id);
+            fetch("/Admin/KhuyenMai/Xoa", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: params.toString()
+            }).then(r => r.json()).then(d => {
+                alert(d.message);
+                if (d.success) location.reload();
+            });
+        }
+    });
+</script>
+}

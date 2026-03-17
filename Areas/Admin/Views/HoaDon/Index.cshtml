@@ -384,6 +384,29 @@
         document.getElementById("loadingOverlay").style.display = "none";
     }
 
+    // helper to insert HTML and execute scripts from returned partial
+    function insertHtmlAndExecuteScripts(container, html) {
+        container.innerHTML = html;
+        // execute inline scripts
+        container.querySelectorAll('script').forEach(s => {
+            try {
+                const ns = document.createElement('script');
+                Array.from(s.attributes).forEach(a => ns.setAttribute(a.name, a.value));
+                if (s.src) {
+                    ns.async = false; // preserve order
+                    ns.src = s.src;
+                    document.body.appendChild(ns);
+                } else {
+                    ns.text = s.textContent;
+                    document.body.appendChild(ns);
+                    document.body.removeChild(ns);
+                }
+            } catch (ex) {
+                console.warn('Script execution error', ex);
+            }
+        });
+    }
+
     // Hiệu ứng khi load xong
     window.onload = () => {
         hideOverlay();
@@ -399,7 +422,8 @@
             .then(r => r.text())
             .then(html => {
                 hideOverlay();
-                modalContainer.innerHTML = html;
+                // insert and run scripts so event handlers in the partial become active
+                insertHtmlAndExecuteScripts(modalContainer, html);
                 new bootstrap.Modal(document.getElementById("modalAddHD")).show();
             })
             .catch(err => {
@@ -417,7 +441,7 @@
             .then(r => r.text())
             .then(html => {
                 hideOverlay();
-                modalContainer.innerHTML = html;
+                insertHtmlAndExecuteScripts(modalContainer, html);
                 new bootstrap.Modal(document.getElementById("modalEditHD")).show();
             })
             .catch(err => {
@@ -432,30 +456,39 @@
     function viewDetail(id) {
         showOverlay();
         fetch(`/Admin/HoaDon/ChiTiet/${id}`)
-            .then(r => r.text())
+            .then(r => {
+                if (!r.ok) return r.text().then(t => { throw new Error('HTTP ' + r.status + ': ' + (t || r.statusText)); });
+                return r.text();
+            })
             .then(html => {
                 hideOverlay();
-                modalContainer.innerHTML = html;
-                new bootstrap.Modal(document.getElementById("modalDetailHD")).show();
+                insertHtmlAndExecuteScripts(modalContainer, html);
+                const el = document.getElementById("modalDetailHD");
+                if (el) new bootstrap.Modal(el).show();
             })
             .catch(err => {
                 hideOverlay();
-                alert("Lỗi tải chi tiết: " + err);
+                console.error('Error loading detail:', err);
+                alert('Lỗi tải chi tiết: ' + (err.message || err));
             });
     }
 
     // ============================
-    // XOÁ HÓA ĐƠN
+    // XOá HÓA ĐƠN
     // ============================
     function deleteHD(id) {
         if (!confirm("Xác nhận xóa hóa đơn này?")) return;
 
         showOverlay();
 
+        // send form-encoded body so MVC model binder binds the primitive 'id' parameter
+        const params = new URLSearchParams();
+        params.append('id', id);
+
         fetch("/Admin/HoaDon/Xoa", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            body: params.toString()
         })
             .then(r => r.json())
             .then(d => {

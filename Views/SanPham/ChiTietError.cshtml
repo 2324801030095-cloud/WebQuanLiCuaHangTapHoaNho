@@ -1,0 +1,12 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; // use site layout if available
+}
+
+<div class="container py-5">
+    <div class="alert alert-danger">
+        <h5>Không thể tải chi tiết sản phẩm</h5>
+        <p>@ViewBag.ErrorMessage</p>
+        <small class="text-muted">@ViewBag.ErrorDetails</small>
+    </div>
+    <a href="@Url.Action("Index","Home")" class="btn btn-secondary">Về trang chủ</a>
+</div>

@@ -1,0 +1,78 @@
+﻿@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.SanPhamView>
+
+@{
+    Func<string, string> imgByFile = file =>
+    {
+        return string.IsNullOrWhiteSpace(file)
+            ? Url.Content("~/Content/Images/no-image.png")
+            : Url.Content("~/Content/Images/" + file.Trim());
+    };
+}
+
+@if (Model != null && Model.Any())
+{
+    <section id="search-result" class="py-4 section-alt">
+        <div class="container">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 fw-bold mb-0 text-success">
+                    Kết quả tìm kiếm (@Model.Count())
+                </h2>
+                <a href="@Url.Action("TatCa", "DanhMuc")" class="text-muted small">
+                    Xem tất cả sản phẩm
+                </a>
+            </div>
+
+            <div class="row g-4">
+
+                @foreach (var p in Model)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 shadow-sm border-0 product-card">
+
+                            <img class="card-img-top product-img"
+                                 src="@imgByFile(p.HinhAnh)"
+                                 alt="@p.TenSP" />
+
+                            <div class="card-body d-flex flex-column">
+
+                                <h6 class="fw-semibold mb-2 text-truncate" title="@p.TenSP">
+                                    @p.TenSP
+                                </h6>
+
+                                <div class="price mb-2">
+                                    <span class="text-success fw-bold">
+                                        @String.Format("{0:N0} ₫", p.GiaBan)
+                                    </span>
+                                </div>
+
+                                <small class="text-muted mb-2">Tồn: @p.Ton</small>
+
+                                <div class="mt-auto d-flex gap-2">
+
+                                    <a class="btn btn-outline-success btn-sm flex-fill"
+                                       href="@Url.Action("ChiTiet","SanPham", new { id = p.MaSP })">
+                                        <i class="bi bi-eye me-1"></i> Xem
+                                    </a>
+
+                                    <!-- Nút thêm giỏ hàng AJAX -->
+                                    <button type="button"
+                                            class="btn btn-brand btn-sm flex-fill btn-add-cart"
+                                            data-id="@p.MaSP"
+                                            data-name="@p.TenSP"
+                                            data-price="@p.GiaBan"
+                                            data-img="@imgByFile(p.HinhAnh)">
+                                        <i class="bi bi-bag-plus me-1"></i> Thêm
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </section>
+}

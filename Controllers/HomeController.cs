@@ -1,124 +1,169 @@
-﻿// Nạp namespace cần dùng
-using System.Linq;                                                // Cho LINQ: Where, OrderBy, Take
-using System.Web.Mvc;                                             // Cho Controller, ActionResult, PartialView
-using WebQuanLiCuaHangTapHoa.Models;                              // Cho EDMX context + SanPhamView (ViewModel)
+﻿using System;
+using System.Data.Entity;
+using System.Linq;
+using System.Web.Mvc;
+using WebQuanLiCuaHangTapHoa.Models;
 
-namespace WebQuanLiCuaHangTapHoa.Controllers                      // Namespace phải khớp project
+namespace WebQuanLiCuaHangTapHoa.Controllers
 {
-    public class HomeController : Controller                       // Controller trang chủ
+    public class HomeController : Controller
     {
-        // Khởi tạo DbContext từ EDMX (Tên theo EDMX của bạn)
         private readonly QuanLyTapHoaThanhNhanEntities1 _db
-            = new QuanLyTapHoaThanhNhanEntities1();               // Dùng connectionString trong Web.config
+            = new QuanLyTapHoaThanhNhanEntities1();
 
-        // =======================
-        // Action: Index (Trang chủ)
-        // URL: /Home/Index?kw=&maDM=
-        // =======================
+        // ===================== TRANG CHỦ =====================
         public ActionResult Index(string kw = null, int? maDM = null)
         {
-            // Lưu lại filter vào ViewBag để hiển thị lại trên UI (ô search, breadcrumb…)
-            ViewBag.Keyword = kw;                                  // Từ khóa đang tìm
-            ViewBag.MaDM = maDM;                                   // Danh mục đang lọc
-
-            // Không lấy dữ liệu nặng ở đây -> chỉ return view khung
-            // Phần danh sách sản phẩm sẽ nạp qua Partial (đúng phong cách Lab chia nhỏ)
-            return View();                                         // Trả về Index.cshtml (không model)
+            ViewBag.Keyword = kw;
+            ViewBag.MaDM = maDM;
+            return View();
         }
 
-        // ==========================================
-        // ChildAction: NewProducts (khối “DB mới nhất”)
-        // Gọi trong Index qua Html.Action
-        // ==========================================
-        [ChildActionOnly]                                          // Chỉ gọi nội bộ từ View
-        public ActionResult NewProducts(string kw = null, int? maDM = null, int take = 12)
-        {
-            // Tạo query base: chỉ sp đang hoạt động
-            var query =
-                from sp in _db.SanPham                              // Từ bảng SanPham
-                where sp.HoatDong == true                           // Chỉ lấy SP hoạt động
-                select new SanPhamView                              // Map về ViewModel nhẹ
-                {
-                    MaSP = sp.MaSP,                                 // Mã sản phẩm
-                    TenSP = sp.TenSP,                               // Tên
-                    GiaBan = sp.GiaBan,                             // Giá
-                    Ton = _db.Kho                                   // Lấy tồn kho
-                          .Where(k => k.MaSP == sp.MaSP)
-                          .Select(k => (int?)k.Ton)                 // chọn nullable để FirstOrDefault không lỗi
-                          .FirstOrDefault() ?? 0,                   // nếu null -> 0
-                    MaDM = sp.MaDM                                  // Mã danh mục (phục vụ link)
-                };
-
-            // Lọc theo danh mục nếu có
-            if (maDM.HasValue)                                      // Nếu có maDM trên URL
-                query = query.Where(x => x.MaDM == maDM.Value);     // Thì lọc đúng danh mục
-
-            // Lọc theo từ khóa nếu có (tìm theo tên)
-            if (!string.IsNullOrWhiteSpace(kw))                     // Nếu có từ khóa
-                query = query.Where(x => x.TenSP.Contains(kw));     // Lọc tên chứa từ khóa
-
-            // Lấy mới nhất theo MaSP (ID tăng dần), giới hạn take
-            var ds = query
-                     .OrderByDescending(x => x.MaSP)               // Mới nhất trước
-                     .Take(take)                                   // Lấy N sp (mặc định 12)
-                     .ToList();                                    // Thực thi query
-
-            // Trả Partial lưới sản phẩm, model là danh sách ViewModel
-            return PartialView("_ProductGridPartial", ds);          // Dùng lại partial tái sử dụng
-        }
-
-        // ==========================================
-        // ChildAction: TopSelling (khối bán chạy – demo)
-        // Sau này bạn thay bằng thống kê thật (Lab sau)
-        // ==========================================
+        // ============================================================
+        // 1️⃣ NEW PRODUCTS – LẤY SẢN PHẨM MỚI (MaSP mới nhất)
+        // ============================================================
         [ChildActionOnly]
-        public ActionResult TopSelling(int take = 9)                // Cho phép cấu hình số lượng
+        public ActionResult NewProducts(int take = 100)
         {
-            // Demo: tái sử dụng NewProducts (vì chưa có chỉ số doanh số)
-            // Bạn có thể thay bằng join CTHD/HoaDon để tính bán chạy theo kỳ
-            var ds = (from sp in _db.SanPham
-                      where sp.HoatDong == true
-                      orderby sp.MaSP descending                    // tạm xem “mới” như “hot”
+            var ds = _db.SanPham
+                .Where(s => s.HoatDong == true)
+                .OrderByDescending(s => s.MaSP)
+                .Take(take)
+                .Select(s => new SanPhamView
+                {
+                    MaSP = s.MaSP,
+                    TenSP = s.TenSP,
+                    GiaBan = s.GiaBan,
+                    HinhAnh = s.HinhAnh,
+                    MaDM = s.MaDM,
+                    Ton = _db.Kho.Where(k => k.MaSP == s.MaSP)
+                                 .Select(k => (int?)k.Ton)
+                                 .FirstOrDefault() ?? 0
+                })
+                .ToList();
+
+            return PartialView("~/Views/Shared/_NewProductsPartial.cshtml", ds);
+        }
+
+        // ============================================================
+        // 2️⃣ TOP TODAY – SẢN PHẨM BÁN CHẠY HÔM NAY (Có Flip 3D)
+        // ============================================================
+        // ============================================================
+        // 2️⃣ TOP TODAY – SẢN PHẨM BÁN CHẠY HÔM NAY (THIẾT KẾ GỐC: _TopFlipPartial)
+        // ============================================================
+        [ChildActionOnly]
+        public ActionResult TopToday(int take = 5)
+        {
+            var today = DateTime.Today;
+
+            var ds = (from hd in _db.HoaDon
+                      join ct in _db.ChiTietHoaDon on hd.MaHD equals ct.MaHD
+                      join sp in _db.SanPham on ct.MaSP equals sp.MaSP
+                      where sp.HoatDong == true && hd.Ngay >= today
+                      group ct by new
+                      {
+                          sp.MaSP,
+                          sp.TenSP,
+                          sp.GiaBan,
+                          sp.HinhAnh,
+                          sp.MaDM,
+                          sp.MoTaNgan
+                      } into g
+                      orderby g.Sum(x => x.SoLuong) descending
                       select new SanPhamView
                       {
-                          MaSP = sp.MaSP,
-                          TenSP = sp.TenSP,
-                          GiaBan = sp.GiaBan,
-                          Ton = _db.Kho.Where(k => k.MaSP == sp.MaSP)
-                                       .Select(k => (int?)k.Ton)
-                                       .FirstOrDefault() ?? 0,
-                          MaDM = sp.MaDM
+                          MaSP = g.Key.MaSP,
+                          TenSP = g.Key.TenSP,
+                          GiaBan = g.Key.GiaBan,
+                          HinhAnh = g.Key.HinhAnh,
+                          MaDM = g.Key.MaDM,
+                          MoTaNgan = g.Key.MoTaNgan
                       })
                       .Take(take)
                       .ToList();
 
-            return PartialView("_ProductGridPartial", ds);          // Render bằng lưới chung
+            // báo cho partial biết có hay không dữ liệu
+            ViewBag.NoDataTopToday = ds.Count == 0;
+
+            // TRẢ VỀ ĐÚNG PHIÊN BẢN GỐC: _TopFlipPartial.cshtml
+            return PartialView("~/Views/Shared/_TopFlipPartial.cshtml", ds);
         }
 
-        // Giải phóng DbContext chuẩn
-        protected override void Dispose(bool disposing)
+        // ============================================================
+        // 3️⃣ TOP SELLING – SẢN PHẨM BÁN CHẠY NHẤT (Tổng doanh số)
+        // ============================================================
+        [ChildActionOnly]
+        public ActionResult TopSelling(int take = 100)
         {
-            if (disposing) _db.Dispose();                           // Hủy context khi controller dispose
-            base.Dispose(disposing);                                 // Gọi dispose lớp cha
+            var ds = (from ct in _db.ChiTietHoaDon
+                      join sp in _db.SanPham on ct.MaSP equals sp.MaSP
+                      where sp.HoatDong == true
+                      group ct by new
+                      {
+                          sp.MaSP,
+                          sp.TenSP,
+                          sp.GiaBan,
+                          sp.HinhAnh,
+                          sp.MaDM
+                      } into g
+                      orderby g.Sum(x => x.SoLuong) descending
+                      select new SanPhamView
+                      {
+                          MaSP = g.Key.MaSP,
+                          TenSP = g.Key.TenSP,
+                          GiaBan = g.Key.GiaBan,
+                          HinhAnh = g.Key.HinhAnh,
+                          MaDM = g.Key.MaDM,
+                          Ton = _db.Kho.Where(k => k.MaSP == g.Key.MaSP)
+                                       .Select(k => (int?)k.Ton)
+                                       .FirstOrDefault() ?? 0
+                      })
+                      .Take(take)
+                      .ToList();
+
+            return PartialView("~/Views/Shared/_TopSellingPartial.cshtml", ds);
         }
 
-        // =================== KHÁCH HÀNG XEM SẢN PHẨM KHUYẾN MÃI ===================
-        // ✅ ACTION MỚI — TRANG KHUYẾN MÃI
+        // ======================== KHUYẾN MÃI ========================
+        [ChildActionOnly]
         public ActionResult KhuyenMai()
         {
-            // Lọc sản phẩm có khuyến mãi = true
             var ds = _db.SanPham
-            .Where(sp => sp.KhuyenMai != null)
-            .ToList();
+                .Where(sp => sp.HoatDong == true && sp.MaKM != null)
+                .Include("KhuyenMai")
+                .ToList();
 
-
-            ViewBag.Title = "Sản phẩm khuyến mãi";
-            return View(ds);
+            return PartialView("~/Views/Shared/_KhuyenMaiPartial.cshtml", ds);
         }
+
+        // ======================== GIỚI THIỆU ========================
         public ActionResult GioiThieu()
         {
-            return View();   // tìm file Views/Home/GioiThieu.cshtml
+            return View();
         }
 
+        // ======================== DEBUG CATEGORIES ========================
+        public ActionResult DebugCategories()
+        {
+            var danhMucs = _db.DanhMuc.ToList();
+            return View(danhMucs);
+        }
+
+        public ActionResult KienThucHome()
+        {
+            var data = _db.KienThuc
+                         .Where(x => x.TrangThai == true)
+                         .OrderByDescending(x => x.NgayDang)
+                         .Take(4)
+                         .ToList();
+
+            return PartialView("_KnowledgePartial", data);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _db.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

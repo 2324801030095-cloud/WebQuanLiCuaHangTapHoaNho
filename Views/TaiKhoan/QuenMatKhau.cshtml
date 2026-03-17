@@ -1,0 +1,373 @@
+﻿@{
+    Layout = null;
+    var title = "Quên mật khẩu";
+    var forgotError = ViewBag.ForgotError as string;
+    var forgotSuccess = ViewBag.ForgotSuccess as string;
+    var step = ViewBag.Step as string ?? "request";
+    var resetId = ViewBag.ResetId != null ? (int)ViewBag.ResetId : 0;
+    var maskedEmail = ViewBag.MaskedEmail as string;
+    var captchaCode = ViewBag.CaptchaCode as string;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Thanh Nhàn Grocery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-1: #e7f8f6;
+            --bg-2: #fef4e6;
+            --bg-3: #eaf1ff;
+            --ink: #0c1720;
+            --muted: #5b6b78;
+            --brand: #0aa39f;
+            --brand-2: #0f6c8a;
+            --accent: #ffb347;
+            --glass: rgba(255, 255, 255, 0.7);
+            --stroke: rgba(13, 31, 45, 0.1);
+            --shadow: 0 30px 80px rgba(11, 24, 31, 0.15);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background:
+                radial-gradient(1200px 600px at 10% 10%, var(--bg-1), transparent 60%),
+                radial-gradient(900px 600px at 90% 20%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 800px at 50% 90%, var(--bg-3), transparent 55%),
+                #f7f9fb;
+            display: grid;
+            place-items: center;
+        }
+
+        .page {
+            width: min(1100px, 92vw);
+            min-height: 620px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 28px;
+            align-items: stretch;
+            position: relative;
+        }
+
+        .orb {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            filter: blur(0px);
+            opacity: 0.55;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .orb.one {
+            background: radial-gradient(circle at 30% 30%, #9ef2e6, transparent 60%);
+            left: -70px;
+            top: -60px;
+        }
+
+        .orb.two {
+            background: radial-gradient(circle at 30% 30%, #ffd7a3, transparent 60%);
+            right: -60px;
+            bottom: -40px;
+            animation-delay: 1.8s;
+        }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-18px); }
+        }
+
+        .panel {
+            background: linear-gradient(155deg, rgba(255,255,255,0.75), rgba(255,255,255,0.45));
+            border: 1px solid var(--stroke);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            padding: 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel.left { padding: 44px 40px; }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .brand .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .headline {
+            margin: 32px 0 16px;
+            font-family: "Space Grotesk", "Outfit", sans-serif;
+            font-size: clamp(28px, 3vw, 40px);
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 1rem;
+            max-width: 460px;
+        }
+
+        .chips {
+            margin-top: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(12, 23, 32, 0.06);
+            font-size: 0.88rem;
+            color: #0a2a32;
+        }
+
+        .grid {
+            margin-top: 34px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .stat {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(12, 23, 32, 0.08);
+            border-radius: 18px;
+            padding: 16px 18px;
+        }
+
+        .stat h4 {
+            margin: 0 0 6px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stat p {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .form-title { font-size: 1.5rem; margin: 0 0 8px; font-weight: 600; }
+        .form-sub { color: var(--muted); margin-bottom: 28px; }
+
+        .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .label { font-size: 0.92rem; color: #1b2a34; letter-spacing: 0.2px; }
+
+        .input {
+            border-radius: 14px;
+            border: 1px solid rgba(12, 23, 32, 0.16);
+            padding: 14px 16px;
+            font-size: 1rem;
+            outline: none;
+            background: rgba(255,255,255,0.85);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input:focus {
+            border-color: rgba(10, 163, 159, 0.9);
+            box-shadow: 0 0 0 4px rgba(10, 163, 159, 0.15);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(10, 163, 159, 0.25); }
+        .btn:active { transform: translateY(0px); }
+
+        .muted { color: var(--muted); font-size: 0.92rem; }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .links a { color: var(--brand-2); text-decoration: none; font-weight: 600; }
+
+        .alert {
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+            border: 1px solid transparent;
+        }
+
+        .alert.success { background: rgba(10, 163, 159, 0.1); border-color: rgba(10, 163, 159, 0.3); color: #0b5a59; }
+        .alert.error { background: rgba(230, 73, 64, 0.12); border-color: rgba(230, 73, 64, 0.35); color: #8f1b13; }
+
+        .footer-note { margin-top: 20px; font-size: 0.86rem; color: var(--muted); }
+
+        .captcha-wrap {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .captcha-box {
+            display: grid;
+            place-items: center;
+            padding: 12px 10px;
+            border-radius: 12px;
+            border: 1px dashed rgba(12, 23, 32, 0.3);
+            background: rgba(255,255,255,0.9);
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #0f3b8f;
+        }
+
+        @@media (max-width: 980px) {
+            .page { grid-template-columns: 1fr; min-height: unset; }
+            .panel.left { order: 2; }
+            .panel.right { order: 1; }
+        }
+
+        @@media (max-width: 560px) {
+            .panel { padding: 26px; }
+            .grid { grid-template-columns: 1fr; }
+            .captcha-wrap { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <span class="orb one" aria-hidden="true"></span>
+        <span class="orb two" aria-hidden="true"></span>
+
+        <section class="panel left">
+            <div>
+                <div class="brand">
+                    <div class="logo">TN</div>
+                    <div>
+                        <div>Thanh Nhàn Grocery</div>
+                        <div class="muted">Xác thực OS Vision 2026</div>
+                    </div>
+                </div>
+
+                <h1 class="headline">Khôi phục mật khẩu an toàn trong 30 giây.</h1>
+                <p class="sub">Nhập email hoặc tên đăng nhập, hệ thống sẽ gửi mã xác minh. Sau khi xác thực, bạn sẽ đặt lại mật khẩu mới.</p>
+
+                <div class="chips">
+                    <span class="chip">Xác thực 2 lớp</span>
+                    <span class="chip">Mã hóa SHA-256</span>
+                    <span class="chip">Chống spam bot</span>
+                    <span class="chip">Hoạt động 24/7</span>
+                </div>
+
+                <div class="grid">
+                    <div class="stat">
+                        <h4>Thời gian xử lý</h4>
+                        <p>Dưới 2 phút</p>
+                    </div>
+                    <div class="stat">
+                        <h4>Độ tin cậy</h4>
+                        <p>99.9% ổn định</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-note">Bạn cần thêm hỗ trợ? Vui lòng liên hệ bộ phận chăm sóc khách hàng.</div>
+        </section>
+
+        <section class="panel right">
+            <div>
+                <h2 class="form-title">Quên mật khẩu</h2>
+                <div class="form-sub">Nhập đúng thông tin để nhận mã xác minh đặt lại mật khẩu.</div>
+
+                @if (!string.IsNullOrWhiteSpace(forgotSuccess))
+                {
+                    <div class="alert success">@forgotSuccess</div>
+                }
+                else if (!string.IsNullOrWhiteSpace(forgotError))
+                {
+                    <div class="alert error">@forgotError</div>
+                }
+
+                @if (step == "verify")
+                {
+                    <div class="muted" style="margin-bottom:16px;">Mã xác minh đã gửi đến: <strong>@maskedEmail</strong></div>
+                    <form action="@Url.Action("XacMinhMa", "TaiKhoan")" method="post" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="resetId" value="@resetId" />
+                        <div class="field">
+                            <label class="label" for="resetCode">Nhập mã 6 số</label>
+                            <input class="input" id="resetCode" name="resetCode" type="text" maxlength="6" placeholder="VD: 123456" />
+                        </div>
+                        <button class="btn" type="submit">Xác minh mã</button>
+                    </form>
+                    <div class="muted" style="margin-top:14px;">Chưa nhận được mã? <a href="@Url.Action("QuenMatKhau", "TaiKhoan")">Gửi lại</a></div>
+                }
+                else
+                {
+                    <form action="@Url.Action("QuenMatKhau", "TaiKhoan")" method="post" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <div class="field">
+                            <label class="label" for="emailOrUser">Email hoặc tên đăng nhập</label>
+                            <input class="input" id="emailOrUser" name="emailOrUser" type="text" placeholder="VD: thanhnan@gmail.com" />
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="captcha">Xác minh chống bot (4 số)</label>
+                            <div class="captcha-wrap">
+                                <input class="input" id="captcha" name="captcha" type="text" maxlength="4" placeholder="Nhập mã" />
+                                <div class="captcha-box" aria-hidden="true">@captchaCode</div>
+                            </div>
+                        </div>
+
+                        <button class="btn" type="submit">Gửi mã xác minh</button>
+                    </form>
+                }
+            </div>
+
+            <div class="links">
+                <span class="muted">Đã nhớ mật khẩu?</span>
+                <a href="@Url.Action("DangNhap", "TaiKhoan")">Quay lại đăng nhập</a>
+                <a href="@Url.Action("DangKy", "TaiKhoan")">Tạo tài khoản</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

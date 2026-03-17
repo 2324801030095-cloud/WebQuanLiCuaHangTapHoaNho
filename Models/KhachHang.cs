@@ -20,6 +20,10 @@ namespace WebQuanLiCuaHangTapHoa.Models
             this.HoaDon = new HashSet<HoaDon>();
             this.TaiKhoanKH = new HashSet<TaiKhoanKH>();
             this.BaoNo = new HashSet<BaoNo>();
+            this.DanhGia = new HashSet<DanhGia>();
+            this.LichSuXemThongBao = new HashSet<LichSuXemThongBao>();
+            this.TinNhan = new HashSet<TinNhan>();
+            this.ThongBao = new HashSet<ThongBao>();
         }
     
         public int MaKH { get; set; }
@@ -34,5 +38,13 @@ namespace WebQuanLiCuaHangTapHoa.Models
         public virtual ICollection<TaiKhoanKH> TaiKhoanKH { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BaoNo> BaoNo { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DanhGia> DanhGia { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<LichSuXemThongBao> LichSuXemThongBao { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TinNhan> TinNhan { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ThongBao> ThongBao { get; set; }
     }
 }

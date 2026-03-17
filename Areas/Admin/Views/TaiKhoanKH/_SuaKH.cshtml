@@ -1,0 +1,72 @@
+@model WebQuanLiCuaHangTapHoa.Models.TaiKhoanKH
+
+<div class="modal fade" id="modalTK" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-pen"></i> Sửa tài khoản khách hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            @using (Html.BeginForm("Sua", "TaiKhoanKH", FormMethod.Post, new { id = "formTK" }))
+            {
+                @Html.HiddenFor(m => m.MaKH)
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label><strong>Tên đăng nhập:</strong></label>
+                        <input type="text" class="form-control" value="@Model.TenDangNhap" disabled />
+                        <small class="text-muted">Không thể thay đổi tên đăng nhập</small>
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Email, "Email")
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+                    </div>
+                    <div class="mb-3">
+                        <label>Mật khẩu mới (để trống nếu không đổi)</label>
+                        <input type="password" name="MatKhau" class="form-control" />
+                        <small class="text-muted">Chỉ nhập nếu muốn đổi mật khẩu</small>
+                    </div>
+                    <div class="form-check">
+                        @Html.CheckBoxFor(m => m.HoatDong, new { @class = "form-check-input" })
+                        <label class="form-check-label" for="HoatDong">Tài khoản hoạt động</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("formTK").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        // Bỏ qua mật khẩu trống
+        if (!formData.get("MatKhau")) {
+            formData.delete("MatKhau");
+        }
+        
+        formData.set("HoatDong", document.querySelector("[name='HoatDong']").checked);
+
+        fetch("/Admin/TaiKhoanKH/Sua", {
+            method: "POST",
+            body: formData
+        })
+        .then(r => r.json())
+        .then(d => {
+            alert(d.message);
+            if (d.success) {
+                bootstrap.Modal.getInstance(document.getElementById("modalTK")).hide();
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Có lỗi xảy ra khi cập nhật tài khoản.");
+        });
+    });
+</script>
+

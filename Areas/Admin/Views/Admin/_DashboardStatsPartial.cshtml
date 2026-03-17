@@ -88,32 +88,95 @@
         </div>
     </div>
 
-    <!-- ===== BIỂU ĐỒ LỢI NHUẬN ===== -->
     <div class="card shadow-sm p-3 mb-4">
+
         <div class="d-flex align-items-center justify-content-between mb-2">
             <h6 class="fw-bold text-success mb-0">
                 <i class="fa-solid fa-sack-dollar me-2"></i>Lợi nhuận 6 tháng gần nhất
             </h6>
         </div>
-        <div class="profit-wrap">
-            <div class="profit-canvas">
-                <canvas id="profitChart" style="width:100%;height:100%"></canvas>
+
+        <!-- LAYOUT CHART + BOX RESPONSIVE -->
+        <div class="profit-flex">
+
+            <!-- BIỂU ĐỒ (70%) -->
+            <div class="profit-chart">
+                <canvas id="profitChart"></canvas>
             </div>
-            <div class="profit-actions mt-3">
-                <button type="button" class="btn btn-success btn-sm btn-export-excel">
-                    <i class="fa-solid fa-file-excel"></i> Excel
-                </button>
-                <button type="button" class="btn btn-primary btn-sm btn-export-png">
-                    <i class="fa-solid fa-image"></i> PNG
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm btn-zoom">
-                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Zoom
-                </button>
+
+            <!-- Ô TRỐNG (30%) -->
+            <div id="chartExtraSpace" class="profit-box p-2">
+                <h6 class="text-center fw-bold text-primary mb-2">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    Top Hóa đơn giá trị cao nhất
+                </h6>
+
+                @{
+                    var topHD = ViewBag.TopHoaDon as List<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.HoaDonIndexVM>;
+                }
+
+                @if (topHD != null && topHD.Any())
+                {
+                    <table class="table table-sm table-bordered table-striped mb-2">
+                        <thead class="table-light">
+                            <tr class="text-center">
+                                <th>#</th>
+                                <th>Mã</th>
+                                <th>Khách hàng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int sttHD = 0;
+                            }
+                            @foreach (var hd in topHD)
+                            {
+                                sttHD++;
+                                <tr>
+                                    <td class="text-center fw-bold">@sttHD</td>
+                                    <td class="text-center">@hd.MaHD</td>
+                                    <td>@hd.TenKH</td>
+                                    <td class="text-end text-danger fw-semibold">
+                                        @String.Format("{0:N0} ₫", hd.TongTien)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center text-muted small fst-italic">
+                        Không có dữ liệu
+                    </div>
+                }
+
+                <div class="text-end small text-muted">
+                    Top 5 theo tổng tiền
+                </div>
             </div>
+
+
         </div>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="button" class="btn btn-success btn-sm btn-export-excel">
+                <i class="fa-solid fa-file-excel"></i> Excel
+            </button>
+            <button type="button" class="btn btn-primary btn-sm btn-export-png">
+                <i class="fa-solid fa-image"></i> PNG
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm btn-zoom">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Zoom
+            </button>
+        </div>
+
         <input type="hidden" id="profitLabels" value='@Html.Raw(ViewBag.ProfitLabelsJson ?? "[]")' />
         <input type="hidden" id="profitValues" value='@Html.Raw(ViewBag.ProfitValuesJson ?? "[]")' />
+
     </div>
+
 
     <!-- ===== BẢNG TOP SẢN PHẨM BÁN CHẠY ===== -->
     <!-- ===== BẢNG TOP SẢN PHẨM BÁN CHẠY ===== -->
@@ -247,7 +310,12 @@
                 fetch(`/Admin/SanPham/ChiTiet/${id}`)
                     .then(res => res.text())
                     .then(html => {
-                        document.getElementById("modalContainer").innerHTML = html;
+                        const modalContainer = document.getElementById("modalContainer");
+                        if (window.renderHtml) {
+                            window.renderHtml(modalContainer, html);
+                        } else {
+                            modalContainer.innerHTML = html;
+                        }
                         new bootstrap.Modal(document.getElementById("modalSP")).show();
                     });
             }
@@ -528,6 +596,146 @@
             height: auto;
             /* nếu cần, chỉnh margin-bottom hoặc padding để tăng khoảng cách giữa các hàng */
         }
+        /* ======================== KPI BOX FIX ======================== */
+
+/* Thu nhỏ toàn bộ box */
+.kpi-box, .stat-card {
+    padding: 10px !important;
+    min-height: 110px !important;
+    border-radius: 10px !important;
+}
+
+/* Font nhỏ hơn */
+.kpi-box h4, .stat-card h4 {
+    font-size: 1.25rem !important;
+}
+.kpi-box h6, .stat-card h6 {
+    font-size: 0.85rem !important;
+}
+
+/* Icon nhỏ hơn */
+.kpi-box .icon-box i,
+.stat-card .icon-box i {
+    font-size: 1.4rem !important;
+}
+
+/* Hover nhẹ hơn */
+.kpi-box:hover, .stat-card:hover {
+    transform: translateY(-4px) scale(1.015) !important;
+    box-shadow: 0 6px 14px rgba(59,130,246,0.18) !important;
+}
+
+/* Giảm độ sáng viền glow */
+.glow-border::before {
+    padding: 1px !important;
+    opacity: .55 !important;
+}
+
+/* Tự thu nhỏ gap giữa các KPI */
+.row.g-3 > div {
+    padding: 4px !important;
+}
+
+
+/* ======================== BIỂU ĐỒ FIX – THU NHỎ ======================== */
+
+/* Thu nhỏ container biểu đồ */
+.profit-wrap {
+    display: flex;
+    gap: 15px;
+}
+
+.profit-canvas {
+    flex: 1;
+    min-height: 220px !important; /* từ ~400px giảm còn 220px */
+    max-height: 260px !important;
+}
+
+/* Nút export nhỏ hơn */
+.profit-actions button {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+}
+
+
+/* ======================== LAYOUT 2 CỘT: Biểu đồ + Top Ranking ======================== */
+
+@@media (min-width: 992px) {
+    .dashboard-row {
+        display: grid;
+        grid-template-columns: 62% 38%;
+        gap: 16px;
+    }
+}
+/* =============================
+   BIỂU ĐỒ + Ô TRỐNG RESPONSIVE
+   ============================= */
+.profit-flex {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    align-items: stretch;
+}
+
+/* Biểu đồ ưu tiên chiếm 70% không gian */
+.profit-chart {
+    flex: 1 1 70%;
+    min-height: 260px;
+    max-height: 340px;
+}
+
+/* Canvas tự co giãn */
+.profit-chart canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Box trống chiếm 30% và tự co lại khi màn nhỏ */
+.profit-box {
+    flex: 1 1 30%;
+    min-width: 260px;
+    min-height: 260px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+}
+
+/* =============================
+   RESPONSIVE — TỰ CO TRÊN MOBILE
+   ============================= */
+@@media (max-width: 1200px) {
+    .profit-flex {
+        flex-direction: column;
+    }
+    .profit-box {
+        min-width: 100%;
+        min-height: 220px;
+    }
+}
+
+/* Tối ưu cho zoom 125% hoặc màn nhỏ */
+@@media (max-width: 1500px) {
+    .profit-box {
+        min-width: 300px;
+    }
+}
+
+/* Zoom 175% hoặc 200% */
+@@media (max-width: 1350px) {
+    .profit-box {
+        min-width: 260px;
+    }
+}
+    /* ===============================
+   FIX MÀU CHỮ KPI = ĐEN HOÀN TOÀN
+   =============================== */
+    .kpi-box h6,
+    .kpi-box h4,
+    .stat-card h6,
+    .stat-card h4 {
+        color: #000 !important;
+    }
+
 </style>
 
 
@@ -596,7 +804,14 @@
             pageKH: pageKH
         },
         success: function (html) {
-            $(".container-fluid").html(html);  // <-- ĐÃ SỬA
+            const container = document.getElementById("statsSection");
+            if (window.renderHtml) {
+                window.renderHtml(container, html);
+            } else if (container) {
+                container.innerHTML = html;
+            }
+            if (window.initProfitChart) window.initProfitChart();
+            if (window.hookActionButtons) window.hookActionButtons();
         }
     });
 });
@@ -612,9 +827,16 @@
 
         $.ajax({
             url: url.replace("/Admin/Admin/Index", "/Admin/Admin/FilterDashboard"),
-            success: function (html) {
-                $(".container-fluid").html(html);  // <-- ĐÃ SỬA
+        success: function (html) {
+            const container = document.getElementById("statsSection");
+            if (window.renderHtml) {
+                window.renderHtml(container, html);
+            } else if (container) {
+                container.innerHTML = html;
             }
-        });
+            if (window.initProfitChart) window.initProfitChart();
+            if (window.hookActionButtons) window.hookActionButtons();
+        }
     });
+});
 </script>

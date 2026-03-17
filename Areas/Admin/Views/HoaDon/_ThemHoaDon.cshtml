@@ -1,80 +1,104 @@
-﻿@model WebQuanLiCuaHangTapHoa.Models.HoaDon
+﻿@model object
+@using WebQuanLiCuaHangTapHoa.Models
+@{
+    // ViewBag.SanPham : IEnumerable<SanPham>
+    var sanPhams = ViewBag.SanPham as IEnumerable<SanPham> ?? new List<SanPham>();
+}
 
-<!-- Modal thêm hóa đơn -->
+<!-- Modal thêm hóa đơn (full-width để thêm sản phẩm trực tiếp) -->
 <div class="modal fade" id="modalAddHD" tabindex="-1">
-    <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="border-radius:12px; overflow:hidden;">
 
             <!-- HEADER -->
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="fa-solid fa-file-circle-plus me-2"></i> Thêm hóa đơn
+                    <i class="fa-solid fa-file-circle-plus me-2"></i> Thêm hóa đơn mới
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <!-- BODY -->
             <div class="modal-body">
 
-                <!-- Form thêm hóa đơn -->
-                <form id="formAddHD">
-
-                    <!-- Ngày lập -->
-                    <div class="mb-3">
+                <!-- THÔNG TIN HÓA ĐƠN -->
+                <div class="row g-3">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Ngày lập</label>
-                        <input type="datetime-local"
-                               name="Ngay"
-                               class="form-control"
-                               value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
-                               required />
+                        <input type="datetime-local" id="hdNgay" class="form-control"
+                               value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                     </div>
 
-                    <!-- KHÁCH HÀNG AUTOCOMPLETE -->
-                    <div class="mb-3 position-relative">
+                    <div class="col-md-4 position-relative">
                         <label class="form-label fw-bold">Khách hàng</label>
 
-                        <!-- Ô nhập tên khách -->
-                        <input type="text"
-                               id="khachInput"
-                               class="form-control"
-                               placeholder="Nhập tên khách hàng..."
-                               autocomplete="off" />
+                        <input type="text" id="khachInputAdd" class="form-control"
+                               placeholder="Nhập tên khách hàng..." autocomplete="off" />
 
-                        <!-- Input ẩn gửi MaKH -->
-                        <input type="hidden" name="MaKH" id="maKH-hidden" />
+                        <input type="hidden" id="hdMaKH" />
 
-                        <!-- Danh sách gợi ý -->
-                        <ul id="suggestKH"
+                        <ul id="suggestKHAdd"
                             class="list-group position-absolute w-100"
                             style="z-index:1000; display:none;"></ul>
 
-                        <!-- Nút mở modal thêm khách -->
-                        <button type="button"
-                                class="btn btn-outline-success btn-sm mt-2"
+                        <button class="btn btn-outline-success btn-sm mt-2"
                                 onclick="openAddKH()">
                             <i class="fa-solid fa-user-plus me-1"></i> Thêm khách hàng mới
                         </button>
                     </div>
 
-                    <!-- Nhân viên -->
-                    <div class="mb-3">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Nhân viên</label>
-                        @Html.DropDownList(
-                            "MaNV",
+                        @Html.DropDownList("MaNV",
                             (SelectList)ViewBag.NhanVien,
                             "--Chọn nhân viên--",
-                            new { @class = "form-select", required = "required" }
-                        )
+                            new { @class = "form-select", id = "hdMaNV" })
                     </div>
+                </div>
 
-                </form>
+                <hr />
+
+                <!-- DANH SÁCH SẢN PHẨM -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="m-0">Danh sách sản phẩm trong hóa đơn</h5>
+
+                    <button class="btn btn-success btn-sm" onclick="openAddSPModal()">
+                        <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tableSPAdd">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="100">Mã SP</th>
+                                <th>Tên SP</th>
+                                <th width="80">SL</th>
+                                <th width="120">Đơn giá</th>
+                                <th width="140">Thành tiền</th>
+                                <th width="60">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JS render -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">Tổng cộng:</th>
+                                <th id="tongTienAdd" class="text-danger fw-bold">0 ₫</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
             </div>
 
             <!-- FOOTER -->
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button class="btn btn-primary" id="btnSaveHD">
-                    <i class="fa-solid fa-check me-1"></i> Lưu hóa đơn
+                <button class="btn btn-primary" id="btnSaveHDWithSP">
+                    <i class="fa-solid fa-check me-1"></i> Lưu hóa đơn & chi tiết
                 </button>
             </div>
 
@@ -82,109 +106,220 @@
     </div>
 </div>
 
+<!-- Modal chọn SP -->
+<div class="modal fade" id="modalAddSPToHD" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Thêm sản phẩm vào hóa đơn</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <label class="form-label fw-bold">Sản phẩm</label>
+                <select id="spSelect" class="form-select">
+                    @foreach (var sp in sanPhams)
+                    {
+                        <option value="@sp.MaSP"
+                                data-ten="@sp.TenSP"
+                                data-gia="@sp.GiaBan">
+                            @sp.TenSP - @String.Format("{0:N0} ₫", sp.GiaBan)
+                        </option>
+                    }
+                </select>
+
+                <label class="form-label fw-bold mt-2">Số lượng</label>
+                <input type="number" id="spSL" class="form-control" value="1" min="1" />
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-primary" onclick="confirmAddSP()">Thêm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    const txtKH = document.getElementById("khachInput");
-    const hiddenMaKH = document.getElementById("maKH-hidden");
-    const listKH = document.getElementById("suggestKH");
+    // ===============================================
+    // DỮ LIỆU TẠM DS SẢN PHẨM
+    // ===============================================
+    let dsSPAdd = []; // { MaSP, TenSP, SoLuong, DonGia }
 
-    // ======================
+    // ===============================================
     // AUTOCOMPLETE KHÁCH HÀNG
-    // ======================
-    txtKH.addEventListener("input", function () {
+    // ===============================================
+    const txtKHAdd = document.getElementById("khachInputAdd");
+    const suggestKHAdd = document.getElementById("suggestKHAdd");
+    const hdMaKH = document.getElementById("hdMaKH");
 
-        let keyword = this.value.trim();
+    txtKHAdd?.addEventListener("input", function () {
+        const keyword = this.value.trim();
 
-        if (keyword.length < 1) {
-            listKH.style.display = "none";
-            hiddenMaKH.value = "";
+        if (!keyword) {
+            suggestKHAdd.style.display = "none";
+            hdMaKH.value = "";
             return;
         }
 
-        fetch(`/Admin/KhachHang/Tim?keyword=${keyword}`)
+        fetch(`/Admin/KhachHang/Tim?keyword=${encodeURIComponent(keyword)}`)
             .then(r => r.json())
             .then(list => {
-                listKH.innerHTML = "";
+                suggestKHAdd.innerHTML = "";
 
-                if (list.length === 0) {
-                    listKH.style.display = "none";
-                    hiddenMaKH.value = "";
+                if (!list.length) {
+                    suggestKHAdd.style.display = "none";
                     return;
                 }
 
-                list.forEach(item => {
+                list.forEach(kh => {
                     let li = document.createElement("li");
                     li.className = "list-group-item list-group-item-action";
-                    li.innerText = item.TenKH;
+                    li.textContent = kh.TenKH;
 
                     li.onclick = () => {
-                        txtKH.value = item.TenKH;
-                        hiddenMaKH.value = item.MaKH;
-                        listKH.style.display = "none";
+                        txtKHAdd.value = kh.TenKH;
+                        hdMaKH.value = kh.MaKH;
+                        suggestKHAdd.style.display = "none";
                     };
 
-                    listKH.appendChild(li);
+                    suggestKHAdd.appendChild(li);
                 });
 
-                listKH.style.display = "block";
+                suggestKHAdd.style.display = "block";
             });
     });
 
-    // ======================
-    // MỞ MODAL THÊM KH MỚI
-    // ======================
+    // ===============================================
+    // MỞ MODAL THÊM KHÁCH
+    // ===============================================
     function openAddKH() {
         showOverlay();
         fetch("/Admin/KhachHang/Them")
             .then(r => r.text())
             .then(html => {
                 hideOverlay();
-                modalContainer.innerHTML = html;
+                if (window.renderHtml) {
+                    window.renderHtml(modalContainer, html);
+                } else {
+                    modalContainer.innerHTML = html;
+                }
                 new bootstrap.Modal(document.getElementById("modalAddKH")).show();
             });
     }
 
-    // ======================
-    // HÀM NHẬN KHÁCH HÀNG MỚI TỪ MODAL THÊM KHÁCH
-    // ======================
-    window.returnNewKH = function (maKH, tenKH) {
-        txtKH.value = tenKH;
-        hiddenMaKH.value = maKH;
-    };
+    // ===============================================
+    // MỞ MODAL THÊM SP
+    // ===============================================
+    function openAddSPModal() {
+        new bootstrap.Modal(document.getElementById("modalAddSPToHD")).show();
+    }
 
-    // ======================
-    // LƯU HÓA ĐƠN
-    // ======================
-    document.getElementById("btnSaveHD").onclick = () => {
+    // ===============================================
+    // XÁC NHẬN THÊM SP
+    // ===============================================
+    function confirmAddSP() {
+        const select = document.getElementById("spSelect");
+        const ma = parseInt(select.value);
+        const ten = select.options[select.selectedIndex].dataset.ten;
+        const gia = parseFloat(select.options[select.selectedIndex].dataset.gia);
+        const sl = parseInt(document.getElementById("spSL").value);
 
-        if (!hiddenMaKH.value) {
+        const idx = dsSPAdd.findIndex(x => x.MaSP === ma);
+
+        if (idx >= 0)
+            dsSPAdd[idx].SoLuong += sl;
+        else
+            dsSPAdd.push({ MaSP: ma, TenSP: ten, SoLuong: sl, DonGia: gia });
+
+        renderTableSPAdd();
+        bootstrap.Modal.getInstance(document.getElementById("modalAddSPToHD")).hide();
+    }
+
+    // ===============================================
+    // RENDER TABLE SP
+    // ===============================================
+    function renderTableSPAdd() {
+        const tbody = document.querySelector("#tableSPAdd tbody");
+        tbody.innerHTML = "";
+
+        let tong = 0;
+
+        dsSPAdd.forEach((sp, i) => {
+            const thanh = sp.SoLuong * sp.DonGia;
+            tong += thanh;
+
+            tbody.innerHTML += `
+            <tr>
+                <td class="text-center align-middle">${sp.MaSP}</td>
+                <td class="align-middle">${sp.TenSP}</td>
+                <td class="text-center align-middle">${sp.SoLuong}</td>
+                <td class="text-end align-middle">${sp.DonGia.toLocaleString()}</td>
+                <td class="text-end align-middle">${thanh.toLocaleString()}</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-danger btn-sm" onclick="removeSPAdd(${i})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+
+        document.getElementById("tongTienAdd").innerText = tong.toLocaleString() + " ₫";
+    }
+
+    function removeSPAdd(i) {
+        dsSPAdd.splice(i, 1);
+        renderTableSPAdd();
+    }
+
+    // ===============================================
+    // LƯU HÓA ĐƠN (POST JSON → ThemHoaDon)
+    // ===============================================
+    document.getElementById("btnSaveHDWithSP").onclick = () => {
+
+        if (!hdMaKH.value) {
             alert("Vui lòng chọn khách hàng.");
-            txtKH.focus();
             return;
         }
 
-        let fd = new FormData(document.getElementById("formAddHD"));
+        if (dsSPAdd.length === 0) {
+            alert("Hóa đơn cần ít nhất 1 sản phẩm.");
+            return;
+        }
+
+        const payload = {
+            Ngay: document.getElementById("hdNgay").value,
+            MaKH: parseInt(hdMaKH.value),
+            MaNV: parseInt(document.getElementById("hdMaNV").value),
+            SanPhams: dsSPAdd
+        };
 
         showOverlay();
 
-        fetch("/Admin/HoaDon/Them", {
+        fetch("/Admin/HoaDon/ThemHoaDon", {
             method: "POST",
-            body: fd
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
         })
             .then(r => r.json())
             .then(d => {
                 hideOverlay();
 
                 if (!d.success) {
-                    alert(d.message);
+                    alert("Lỗi: " + d.message);
                     return;
                 }
 
-                alert("Thêm hóa đơn thành công!");
-
+                alert("Tạo hóa đơn thành công!");
                 bootstrap.Modal.getInstance(document.getElementById("modalAddHD")).hide();
-
                 location.reload();
+            })
+            .catch(err => {
+                hideOverlay();
+                alert("Lỗi khi gửi yêu cầu: " + err);
             });
     };
-
 </script>

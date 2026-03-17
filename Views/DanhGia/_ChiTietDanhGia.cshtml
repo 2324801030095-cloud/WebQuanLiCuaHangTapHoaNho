@@ -1,0 +1,345 @@
+﻿@using System.Data.Entity;
+@using WebQuanLiCuaHangTapHoa.Models;
+@using WebQuanLiCuaHangTapHoa.Models.ViewModels;
+@model DanhGiaChiTietViewModel
+
+@{
+    // ✅ STRONGLY-TYPED MODEL - No need for dynamic casting
+    var dg = Model?.DanhGia;
+    var hoaDons = Model?.HoaDons ?? new List<HoaDon>();
+    var tongTienHD = Model?.TongTienHD ?? 0m;
+    var tongSoHoaDon = Model?.TongSoHoaDon ?? 0;
+
+    if (dg == null)
+    {
+        <div class="alert alert-danger">Không thể tải thông tin đánh giá.</div>
+        return;
+    }
+}
+
+<style>
+    /* ===== MODAL STYLE ===== */
+    .modal-header {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-bottom: 2px solid #047857;
+    }
+
+        .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+    .modal-body {
+        background-color: #f9fafb;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-radius: 12px;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        border: 1px solid #6ee7b7;
+        color: #065f46;
+    }
+
+    /* ===== ẢNH SẢN PHẨM ===== */
+    .product-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    /* ===== BADGE ===== */
+    .badge-reviewed {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ===== BẢNG HÓA ĐƠN ===== */
+    .invoice-table td {
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .invoice-table th {
+        background-color: #f3f4f6;
+        font-weight: 600;
+        color: #374151;
+        padding: 10px 8px;
+        font-size: 0.9rem;
+    }
+
+    .invoice-total-row {
+        background-color: #f0fdf4;
+        font-weight: 700;
+        color: #16a34a;
+    }
+
+    /* ===== CARD HÓA ĐƠN ===== */
+    .invoice-card {
+        border-left: 4px solid #16a34a;
+        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .invoice-card:hover {
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+            transform: translateY(-2px);
+        }
+
+    .invoice-header {
+        background: linear-gradient(135deg, #f0fdf4, #e8f7ed);
+        border-bottom: 1px solid #d1e7dd;
+    }
+
+    /* ===== NÚT CHI TIẾT ĐẸP ===== */
+    .btn-review-detail-modern {
+        background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+        color: white;
+        border: none;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-review-detail-modern:hover {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.5);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-review-detail-modern:active {
+            transform: translateY(0);
+        }
+</style>
+
+<!-- ✅ MODAL CHI TIẾT ĐÁNH GIÁ -->
+<div class="modal fade" id="modalChiTietDG" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-star me-2"></i>
+                    Đánh giá của @dg.KhachHang.TenKH
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- THÔNG TIN ĐÁNH GIÁ -->
+                <div class="card mb-4 border-0">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>👤 Khách hàng:</strong></p>
+                                <p class="text-muted">@dg.KhachHang.TenKH</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>📅 Ngày đánh giá:</strong></p>
+                                <p class="text-muted">@dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>⭐ Điểm đánh giá:</strong></p>
+                                <p>
+                                    @for (int i = 0; i < dg.Diem; i++)
+                                    {
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    }
+                                    <span class="ms-2 badge bg-warning text-dark">@dg.Diem/5</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>🏷️ Sản phẩm:</strong></p>
+                                <p>
+                                    @if (dg.SanPham != null)
+                                    {
+                                        <span class="badge bg-info text-white">@dg.SanPham.TenSP</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Đánh giá cửa hàng</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <p class="mb-1"><strong>💬 Nội dung:</strong></p>
+                            <p class="border-start border-4 border-success ps-3 text-muted">
+                                @dg.NoiDung
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LỊCH SỬ HÓA ĐƠN -->
+                <h6 class="mb-3">
+                    <i class="fa-solid fa-receipt me-2 text-success"></i>
+                    <strong>Chi tiết hóa đơn mua sản phẩm</strong>
+                </h6>
+
+                @{
+                    if (tongSoHoaDon == 0)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fa-solid fa-circle-info me-2"></i>
+                            @if (dg.MaSP.HasValue)
+                            {
+                                <span>Không tìm thấy hóa đơn chứa sản phẩm này.</span>
+                            }
+                            else
+                            {
+                                <span>Đây là đánh giá về cửa hàng, không liên quan đến hóa đơn cụ thể.</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        var hdDetail = Model.HoaDonDetails.FirstOrDefault();
+                        if (hdDetail != null)
+                        {
+                            <div class="card invoice-card mb-3">
+                                <div class="card-header invoice-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong class="text-success" style="font-size: 1.05rem;">Hóa đơn #@hdDetail.MaHD</strong>
+                                            <span class="ms-3 text-muted small">
+                                                <i class="bi bi-calendar me-1"></i>@hdDetail.NgayMua.ToString("dd/MM/yyyy HH:mm")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- DANH SÁCH SẢN PHẨM TRONG HÓA ĐƠN -->
+                                    <table class="table table-sm table-borderless invoice-table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Sản phẩm</th>
+                                                <th class="text-center" style="width: 70px;">Số lượng</th>
+                                                <th class="text-center" style="width: 100px;">Đơn giá</th>
+                                                <th class="text-end" style="width: 110px;">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in hdDetail.Items)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            @if (!string.IsNullOrEmpty(item.HinhAnh))
+                                                            {
+                                                                <img src="@Url.Content("~/Content/Images/" + item.HinhAnh)"
+                                                                     alt="@item.TenSP"
+                                                                     class="product-thumb" />
+                                                            }
+                                                            <div>
+                                                                <div class="fw-semibold" style="color: #1f2937;">@item.TenSP</div>
+                                                                @if (item.LaSanPhamDanhGia)
+                                                                {
+                                                                    <span class="badge-reviewed">
+                                                                        <i class="bi bi-star-fill"></i>Sản phẩm được đánh giá
+                                                                    </span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">@item.SoLuong</td>
+                                                    <td class="text-center">@String.Format("{0:N0}", item.DonGia)đ</td>
+                                                    <td class="text-end fw-bold" style="color: #dc2626;">@String.Format("{0:N0}", item.ThanhTien)đ</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="invoice-total-row border-top">
+                                                <td colspan="3" class="text-end">Tổng cộng:</td>
+                                                <td class="text-end">@String.Format("{0:N0}", hdDetail.TongTien)đ</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+                <!-- TỔNG HỢP -->
+                <div class="alert alert-success mt-4 mb-0">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>📦 Hóa đơn:</strong></p>
+                            <p class="h6 text-success mb-0">@(tongSoHoaDon == 1 ? "#" + (Model.HoaDonDetails.FirstOrDefault()?.MaHD ?? 0).ToString() : "N/A")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>💰 Tổng tiền:</strong></p>
+                            <p class="h6 text-success mb-0 fw-bold">@String.Format("{0:N0}", tongTienHD)đ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== BÌNH LUẬN SẢN PHẨM ===== -->
+                @if (dg.MaSP.HasValue && dg.SanPham != null)
+                {
+                    <hr class="my-4" />
+                    <h6 class="mb-3">
+                        <i class="fa-solid fa-comments me-2 text-info"></i>
+                        <strong>Bình luận của khách hàng về sản phẩm</strong>
+                    </h6>
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex gap-3">
+                                <div>
+                                    <img src="https://i.pravatar.cc/150?u=@dg.MaKH"
+                                         alt="@dg.KhachHang.TenKH"
+                                         class="rounded-circle"
+                                         style="width: 48px; height: 48px; object-fit: cover;" />
+                                </div>
+                                <div class="flex-grow-1">
+                                    
+                                  
+                                    <p class="mb-0" style="color: #374151; line-height: 1.6;">
+                                        @dg.NoiDung
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

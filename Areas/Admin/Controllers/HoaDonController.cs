@@ -1,42 +1,36 @@
-﻿// File: Areas/Admin/Controllers/HoaDonController.cs
-using System;
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using WebQuanLiCuaHangTapHoa.Models;
 using PagedList;
 using System.Collections.Generic;
-
-// Thêm using để dùng Include<T> extension (EF6)
 using System.Data.Entity;
-
-// Thêm using tới namespace chứa ChiTietItemVM
 using WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class HoaDonController : Controller
+    public class HoaDonController : BaseController
     {
-        // Kết nối DbContext (EF)
-        private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
+        // CHỈ KHAI BÁO 1 LẦN DUY NHẤT
+        private QuanLyTapHoaThanhNhanEntities1 db = new QuanLyTapHoaThanhNhanEntities1();
 
-        // ==========================
-        // Index: danh sách hóa đơn
-        // ==========================
+        // =====================================================
+        // 1) TRANG DANH SÁCH HÓA ĐƠN (INDEX)
+        // =====================================================
         public ActionResult Index(int? page, string search, string from, string to, string sort)
         {
-            // page + pageSize cho phân trang
             int pageNumber = page ?? 1;
             int pageSize = 10;
 
-            // IMPORTANT: Include navigation properties để tránh lazy-load/proxy lỗi khi view truy cập
-            // Include NhanVien, KhachHang, ChiTietHoaDon để view có thể dùng hd.NhanVien?.TenNV và hd.ChiTietHoaDon
-            var q = _db.HoaDon
-                       .Include(h => h.NhanVien)       // load nhân viên (TenNV)
-                       .Include(h => h.KhachHang)      // load khách hàng (TenKH)
-                       .Include(h => h.ChiTietHoaDon)  // load chi tiết (nếu cần tính toán)
+            var q = db.HoaDon
+                       .Include(h => h.NhanVien)
+                       .Include(h => h.KhachHang)
+                       .Include(h => h.ChiTietHoaDon)
                        .AsQueryable();
 
-            // 1) Tìm kiếm: theo MaHD / MaKH nếu nhập số, nếu chuỗi thì theo tên KH hoặc tên NV
+            // Tìm kiếm
             if (!string.IsNullOrEmpty(search))
             {
                 string s = search.Trim();
@@ -53,248 +47,291 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 }
             }
 
-            // 2) Lọc ngày: từ -> đến (tính đúng thời điểm bắt đầu/kết thúc)
-            if (!string.IsNullOrEmpty(from) && DateTime.TryParse(from, out DateTime tuNgay))
+            // Lọc ngày
+            if (DateTime.TryParse(from, out DateTime tuNgay))
             {
-                var minDate = tuNgay.Date; // 00:00:00
-                q = q.Where(h => h.Ngay >= minDate);
+                q = q.Where(h => h.Ngay >= tuNgay.Date);
+            }
+            if (DateTime.TryParse(to, out DateTime denNgay))
+            {
+                q = q.Where(h => h.Ngay <= denNgay.Date.AddDays(1).AddTicks(-1));
             }
 
-            if (!string.IsNullOrEmpty(to) && DateTime.TryParse(to, out DateTime denNgay))
+            // Sắp xếp
+            switch (sort)
             {
-                var maxDate = denNgay.Date.AddDays(1).AddTicks(-1); // 23:59:59.999...
-                q = q.Where(h => h.Ngay <= maxDate);
+                case "ngay_asc": q = q.OrderBy(h => h.Ngay); break;
+                case "ngay_desc": q = q.OrderByDescending(h => h.Ngay); break;
+                case "mahd_desc": q = q.OrderByDescending(h => h.MaHD); break;
+                default: q = q.OrderBy(h => h.MaHD); break;
             }
 
-            // 3) Sắp xếp (mặc định: MaHD tăng dần theo yêu cầu)
-            if (string.IsNullOrEmpty(sort))
-            {
-                q = q.OrderBy(h => h.MaHD);
-            }
-            else
-            {
-                switch (sort)
-                {
-                    case "ngay_asc":
-                        q = q.OrderBy(h => h.Ngay);
-                        break;
-                    case "ngay_desc":
-                        q = q.OrderByDescending(h => h.Ngay);
-                        break;
-                    case "mahd_desc":
-                        q = q.OrderByDescending(h => h.MaHD);
-                        break;
-                    case "mahd_asc":
-                        q = q.OrderBy(h => h.MaHD);
-                        break;
-                    default:
-                        q = q.OrderBy(h => h.MaHD);
-                        break;
-                }
-            }
-
-            // 4) Phân trang và trả view
-            var list = q.ToList(); // thực thi query
+            var list = q.ToList();
             return View(list.ToPagedList(pageNumber, pageSize));
         }
 
-
         // =====================================================
-        // GET: Partial - form thêm (trả PartialView)
+        // 2) GET FORM THÊM HÓA ĐƠN
         // =====================================================
         [HttpGet]
         public ActionResult Them()
         {
-            // load selectlist KH và NV cho form thêm
-            ViewBag.KhachHang = new SelectList(_db.KhachHang.OrderBy(k => k.TenKH).ToList(), "MaKH", "TenKH");
-            ViewBag.NhanVien = new SelectList(_db.NhanVien.OrderBy(n => n.TenNV).ToList(), "MaNV", "TenNV");
+            ViewBag.KhachHang = new SelectList(db.KhachHang.OrderBy(k => k.TenKH), "MaKH", "TenKH");
+            ViewBag.NhanVien = new SelectList(db.NhanVien.OrderBy(n => n.TenNV), "MaNV", "TenNV");
+            ViewBag.SanPham = db.SanPham.OrderBy(sp => sp.TenSP).ToList();
+
             return PartialView("_ThemHoaDon");
         }
 
         // =====================================================
-        // POST: Thêm hóa đơn (JSON result)
+        // 3) POST THÊM HÓA ĐƠN + CHI TIẾT (JSON)
         // =====================================================
         [HttpPost]
-        public JsonResult Them(HoaDon model)
+        public JsonResult ThemHoaDon()
         {
             try
             {
-                if (model == null)
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+                string contentType = Request.ContentType ?? "";
 
-                // nếu không truyền ngày → set hiện tại
-                model.Ngay = model.Ngay == default(DateTime) ? DateTime.Now : model.Ngay;
+                // Nếu client gửi JSON
+                if (contentType.Contains("application/json"))
+                {
+                    Request.InputStream.Position = 0;
+                    string json;
+                    using (var reader = new StreamReader(Request.InputStream))
+                        json = reader.ReadToEnd();
 
-                // nếu không truyền MaNV → mặc định 1 (bạn có thể thay)
-                if (model.MaNV == 0) model.MaNV = 1;
+                    var vm = JsonConvert.DeserializeObject<HoaDonCreateVM>(json);
 
-                _db.HoaDon.Add(model);
-                _db.SaveChanges();
+                    // VALIDATE
+                    if (vm == null)
+                        return Json(new { success = false, message = "Dữ liệu JSON không hợp lệ." }, JsonRequestBehavior.AllowGet);
 
-                return Json(new { success = true, message = "Đã tạo hóa đơn (Mã: " + model.MaHD + ")." });
+                    if (vm.MaKH == 0)
+                        return Json(new { success = false, message = "Chưa chọn khách hàng." }, JsonRequestBehavior.AllowGet);
+
+                    if (vm.MaNV == 0)
+                        return Json(new { success = false, message = "Chưa chọn nhân viên." }, JsonRequestBehavior.AllowGet);
+
+                    if (vm.SanPhams == null || !vm.SanPhams.Any())
+                        return Json(new { success = false, message = "Chưa có sản phẩm trong hóa đơn." }, JsonRequestBehavior.AllowGet);
+
+                    // Kiểm tra số lượng hợp lệ
+                    if (vm.SanPhams.Any(s => s.SoLuong <= 0))
+                        return Json(new { success = false, message = "Số lượng sản phẩm phải lớn hơn 0." }, JsonRequestBehavior.AllowGet);
+
+                    // Transaction đảm bảo an toàn
+                    using (var trans = db.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            // Tạo hóa đơn
+                            var hd = new HoaDon
+                            {
+                                Ngay = vm.Ngay == default(DateTime) ? DateTime.Now : vm.Ngay,
+                                MaKH = vm.MaKH,
+                                MaNV = vm.MaNV
+                            };
+
+                            db.HoaDon.Add(hd);
+                            db.SaveChanges(); // tạo MaHD
+
+                            // Thêm chi tiết
+                            foreach (var item in vm.SanPhams)
+                            {
+                                // Validate sản phẩm tồn tại
+                                var sp = db.SanPham.Find(item.MaSP);
+                                if (sp == null)
+                                {
+                                    trans.Rollback();
+                                    return Json(new { success = false, message = "Không tìm thấy sản phẩm MaSP=" + item.MaSP }, JsonRequestBehavior.AllowGet);
+                                }
+
+                                var ct = new ChiTietHoaDon
+                                {
+                                    MaHD = hd.MaHD,
+                                    MaSP = item.MaSP,
+                                    SoLuong = item.SoLuong,
+                                    DonGia = (int)item.DonGia
+                                };
+
+                                db.ChiTietHoaDon.Add(ct);
+                            }
+
+                            db.SaveChanges();
+                            trans.Commit();
+
+                            return Json(new { success = true, message = "Tạo hóa đơn thành công.", maHD = hd.MaHD }, JsonRequestBehavior.AllowGet);
+                        }
+                        catch (Exception ex)
+                        {
+                            trans.Rollback();
+                            return Json(new { success = false, message = "Lỗi khi lưu hóa đơn: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                }
+
+                return Json(new { success = false, message = "Định dạng request không hợp lệ." }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lỗi khi thêm: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi không xác định: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
         // =====================================================
-        // GET: Partial - form sửa
+        // 4) GET FORM SỬA HÓA ĐƠN
         // =====================================================
         [HttpGet]
         public ActionResult Sua(int id)
         {
-            var hd = _db.HoaDon.Find(id);
+            var hd = db.HoaDon.Find(id);
             if (hd == null) return HttpNotFound();
 
-            // load selectlist với giá trị hiện tại được chọn
-            ViewBag.KhachHang = new SelectList(_db.KhachHang.OrderBy(k => k.TenKH).ToList(), "MaKH", "TenKH", hd.MaKH);
-            ViewBag.NhanVien = new SelectList(_db.NhanVien.OrderBy(n => n.TenNV).ToList(), "MaNV", "TenNV", hd.MaNV);
+            ViewBag.KhachHang = new SelectList(db.KhachHang.OrderBy(k => k.TenKH), "MaKH", "TenKH", hd.MaKH);
+            ViewBag.NhanVien = new SelectList(db.NhanVien.OrderBy(n => n.TenNV), "MaNV", "TenNV", hd.MaNV);
+
             return PartialView("_SuaHoaDon", hd);
         }
 
         // =====================================================
-        // POST: Sửa hóa đơn
+        // 5) POST SỬA HÓA ĐƠN (FormData)
         // =====================================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult Sua(HoaDon model)
         {
             try
             {
-                if (model == null) return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+                if (model.MaHD <= 0)
+                    return Json(new { success = false, message = "Mã hóa đơn không hợp lệ." }, JsonRequestBehavior.AllowGet);
 
-                var old = _db.HoaDon.Find(model.MaHD);
-                if (old == null) return Json(new { success = false, message = "Không tìm thấy hóa đơn." });
+                var old = db.HoaDon.Find(model.MaHD);
+                if (old == null)
+                    return Json(new { success = false, message = "Không tìm thấy hóa đơn." }, JsonRequestBehavior.AllowGet);
 
-                // cập nhật các trường cho phép
+                // Validate
+                if (model.MaKH == 0)
+                    return Json(new { success = false, message = "Chưa chọn khách hàng." }, JsonRequestBehavior.AllowGet);
+
+                if (model.MaNV == 0)
+                    return Json(new { success = false, message = "Chưa chọn nhân viên." }, JsonRequestBehavior.AllowGet);
+
+                // Cập nhật
                 old.Ngay = model.Ngay == default(DateTime) ? old.Ngay : model.Ngay;
                 old.MaKH = model.MaKH;
                 old.MaNV = model.MaNV;
 
-                _db.SaveChanges();
-                return Json(new { success = true, message = "Đã cập nhật hóa đơn." });
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Cập nhật hóa đơn thành công." }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lỗi khi cập nhật: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi cập nhật: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
         // =====================================================
-        // GET: Chi tiết hóa đơn (TRẢ List<ChiTietItemVM> — KHÔNG trả anonymous)
+        // 6) CHI TIẾT HÓA ĐƠN (MODAL)
         // =====================================================
         [HttpGet]
         public ActionResult ChiTiet(int id)
         {
-            // Lấy hóa đơn kèm navigation (dùng trong partial)
-            var hoaDon = _db.HoaDon
-                            .Include(h => h.NhanVien)
-                            .Include(h => h.KhachHang)
-                            .FirstOrDefault(h => h.MaHD == id);
+            var hd = db.HoaDon
+                        .Include(h => h.KhachHang)
+                        .Include(h => h.NhanVien)
+                        .FirstOrDefault(h => h.MaHD == id);
 
-            if (hoaDon == null) return HttpNotFound();
+            if (hd == null) return HttpNotFound();
 
-            // Lấy chi tiết và project vào ChiTietItemVM (loại bỏ anonymous/dynamic)
-            var chiTietVm = _db.ChiTietHoaDon
-                .Where(ct => ct.MaHD == id)
-                .Select(ct => new ChiTietItemVM
-                {
-                    MaSP = ct.MaSP,
-                    TenSP = ct.SanPham != null ? ct.SanPham.TenSP : "(SP mất)",
-                    SoLuong = ct.SoLuong,
-                    DonGia = (decimal)ct.DonGia // cast sang decimal nếu DonGia là int
-                })
-                .ToList();
+            var ct = db.ChiTietHoaDon
+                        .Where(x => x.MaHD == id)
+                        .Select(x => new ChiTietItemVM
+                        {
+                            MaSP = x.MaSP,
+                            TenSP = x.SanPham.TenSP,
+                            SoLuong = x.SoLuong,
+                            DonGia = x.DonGia
+                        })
+                        .ToList();
 
-            // Tính tổng tiền từ VM
-            var tong = chiTietVm.Sum(x => x.ThanhTien);
+            ViewBag.TongTien = ct.Sum(x => x.ThanhTien);
+            ViewBag.HoaDon = hd;
 
-            // Gắn vào ViewBag để partial dùng (hoặc bạn có thể tạo full VM chứa cả HoaDon + ChiTiet list)
-            ViewBag.TongTien = tong;
-            ViewBag.HoaDon = hoaDon;
-
-            // Trả partial view với kiểu rõ ràng IEnumerable<ChiTietItemVM>
-            return PartialView("_ChiTietHoaDon", chiTietVm);
+            return PartialView("_ChiTietHoaDon", ct);
         }
 
         // =====================================================
-        // POST: Xóa 1 chi tiết hóa đơn (theo MaCTHD)
-        // Bạn có thể thay bằng MaSP nếu DB/logic của bạn dùng MaSP làm unique key trong ChiTiet
-        // =====================================================
-        [HttpPost]
-        public JsonResult XoaChiTiet(int maCTHD)
-        {
-            try
-            {
-                var ct = _db.ChiTietHoaDon.Find(maCTHD);
-                if (ct == null) return Json(new { success = false, message = "Không tìm thấy chi tiết." });
-
-                _db.ChiTietHoaDon.Remove(ct);
-                _db.SaveChanges();
-                return Json(new { success = true, message = "Đã xóa dòng chi tiết." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Lỗi khi xóa chi tiết: " + ex.Message });
-            }
-        }
-
-        // =====================================================
-        // POST: Xóa hóa đơn (cả chi tiết) - giữ nguyên
+        // 7) XÓA HÓA ĐƠN
         // =====================================================
         [HttpPost]
         public JsonResult Xoa(int id)
         {
             try
             {
-                var hoaDon = _db.HoaDon.Find(id);
-                if (hoaDon == null) return Json(new { success = false, message = "Không tìm thấy hóa đơn để xóa!" });
+                if (id <= 0)
+                    return Json(new { success = false, message = "Mã hóa đơn không hợp lệ." }, JsonRequestBehavior.AllowGet);
 
-                _db.HoaDon.Remove(hoaDon);
-                _db.SaveChanges();
-                return Json(new { success = true, message = "🗑️ Đã xóa hóa đơn thành công!" });
+                var hd = db.HoaDon.Find(id);
+                if (hd == null)
+                    return Json(new { success = false, message = "Không tìm thấy hóa đơn." }, JsonRequestBehavior.AllowGet);
+
+                // Xóa chi tiết trước
+                var chiTiet = db.ChiTietHoaDon.Where(ct => ct.MaHD == id).ToList();
+                foreach (var ct in chiTiet)
+                {
+                    db.ChiTietHoaDon.Remove(ct);
+                }
+
+                // Xóa hóa đơn
+                db.HoaDon.Remove(hd);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Đã xóa hóa đơn." }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "❌ Lỗi: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi xóa: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
         // =====================================================
-        // POST: Lọc theo ngày (trả partial danh sách - bạn đã có _DanhSachHoaDon)
+        // 8) LỌC THEO NGÀY
         // =====================================================
         [HttpPost]
         public ActionResult LocTheoNgay(DateTime tuNgay, DateTime denNgay)
         {
-            var hoaDons = _db.HoaDon
-                .Where(h => h.Ngay >= tuNgay && h.Ngay <= denNgay)
-                .OrderByDescending(h => h.Ngay)
-                .ToList();
+            var list = db.HoaDon
+                          .Where(h => h.Ngay >= tuNgay && h.Ngay <= denNgay)
+                          .OrderByDescending(h => h.Ngay)
+                          .ToList();
 
-            return PartialView("_DanhSachHoaDon", hoaDons);
+            return PartialView("_DanhSachHoaDon", list);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) _db.Dispose();
-            base.Dispose(disposing);
-        }
-
-
+        // =====================================================
+        // 9) XUẤT PDF
+        // =====================================================
         public ActionResult ExportPDF(int id)
         {
-            var hd = _db.HoaDon.Find(id);
+            var hd = db.HoaDon.Find(id);
+            if (hd == null) return HttpNotFound();
 
-            if (hd == null)
-                return HttpNotFound();
-
-            // (Bạn sẽ dùng Rotativa hoặc iTextSharp)
             return new Rotativa.ActionAsPdf("ChiTietPDF", new { id = id })
             {
                 FileName = "HoaDon_" + id + ".pdf"
             };
         }
 
+        // =====================================================
+        // 10) DISPOSE
+        // =====================================================
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                db.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }

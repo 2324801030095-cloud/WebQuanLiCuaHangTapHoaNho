@@ -9,7 +9,7 @@ using System.Data.Entity;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class KhachHangController : Controller
+    public class KhachHangController : BaseController
     {
         // Khởi tạo DbContext (auto-generated). readonly tránh gán nhầm.
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();

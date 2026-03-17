@@ -1,4 +1,7 @@
-﻿namespace WebQuanLiCuaHangTapHoa.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace WebQuanLiCuaHangTapHoa.Models
 {
     // Đại diện cho 1 sản phẩm trong giỏ hàng
     public class CartItem

@@ -421,11 +421,12 @@
     async function loadModal(url, modalId) {
         showLoading();
         const html = await (await fetch(url)).text();
-        document.getElementById("modalContainer").innerHTML = html;
-        // execute inline scripts in returned html
-        document.getElementById("modalContainer").querySelectorAll("script").forEach(s => {
-            const n = document.createElement("script"); n.text = s.text; document.body.appendChild(n);
-        });
+        const modalContainer = document.getElementById("modalContainer");
+        if (window.renderHtml) {
+            window.renderHtml(modalContainer, html);
+        } else {
+            modalContainer.innerHTML = html;
+        }
         hideLoading();
         const el = document.getElementById(modalId);
         if (el) new bootstrap.Modal(el).show();

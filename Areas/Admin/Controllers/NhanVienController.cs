@@ -6,7 +6,7 @@ using PagedList;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class NhanVienController : Controller
+    public class NhanVienController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db =
             new QuanLyTapHoaThanhNhanEntities1();
@@ -122,6 +122,15 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         {
             var nv = _db.NhanVien.Find(id);
             if (nv == null) return HttpNotFound();
+
+            // Populate role list like salary page
+            var chucVuList = _db.NhanVien
+                .Where(x => x.ChucVu != null && x.ChucVu.Trim() != "")
+                .Select(x => x.ChucVu)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+            ViewBag.DSChucVu = chucVuList;
 
             return PartialView("_SuaNhanVien", nv);
         }

@@ -1,0 +1,32 @@
+﻿@model PagedList.IPagedList<WebQuanLiCuaHangTapHoa.Areas.Admin.Models.SalaryLogEntry>
+@using PagedList.Mvc;
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Lịch sử thay đổi lương";
+}
+
+<div class="container p-4">
+    <h4 class="page-title"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử lương</h4>
+    <div class="card mt-3">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr><th>Thời gian (UTC)</th><th>Mã</th><th>Tên</th><th>Trước</th><th>Sau</th><th>Người</th></tr></thead>
+                <tbody>
+                    @foreach(var e in Model){
+                        <tr>
+                            <td>@e.When.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@e.MaNV</td>
+                            <td>@e.TenNV</td>
+                            <td>@String.Format("{0:N0} ₫", e.OldSalary)</td>
+                            <td>@String.Format("{0:N0} ₫", e.NewSalary)</td>
+                            <td>@e.ChangedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-center bg-white">
+            @Html.PagedListPager(Model, page => Url.Action("History", "Luong", new { area = "Admin", page }), new PagedListRenderOptions { UlElementClasses = new[] { "pagination" } })
+        </div>
+    </div>
+</div>

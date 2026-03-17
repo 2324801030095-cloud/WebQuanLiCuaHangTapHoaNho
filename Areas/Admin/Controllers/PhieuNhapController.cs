@@ -9,7 +9,7 @@ using WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class PhieuNhapController : Controller
+    public class PhieuNhapController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
 

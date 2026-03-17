@@ -1,0 +1,141 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.ViewModels.TestimonialCreateModel
+
+@{
+    bool canReview = ViewBag.CanReview is bool && (bool)ViewBag.CanReview;
+}
+
+<div class="review-box">
+    <h3 class="review-title">Gửi đánh giá của bạn</h3>
+
+    @if (!canReview)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @if (Model != null && Model.MaSP.HasValue)
+            {
+                <strong>Bạn cần mua sản phẩm này trước khi đánh giá.</strong>
+                <p class="mb-0 mt-2 small">Hãy mua sản phẩm và quay lại để chia sẻ cảm nhận của bạn.</p>
+            }
+            else
+            {
+                <strong>Bạn cần mua hàng trước khi đánh giá cửa hàng.</strong>
+                <p class="mb-0 mt-2 small">Hãy đặt hàng và quay lại để chia sẻ cảm nhận của bạn.</p>
+            }
+        </div>
+    }
+
+    @if (canReview)
+    {
+    <div id="reviewSuccess" class="alert alert-success d-none">
+        <i class="bi bi-check-circle me-2"></i>
+        Cảm ơn bạn! Đánh giá đã được gửi và chờ duyệt.
+    </div>
+    <form id="reviewForm">
+
+        <!-- Mã sản phẩm (nếu có) -->
+        <input type="hidden" name="MaSP" value="@(Model != null ? Model.MaSP : null)" />
+
+        <!-- Số sao -->
+        <div class="mb-3 star-select" id="starSelect">
+            <i class="bi bi-star" data-val="1"></i>
+            <i class="bi bi-star" data-val="2"></i>
+            <i class="bi bi-star" data-val="3"></i>
+            <i class="bi bi-star" data-val="4"></i>
+            <i class="bi bi-star" data-val="5"></i>
+            <input type="hidden" id="Diem" name="Diem" value="0" />
+        </div>
+
+        <!-- Nội dung -->
+        <textarea name="NoiDung" rows="4" class="form-control mb-3"
+                  placeholder="Hãy chia sẻ cảm nhận của bạn..."></textarea>
+
+        <button type="submit" class="btn btn-success btn-review">Gửi đánh giá</button>
+    </form>
+    }
+</div>
+
+<style>
+    .review-box {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .review-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #14532d;
+        margin-bottom: 15px;
+    }
+
+    .star-select i {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #d1d5db;
+        margin-right: 6px;
+        transition: 0.2s;
+    }
+
+        .star-select i.active {
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251,191,36,0.8);
+            transform: scale(1.15);
+        }
+
+    textarea {
+        padding: 12px;
+        border-radius: 10px !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const formEl = document.getElementById("reviewForm");
+        if (!formEl) return;
+
+        /* XỬ LÝ CHỌN SAO */
+        const stars = document.querySelectorAll("#starSelect i");
+        const diemInput = document.getElementById("Diem");
+
+        stars.forEach(star => {
+            star.addEventListener("click", function () {
+                let val = parseInt(this.getAttribute("data-val"));
+
+                diemInput.value = val;
+
+                stars.forEach(s => s.classList.remove("active"));
+                for (let i = 0; i < val; i++) {
+                    stars[i].classList.add("active");
+                }
+            });
+        });
+
+        /* GỬI AJAX */
+        formEl.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '/DanhGia/Submit',     // Không dùng Url.Action => không lỗi
+                type: 'POST',
+                data: formData,
+                success: function (res) {
+                    alert(res.message);
+                    if (res.ok) {
+                        formEl.reset();
+                        formEl.classList.add("d-none");
+                        document.getElementById("reviewSuccess").classList.remove("d-none");
+                    }
+                },
+                error: function () {
+                    alert("Có lỗi xảy ra. Vui lòng thử lại.");
+                }
+            });
+        });
+    });
+</script>

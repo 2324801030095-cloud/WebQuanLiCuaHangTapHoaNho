@@ -1,0 +1,94 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.KienThuc
+
+<section class="py-5">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-4 small text-muted">
+            <a href="/" class="text-success">Trang chủ</a> >
+            <a href="/#knowledge" class="text-success">Kiến thức</a> >
+            <span>@Model.TieuDe</span>
+        </nav>
+
+        <!-- Tiêu đề -->
+        <h1 class="fw-bold mb-3" style="color:#0a4b2f;">@Model.TieuDe</h1>
+
+        <!-- Meta thông tin -->
+        <div class="text-muted mb-4">
+            <i class="bi bi-person"></i> @Model.TacGia
+            <span class="mx-2">•</span>
+
+            <i class="bi bi-clock"></i>
+            @(Model.NgayDang.HasValue ? Model.NgayDang.Value.ToString("dd/MM/yyyy") : "")
+
+            <span class="mx-2">•</span>
+            <i class="bi bi-eye"></i> @Model.LuotXem lượt xem
+        </div>
+
+        <!-- NÚT QUAY LẠI -->
+        <div class="mb-4">
+            <a href="@Url.Action("Index","Home")#knowledge"
+               class="btn btn-outline-success rounded-pill px-4 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại mục Kiến thức
+            </a>
+        </div>
+
+        <!-- Ảnh đại diện (vừa khung, không méo) -->
+        <div class="kt-img-wrapper mb-4">
+            <img src="@Model.AnhDaiDien"
+                 alt="@Model.TieuDe"
+                 class="kt-detail-img rounded-4 shadow" />
+        </div>
+
+        <!-- Nội dung bài viết -->
+        <article class="fs-5 text-muted" style="line-height:1.75;">
+            @Html.Raw(Model.NoiDung)
+        </article>
+
+        <!-- Chủ đề -->
+        @if (!string.IsNullOrEmpty(Model.ChuDeChinh))
+        {
+            <div class="mt-5 pt-4 border-top">
+                <span class="badge bg-success px-3 py-2 fs-6">
+                    <i class="bi bi-tags"></i> @Model.ChuDeChinh
+                </span>
+            </div>
+        }
+
+    </div>
+</section>
+
+<style>
+    /* Khung bao ảnh */
+    .kt-img-wrapper {
+        width: 100%;
+        max-height: 450px;
+        background: #f3f4f6; /* màu nền nhẹ để tránh lộ khoảng trắng */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        border-radius: 14px;
+    }
+
+    /* Ảnh luôn vừa khung - không méo */
+    .kt-detail-img {
+        max-width: 100%;
+        max-height: 450px;
+        object-fit: contain; /* giữ nguyên tỷ lệ ảnh */
+    }
+
+    article img {
+        max-width: 100%;
+        height: auto;
+        margin: 20px 0;
+        border-radius: 8px;
+    }
+
+    .btn-outline-success:hover {
+        background: #0a4b2f;
+        color: #fff;
+        border-color: #0a4b2f;
+        transition: 0.25s;
+    }
+</style>

@@ -1,5 +1,35 @@
 ﻿@{
-    dynamic kh = Session["KH"];
+    var khObj = Session["KH"];
+    string khDisplayName = "Khách hàng";
+    bool khExists = false;
+
+    if (khObj != null)
+    {
+        khExists = true;
+        try
+        {
+            var propTen = khObj.GetType().GetProperty("TenKH");
+            var propUser = khObj.GetType().GetProperty("TenDangNhap");
+            string ten = null;
+            if (propTen != null)
+            {
+                ten = propTen.GetValue(khObj, null) as string;
+            }
+
+            if (string.IsNullOrEmpty(ten) && propUser != null)
+            {
+                ten = propUser.GetValue(khObj, null) as string;
+            }
+            if (!string.IsNullOrEmpty(ten))
+            {
+                khDisplayName = ten;
+            }
+        }
+        catch
+        {
+            // ignore reflection errors and keep default
+        }
+    }
 }
 
 <style>
@@ -7,35 +37,37 @@
        VARIABLES & BASICS
     ================================================ */
     :root {
-        --primary: #16a34a;       /* Xanh lá chủ đạo */
+        --primary: #16a34a; /* Xanh lá chủ đạo */
         --primary-light: #dcfce7; /* Xanh nền nhạt */
         --text-main: #334155;
         --border-color: #e2e8f0;
-        --radius-pill: 99px;      /* Bo tròn viên thuốc */
+        --radius-pill: 99px; /* Bo tròn viên thuốc */
         --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         --transition: all 0.25s ease-in-out;
     }
 
     #appHeader {
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(10px); /* Kính mờ thời thượng */
         border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
         z-index: 1000;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-        border: 1px solid #808080; /* Viền đen đậm */
-        border-radius: 10px;
+        box-shadow: 0 8px 28px rgba(2,6,23,0.06);
+        border: 1px solid #e6efe9;
+        border-radius: 16px;
         /* --- THÊM KHOẢNG TRỐNG Ở ĐÂY --- */
 
-        margin-bottom: 1px; /* Tạo khoảng hở 10px với phần nội dung phía dưới */
+        margin: 8px 0 6px;
     }
 
     .tn-container {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 12px 24px;
+        padding: 10px 18px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -61,7 +93,7 @@
         align-items: center;
         gap: 8px;
         letter-spacing: -0.5px;
-        margin-left: 20px;
+        margin-left: 8px;
     }
 
         .navbar-brand i {
@@ -74,8 +106,8 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
-        background: #16a34a;
+        padding: 8px 14px;
+        background: linear-gradient(135deg, #16a34a, #22c55e);
         border: none;
         color: #fff;
         border-radius: 6px;
@@ -87,38 +119,46 @@
         cursor: pointer;
     }
 
-    .btn-cat-toggle:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
-    }
+        .btn-cat-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+        }
 
     /* Menu Links (Nâng cấp: Underline Animation) */
-    .tn-main { display: flex; gap: 24px; }
+    .tn-main {
+        display: flex;
+        gap: 18px;
+    }
 
     .tn-link {
         text-decoration: none;
         color: var(--text-main);
         font-weight: 500;
         position: relative;
-        padding: 5px 0;
+        padding: 6px 2px;
         transition: color 0.2s;
     }
 
-    .tn-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: 0;
-        left: 0;
-        background-color: var(--primary);
-        transition: width 0.3s ease;
-    }
+        .tn-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
 
-    .tn-link:hover { color: var(--primary); }
-    .tn-link:hover::after { width: 100%; }
+        .tn-link:hover {
+            color: var(--primary);
+        }
+
+            .tn-link:hover::after {
+                width: 100%;
+            }
 
     /* ================================================
        RIGHT: SEARCH & ICONS (NÂNG CẤP CHÍNH)
@@ -132,13 +172,13 @@
     /* 1. Search Bar: Dạng viên thuốc hiện đại */
     .search-group {
         position: relative;
-        width: 300px; /* Giữ kích thước vừa phải */
+        width: 320px;
     }
 
     .tn-search {
         width: 100%;
-        padding: 10px 45px 10px 20px; /* Padding phải chừa chỗ cho nút */
-        border: 1px solid var(--border-color);
+        padding: 10px 42px 10px 18px;
+        border: 1px solid #e2e8f0;
         border-radius: var(--radius-pill);
         background: #f8fafc;
         outline: none;
@@ -146,11 +186,11 @@
         transition: var(--transition);
     }
 
-    .tn-search:focus {
-        background: #fff;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1); /* Glow effect */
-    }
+        .tn-search:focus {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1); /* Glow effect */
+        }
 
     .btn-search-icon {
         position: absolute;
@@ -170,15 +210,15 @@
         transition: var(--transition);
     }
 
-    .btn-search-icon:hover {
-        background: var(--primary-light);
-        color: var(--primary);
-    }
+        .btn-search-icon:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
 
     /* 2. User & Cart Icons: Clean & Minimal */
     .btn-icon-modern {
-        width: 44px; /* Giữ nguyên kích thước cũ */
-        height: 44px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -191,15 +231,15 @@
         text-decoration: none;
     }
 
-    .btn-icon-modern i {
-        font-size: 1.4rem; /* Icon to rõ */
-    }
+        .btn-icon-modern i {
+            font-size: 1.4rem; /* Icon to rõ */
+        }
 
-    /* Hover Effect: Nền nhạt + Viền mỏng + Icon đổi màu */
-    .btn-icon-modern:hover, .dropdown.show .btn-icon-modern {
-        background-color: #f1f5f9;
-        color: var(--primary);
-    }
+        /* Hover Effect: Nền nhạt + Viền mỏng + Icon đổi màu */
+        .btn-icon-modern:hover, .dropdown.show .btn-icon-modern {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
 
     /* Badge Cart: Tinh tế hơn */
     .badge-float {
@@ -219,15 +259,98 @@
         border-radius: 10px;
         border: 2px solid #fff; /* Viền trắng cắt vào icon tạo cảm giác tách biệt */
     }
-  
+
     /* Responsive */
-    @@media (max-width: 1200px) { .tn-main { display: none; } }
+    @@media (max-width: 1200px) {
+        .tn-main {
+            display: none;
+        }
+    }
+
     @@media (max-width: 768px) {
-        .search-group { width: auto; }
-        .tn-search { display: none; }
-        .btn-search-icon { position: static; transform: none; width: 44px; height: 44px; font-size: 1.2rem; }
-        .btn-cat-toggle span { display: none; }
-        .tn-container { padding: 10px 16px; }
+        .search-group {
+            width: auto;
+        }
+
+        .tn-search {
+            display: none;
+        }
+
+        .btn-search-icon {
+            position: static;
+            transform: none;
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+        }
+
+        .btn-cat-toggle span {
+            display: none;
+        }
+
+        .tn-container {
+            padding: 10px 16px;
+        }
+    }
+
+    /* ICON THÔNG BÁO DROPDOWN */
+    .notify-dropdown {
+        width: 320px;
+        max-height: 420px;
+        overflow-y: auto;
+        border-radius: 14px !important;
+    }
+
+    .notify-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px !important;
+        transition: background .2s;
+    }
+
+        .notify-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+    .hd-right {
+        padding-right: 12px;
+        gap: 18px;
+    }
+
+    /* extra spacing before notification icon */
+    .notify-gap {
+        margin-left: 12px;
+    }
+
+    /* Account dropdown layout fix */
+    .user-dropdown {
+        min-width: 240px;
+    }
+
+    .user-greet {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .user-greet strong {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        max-width: 150px;
+        vertical-align: bottom;
+    }
+    
+    /* Font fixes for all views */
+    body, html, * {
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
     }
 </style>
 
@@ -239,59 +362,83 @@
                 <i class="bi bi-shop-window"></i> Thanh Nhàn
             </a>
 
-            <div class="dropdown">
+            <div class="dropdown notify-gap">
                 <button class="btn-cat-toggle" type="button" data-bs-toggle="dropdown">
                     <i class="bi bi-grid"></i> <span>Danh mục</span>
                 </button>
-                <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-3 mt-2">
+                <div class="dropdown-menu shadow-lg border-0 rounded-4 p-3 mt-2">
                     <div class="tn-cat-grid">
                         @Html.Action("Menu", "DanhMuc")
                     </div>
-                </ul>
+                </div>
+
             </div>
 
             <nav class="tn-main d-none d-xl-flex">
-                <a class="tn-link" href="@Url.Action("Index","Home")">Trang chủ</a>
-                <a class="tn-link" href="#top-products">Top</a>
-                <a class="tn-link" href="#featured">Mới</a>
-                <a class="tn-link" href="#knowledge">Tin tức</a>
+                <a class="tn-link" href="@($"{Url.Action("Index", "Home")}#top-products")">Top</a>
+                <a class="tn-link" href="@($"{Url.Action("Index", "Home")}#featured")">Mới</a>
+                <a class="tn-link" href="@Url.Action("DanhSach","KienThuc")">Kiến thức</a>
                 <a class="tn-link" href="@Url.Action("GioiThieu","Home")">Giới thiệu</a>
-                <a class="tn-link text-danger fw-bold" href="#">Flash Sale</a>
+                <a class="tn-link text-danger fw-bold" href="@($"{Url.Action("Index", "Home")}#flash-sale")">Flash Sale</a>
             </nav>
         </div>
 
         <div class="hd-right">
 
-            <form method="get" action="@Url.Action("Index","Home")">
+            <form method="get" action="@Url.Action("Search","Search")">
                 <div class="search-group">
-                    <input class="tn-search" name="kw" value="@ViewBag.Keyword"
-                           type="search" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
+                    <input class="tn-search" name="kw" value="@ViewBag.Keyword" type="search" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
                     <button class="btn-search-icon" type="submit">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
             </form>
 
-            @if (kh == null)
-            {
-                <a class="btn-icon-modern" href="@Url.Action("DangNhap","TaiKhoan")" title="Đăng nhập">
-                    <i class="bi bi-person"></i>
-                </a>
-            }
-            else
+
+            @if (khExists)
             {
                 <div class="dropdown">
-                    <button class="btn-icon-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn-icon-modern dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-check-fill text-success"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
-                        <li class="px-3 py-2 text-muted small">Xin chào, <strong>@kh.HoTen</strong></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 user-dropdown">
+                        <li class="px-3 py-2 text-muted small user-greet">
+                            <span>Xin chào,</span> <strong title="@khDisplayName">@khDisplayName</strong>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="@Url.Action("ThongTin","TaiKhoan")"><i class="bi bi-person-gear me-2"></i>Tài khoản</a></li>
                         <li><a class="dropdown-item text-danger" href="@Url.Action("DangXuat","TaiKhoan")"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
                     </ul>
                 </div>
             }
+            else
+            {
+                <div class="dropdown">
+                    <button class="btn-icon-modern dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Tài khoản">
+                        <i class="bi bi-person"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2">
+                        <li><a class="dropdown-item" href="@Url.Action("DangNhap","TaiKhoan")"><i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("DangKy","TaiKhoan")"><i class="bi bi-person-plus me-2"></i>Đăng ký</a></li>
+                    </ul>
+                </div>
+            }
+
+
+            <!-- ICON THÔNG BÁO -->
+            <div class="dropdown">
+                <button class="btn-icon-modern position-relative" id="btnNotify" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge-float" id="notifyCount">@(ViewBag.NotificationCount ?? 0)</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 notify-dropdown">
+                    <li class="px-3 py-2 text-muted small fw-bold">Thông báo</li>
+                    <li><hr class="dropdown-divider" /></li>
+                    @Html.Action("GetNotifications", "ThongBao", new { take = 10 })
+                </ul>
+            </div>
+
 
             <button class="btn-icon-modern position-relative" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
                 <i class="bi bi-handbag"></i> <span class="badge-float" id="cartCount">0</span>

@@ -48,12 +48,13 @@
 <script>
     document.getElementById("btnUpdateTC").onclick = function () {
 
+        const soTien = parseInt(document.getElementById("SoTien").value, 10) || 0;
         const data = {
             MaTC: document.getElementById("MaTC").value,
             Loai: document.getElementById("Loai").value,
-            SoTien: document.getElementById("SoTien").value,
+            SoTien: soTien,
             Ngay: document.getElementById("Ngay").value,
-            GhiChu: document.getElementById("GhiChu").value
+            DienGiai: document.getElementById("DienGiai").value
         };
 
         fetch("/Admin/ThuChi/Sua", {
@@ -63,8 +64,13 @@
         })
         .then(r => r.json())
         .then(d => {
-            alert(d.message);
-            if (d.success) location.reload();
+            window.showAppToast?.(d.message, d.success ? "success" : "error");
+            if (d.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalTC"));
+                if (modal) modal.hide();
+                if (window.refreshList) window.refreshList();
+                else if (window.refreshContent) window.refreshContent();
+            }
         });
     };
 </script>

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
 
@@ -30,6 +30,8 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             int deltaToMonday = ((int)today.DayOfWeek + 6) % 7;
             DateTime weekStart = today.AddDays(-deltaToMonday);
             DateTime weekEnd = weekStart.AddDays(7);
+            DateTime monthStart = new DateTime(today.Year, today.Month, 1);
+            DateTime monthEnd = monthStart.AddMonths(1);
 
             ViewBag.DoanhThuNgay = _db.HoaDon
                 .Where(h => h.Ngay >= today && h.Ngay < tomorrow)
@@ -38,6 +40,11 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 
             ViewBag.DoanhThuTuan = _db.HoaDon
                 .Where(h => h.Ngay >= weekStart && h.Ngay < weekEnd)
+                .SelectMany(h => h.ChiTietHoaDon)
+                .Sum(ct => (int?)ct.SoLuong * ct.DonGia) ?? 0;
+
+            ViewBag.DoanhThuThang = _db.HoaDon
+                .Where(h => h.Ngay >= monthStart && h.Ngay < monthEnd)
                 .SelectMany(h => h.ChiTietHoaDon)
                 .Sum(ct => (int?)ct.SoLuong * ct.DonGia) ?? 0;
 
@@ -139,7 +146,35 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
                 ViewBag.CustomerMetric = (int)(TempData["CustomerMetric"] ?? 1);
             }
 
+
+            /* ================= TOP HÓA ĐƠN GIÁ TRỊ CAO NHẤT ================= */
+            var topHD = _db.HoaDon
+                .Select(h => new HoaDonIndexVM
+                {
+                    MaHD = h.MaHD,
+                    Ngay = h.Ngay,
+                    MaKH = h.MaKH,
+                    TenKH = h.KhachHang != null ? h.KhachHang.TenKH : "Khách lẻ",
+                    TenNV = h.NhanVien.TenNV,
+                    TongTien = h.ChiTietHoaDon.Sum(ct => ct.SoLuong * ct.DonGia)
+                })
+                .OrderByDescending(x => x.TongTien)
+                .Take(5)
+                .ToList();
+
+            ViewBag.TopHoaDon = topHD;
+
+
+
+
             return View();
+
+
+
+
+
+           
+
         }
 
 
@@ -178,6 +213,8 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             int deltaToMonday = ((int)today.DayOfWeek + 6) % 7;
             DateTime weekStart = today.AddDays(-deltaToMonday);
             DateTime weekEnd = weekStart.AddDays(7);
+            DateTime monthStart = new DateTime(today.Year, today.Month, 1);
+            DateTime monthEnd = monthStart.AddMonths(1);
 
             ViewBag.DoanhThuNgay = _db.HoaDon
                 .Where(h => h.Ngay >= today && h.Ngay < tomorrow)
@@ -186,6 +223,11 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 
             ViewBag.DoanhThuTuan = _db.HoaDon
                 .Where(h => h.Ngay >= weekStart && h.Ngay < weekEnd)
+                .SelectMany(h => h.ChiTietHoaDon)
+                .Sum(ct => (int?)ct.SoLuong * ct.DonGia) ?? 0;
+
+            ViewBag.DoanhThuThang = _db.HoaDon
+                .Where(h => h.Ngay >= monthStart && h.Ngay < monthEnd)
                 .SelectMany(h => h.ChiTietHoaDon)
                 .Sum(ct => (int?)ct.SoLuong * ct.DonGia) ?? 0;
 
@@ -293,6 +335,40 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             ViewBag.CustomerMetric = customerMetric;
 
             return PartialView("_DashboardStatsPartial");
+        }
+
+        // ===========================================================
+        // MENU - Quản lý menu (placeholder)
+        // ===========================================================
+        public ActionResult Menu()
+        {
+            ViewBag.Message = "Chức năng quản lý menu sẽ được phát triển thêm trong tương lai.";
+            return View();
+        }
+
+        // ===========================================================
+        // THÔNG TIN HỆ THỐNG
+        // ===========================================================
+        public ActionResult ThongTinHeThong()
+        {
+            // Lấy thống kê tổng quan
+            ViewBag.TongSP = _db.SanPham.Count();
+            ViewBag.TongKH = _db.KhachHang.Count();
+            ViewBag.TongNV = _db.NhanVien.Count();
+            ViewBag.TongHD = _db.HoaDon.Count();
+            ViewBag.TongDM = _db.DanhMuc.Count();
+            ViewBag.TongNCC = _db.NhaCungCap.Count();
+
+            return View();
+        }
+
+        // ===========================================================
+        // CÀI ĐẶT
+        // ===========================================================
+        public ActionResult CaiDat()
+        {
+            ViewBag.Message = "Chức năng cài đặt hệ thống sẽ được phát triển thêm trong tương lai.";
+            return View();
         }
 
         protected override void Dispose(bool disposing)

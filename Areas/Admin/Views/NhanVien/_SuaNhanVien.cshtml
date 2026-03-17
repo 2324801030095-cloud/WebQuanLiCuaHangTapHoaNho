@@ -85,7 +85,16 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Chức vụ</label>
-                                    <input class="form-control" name="ChucVu" value="@Model.ChucVu" />
+                                    <select class="form-select" name="ChucVu">
+                                        <option value="">— Chọn chức vụ —</option>
+                                        @if (ViewBag.DSChucVu != null)
+                                        {
+                                            foreach (var cv in ViewBag.DSChucVu as List<string>)
+                                            {
+                                                <option value="@cv" @(Model.ChucVu == cv ? "selected" : "")>@cv</option>
+                                            }
+                                        }
+                                    </select>
                                 </div>
 
                                 <div class="col-md-6">

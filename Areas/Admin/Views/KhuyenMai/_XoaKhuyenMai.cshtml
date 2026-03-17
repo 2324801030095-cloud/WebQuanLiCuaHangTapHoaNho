@@ -1,0 +1,42 @@
+﻿@model WebQuanLiCuaHangTapHoa.Models.KhuyenMai
+
+<div class="modal fade" id="modalKM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Xóa khuyến mãi</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc muốn xóa khuyến mãi này?</p>
+                @using (Html.BeginForm("Xoa", "KhuyenMai", FormMethod.Post, new { id = "formDelKM" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.MaKM)
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" id="btnDelKM">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("btnDelKM").addEventListener("click", function () {
+        const form = document.getElementById("formDelKM");
+        const fd = new FormData(form);
+        fetch(form.action || "/Admin/KhuyenMai/Xoa", {
+            method: "POST",
+            body: fd
+        }).then(r => r.json()).then(d => {
+            alert(d.message);
+            if (d.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById("modalKM"));
+                if (modal) modal.hide();
+                location.reload();
+            }
+        }).catch(e => { console.error(e); alert("Lỗi"); });
+    });
+</script>

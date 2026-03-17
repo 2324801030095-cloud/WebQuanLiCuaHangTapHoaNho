@@ -1,0 +1,50 @@
+@model IEnumerable<dynamic>
+
+@{
+    int count = ViewBag.NotificationCount ?? 0;
+}
+
+@if (Model != null && Model.Any())
+{
+    foreach (var notif in Model)
+    {
+        string iconClass = "bi-info-circle";
+        string textColor = "text-primary";
+        
+        if (notif.Loai == "SMS")
+        {
+            iconClass = "bi-chat-dots";
+            textColor = "text-info";
+        }
+        else if (notif.Loai == "ORDER")
+        {
+            iconClass = "bi-truck";
+            textColor = "text-success";
+        }
+        else if (notif.Loai == "PAYMENT")
+        {
+            iconClass = "bi-check-circle";
+            textColor = "text-primary";
+        }
+        
+        <li>
+            <a class="dropdown-item notify-item" href="#">
+                <i class="bi @iconClass me-2 @textColor"></i>
+                <div>
+                    <div>@notif.NoiDung</div>
+                    <small class="text-muted">@(((DateTime)notif.NgayGui).ToString("dd/MM/yyyy HH:mm"))</small>
+                </div>
+            </a>
+        </li>
+    }
+}
+else
+{
+    <li>
+        <a class="dropdown-item notify-item" href="#">
+            <i class="bi bi-bell-slash me-2 text-muted"></i>
+            <div>Chưa có thông báo nào</div>
+        </a>
+    </li>
+}
+

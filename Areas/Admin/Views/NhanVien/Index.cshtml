@@ -364,13 +364,11 @@
     async function loadModal(url, modalId) {
         const html = await (await fetch(url)).text();
         const box = document.getElementById("modalContainer");
-        box.innerHTML = html;
-
-        box.querySelectorAll("script").forEach(s => {
-            const t = document.createElement("script");
-            t.text = s.text;
-            document.body.appendChild(t);
-        });
+        if (window.renderHtml) {
+            window.renderHtml(box, html);
+        } else {
+            box.innerHTML = html;
+        }
 
         new bootstrap.Modal(document.getElementById(modalId)).show();
     }

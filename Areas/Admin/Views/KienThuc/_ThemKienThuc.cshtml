@@ -1,0 +1,63 @@
+@model WebQuanLiCuaHangTapHoa.Models.KienThuc
+
+<div class="modal fade" id="modalKT" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-plus"></i> Thêm bài viết kiến thức</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            @using (Html.BeginForm("Them", "KienThuc", FormMethod.Post, new { id = "formKT" }))
+            {
+                <div class="modal-body">
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.TieuDe, "Tiêu đề *")
+                        @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Slug, "Slug (URL)")
+                        @Html.TextBoxFor(m => m.Slug, new { @class = "form-control", placeholder = "Tự động tạo từ tiêu đề nếu để trống" })
+                        <small class="text-muted">Ví dụ: huong-dan-mua-hang</small>
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.NoiDung, "Nội dung *")
+                        @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-control", rows = "10", required = "required" })
+                    </div>
+                    <div class="form-check">
+                        @Html.CheckBoxFor(m => m.TrangThai, new { @class = "form-check-input", @checked = "checked" })
+                        <label class="form-check-label" for="TrangThai">Xuất bản ngay</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("formKT").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const obj = {};
+        formData.forEach((v, k) => obj[k] = v);
+        obj.TrangThai = document.querySelector("[name='TrangThai']").checked;
+
+        fetch("/Admin/KienThuc/Them", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(obj)
+        })
+        .then(r => r.json())
+        .then(d => {
+            alert(d.message);
+            if (d.success) {
+                bootstrap.Modal.getInstance(document.getElementById("modalKT")).hide();
+                location.reload();
+            }
+        });
+    });
+</script>
+

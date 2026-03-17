@@ -1,0 +1,166 @@
+@using WebQuanLiCuaHangTapHoa.Models.ViewModels
+@model DanhGiaChiTietViewModel
+
+@{
+    var dg = Model?.DanhGia;
+    var order = Model?.HoaDonDetails?.FirstOrDefault();
+    if (dg == null)
+    {
+        <div class="alert alert-danger">Không th? t?i chi ti?t bình lu?n.</div>
+        return;
+    }
+}
+
+<style>
+    .comment-detail-header {
+        background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+        color: #fff;
+    }
+
+    .comment-meta {
+        font-size: 0.95rem;
+    }
+
+    .product-thumb {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .badge-reviewed {
+        background: #f59e0b;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+    }
+</style>
+
+<div class="modal fade" id="modalDetail" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header comment-detail-header">
+                <h5 class="modal-title"><i class="fa-solid fa-comment-dots me-2"></i>Chi ti?t bình lu?n</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6 comment-meta">
+                        <strong>Mã dánh giá:</strong> #@dg.MaDanhGia
+                    </div>
+                    <div class="col-md-6 comment-meta">
+                        <strong>Ngày dánh giá:</strong> @dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                    <div class="col-md-6 comment-meta">
+                        <strong>Khách hàng:</strong> @(dg.KhachHang?.TenKH ?? "N/A")
+                    </div>
+                    <div class="col-md-6 comment-meta">
+                        <strong>S?n ph?m:</strong> @(dg.SanPham?.TenSP ?? "Ðánh giá c?a hàng")
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Ði?m dánh giá:</strong>
+                    <div class="mt-1">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fa-solid fa-star @(i <= dg.Diem ? "text-warning" : "text-muted")"></i>
+                        }
+                        <span class="ms-2">(@dg.Diem/5)</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>N?i dung:</strong>
+                    <div class="p-3 bg-light rounded mt-2">@dg.NoiDung</div>
+                </div>
+
+                <div class="mb-4">
+                    <strong>Tr?ng thái:</strong>
+                    @if (dg.TrangThai)
+                    {
+                        <span class="badge bg-success ms-2">Ðã duy?t</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning ms-2">Ch? duy?t</span>
+                    }
+                </div>
+
+                <h6 class="mb-3"><i class="fa-solid fa-receipt me-2 text-success"></i>Ðon hàng có s?n ph?m du?c dánh giá</h6>
+
+                @if (order == null)
+                {
+                    <div class="alert alert-info">
+                        @if (dg.MaSP.HasValue)
+                        {
+                            <span>Không tìm th?y hóa don ch?a s?n ph?m này.</span>
+                        }
+                        else
+                        {
+                            <span>Ðây là dánh giá c?a hàng, không g?n v?i hóa don c? th?.</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <strong>Hóa don #@order.MaHD</strong>
+                            <span class="text-muted ms-2">@order.NgayMua.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>S?n ph?m</th>
+                                        <th class="text-center">SL</th>
+                                        <th class="text-center">Ðon giá</th>
+                                        <th class="text-end">Thành ti?n</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in order.Items)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
+                                                    {
+                                                        <img src="@Url.Content("~/Content/Images/" + item.HinhAnh)" alt="@item.TenSP" class="product-thumb" />
+                                                    }
+                                                    <div>
+                                                        <div class="fw-semibold">@item.TenSP</div>
+                                                        @if (item.LaSanPhamDanhGia)
+                                                        {
+                                                            <span class="badge-reviewed">S?n ph?m du?c dánh giá</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">@item.SoLuong</td>
+                                            <td class="text-center">@String.Format("{0:N0}", item.DonGia)d</td>
+                                            <td class="text-end fw-bold text-danger">@String.Format("{0:N0}", item.ThanhTien)d</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-success">
+                                        <td colspan="3" class="text-end">T?ng c?ng</td>
+                                        <td class="text-end">@String.Format("{0:N0}", order.TongTien)d</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ðóng</button>
+            </div>
+        </div>
+    </div>
+</div>

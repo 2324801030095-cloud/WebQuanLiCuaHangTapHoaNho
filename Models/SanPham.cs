@@ -19,6 +19,8 @@ namespace WebQuanLiCuaHangTapHoa.Models
         {
             this.ChiTietHoaDon = new HashSet<ChiTietHoaDon>();
             this.ChiTietPhieuNhap = new HashSet<ChiTietPhieuNhap>();
+            this.KienThuc = new HashSet<KienThuc>();
+            this.DanhGia = new HashSet<DanhGia>();
         }
     
         public int MaSP { get; set; }
@@ -41,5 +43,9 @@ namespace WebQuanLiCuaHangTapHoa.Models
         public virtual DonViTinh DonViTinh { get; set; }
         public virtual Kho Kho { get; set; }
         public virtual KhuyenMai KhuyenMai { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<KienThuc> KienThuc { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DanhGia> DanhGia { get; set; }
     }
 }

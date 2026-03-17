@@ -6,7 +6,7 @@ using PagedList;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class NhaCungCapController : Controller
+    public class NhaCungCapController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
 

@@ -129,51 +129,6 @@
     )
 </div>
 
-<!-- =================== SCRIPT LỌC + PHÂN TRANG AJAX =================== -->
-<script>
-    // ====== Lọc dữ liệu ======
-    document.getElementById("btnFilter").onclick = function () {
-
-        let from = document.getElementById("filterFrom").value;
-        let to = document.getElementById("filterTo").value;
-        let loai = document.getElementById("filterLoai").value;
-        let money = document.getElementById("filterMoney").value;
-
-        let url =
-            `/Admin/ThuChi/DanhSach?from=${from}&to=${to}&loai=${loai}&money=${money}`;
-
-        fetch(url)
-            .then(r => r.text())
-            .then(html => {
-                document.getElementById("listContainer").innerHTML = html;
-            });
-    };
-
-    // ====== AJAX phân trang ======
-    document.addEventListener('click', function (e) {
-
-        const a = e.target.closest('.pagination a');
-        if (!a) return;
-
-        e.preventDefault();
-
-        const url = a.href;
-
-        fetch(url, { credentials: 'same-origin' })
-            .then(resp => resp.text())
-            .then(html => {
-                const container = document.getElementById('listContainer');
-                if (container) {
-                    container.innerHTML = html;
-                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                    window.location.href = url;
-                }
-            })
-            .catch(() => window.location.href = url);
-    });
-</script>
-
 <!-- =================== CSS PHÂN TRANG =================== -->
 <style>
     .pagination {

@@ -3,12 +3,91 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<div class="container mt-5">
-    <h3 class="text-center text-primary">🧠 Thông tin hệ thống quản trị</h3>
-    <ul class="list-group mt-3">
-        <li class="list-group-item">Tên dự án: <strong>WebQuảnLýCửaHàngTạpHóa</strong></li>
-        <li class="list-group-item">Môn học: Lập trình Web ASP.NET MVC</li>
-        <li class="list-group-item">Sinh viên thực hiện: <strong>Apollo</strong></li>
-        <li class="list-group-item">Ngày cập nhật: @DateTime.Now.ToString("dd/MM/yyyy")</li>
-    </ul>
+<div class="container-fluid p-4">
+    <div class="text-center mb-4">
+        <h4 class="page-title">
+            <i class="fa-solid fa-store"></i>
+            Thông tin hệ thống
+        </h4>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin dự án -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-info-circle"></i> Thông tin dự án</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>Tên dự án:</strong></span>
+                            <span>WebQuảnLýCửaHàngTạpHóa</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>Môn học:</strong></span>
+                            <span>Lập trình Web ASP.NET MVC</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>Sinh viên:</strong></span>
+                            <span>Apollo</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>Ngày cập nhật:</strong></span>
+                            <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê tổng quan -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-chart-bar"></i> Thống kê tổng quan</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-primary mb-0">@ViewBag.TongSP</h3>
+                                <small class="text-muted">Sản phẩm</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-success mb-0">@ViewBag.TongKH</h3>
+                                <small class="text-muted">Khách hàng</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-info mb-0">@ViewBag.TongNV</h3>
+                                <small class="text-muted">Nhân viên</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-warning mb-0">@ViewBag.TongHD</h3>
+                                <small class="text-muted">Hóa đơn</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-danger mb-0">@ViewBag.TongDM</h3>
+                                <small class="text-muted">Danh mục</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-secondary mb-0">@ViewBag.TongNCC</h3>
+                                <small class="text-muted">Nhà cung cấp</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

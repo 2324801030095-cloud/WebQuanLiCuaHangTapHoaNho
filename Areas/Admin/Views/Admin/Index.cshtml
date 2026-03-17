@@ -148,7 +148,12 @@
         fetch(`/Admin/Admin/FilterDashboard?month=${month}&year=${year}`)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("statsSection").innerHTML = html;
+                const stats = document.getElementById("statsSection");
+                if (window.renderHtml) {
+                    window.renderHtml(stats, html);
+                } else {
+                    stats.innerHTML = html;
+                }
                 initProfitChart();
                 hookActionButtons();
             });

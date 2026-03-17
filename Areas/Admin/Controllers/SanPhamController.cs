@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.IO;
 using System.Web.Mvc;
 using System.Data.Entity;
 using WebQuanLiCuaHangTapHoa.Models;
 using WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels;
 using PagedList;
+using System.Web;
 
 namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
 {
-    public class SanPhamController : Controller
+    public class SanPhamController : BaseController
     {
         private readonly QuanLyTapHoaThanhNhanEntities1 _db = new QuanLyTapHoaThanhNhanEntities1();
 
@@ -90,18 +92,54 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
             return PartialView("_ThemSanPham");
         }
 
+        private bool TrySaveImage(HttpPostedFileBase imageFile, string imageName, out string fileName, out string error)
+        {
+            fileName = null;
+            error = null;
+
+            if (imageFile == null || imageFile.ContentLength == 0) return true;
+
+            var originalName = Path.GetFileName(imageFile.FileName);
+            var ext = Path.GetExtension(originalName);
+            var baseName = string.IsNullOrWhiteSpace(imageName)
+                ? Path.GetFileNameWithoutExtension(originalName)
+                : Path.GetFileNameWithoutExtension(imageName);
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            baseName = new string(baseName.Where(c => !invalidChars.Contains(c)).ToArray()).Trim();
+            if (string.IsNullOrWhiteSpace(baseName))
+            {
+                baseName = "img_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            }
+
+            fileName = baseName + ext;
+            var imagesDir = Server.MapPath("~/Content/Images");
+            if (!Directory.Exists(imagesDir)) Directory.CreateDirectory(imagesDir);
+            var filePath = Path.Combine(imagesDir, fileName);
+
+            imageFile.SaveAs(filePath);
+            return true;
+        }
+
         [HttpPost]
-        public JsonResult Them(SanPham sp)
+        public JsonResult Them(SanPham sp, HttpPostedFileBase imageFile)
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    _db.SanPham.Add(sp);
-                    _db.SaveChanges();
-                    return Json(new { success = true, message = "✅ Đã thêm sản phẩm thành công!" });
-                }
-                return Json(new { success = false, message = "⚠️ Dữ liệu không hợp lệ!" });
+                if (!ModelState.IsValid)
+                    return Json(new { success = false, message = "⚠️ Dữ liệu không hợp lệ!" });
+
+                string fileName;
+                string error;
+                if (!TrySaveImage(imageFile, sp.HinhAnh, out fileName, out error))
+                    return Json(new { success = false, message = error ?? "❌ Không thể lưu ảnh!" });
+
+                if (!string.IsNullOrWhiteSpace(fileName))
+                    sp.HinhAnh = fileName;
+
+                _db.SanPham.Add(sp);
+                _db.SaveChanges();
+                return Json(new { success = true, message = "✅ Đã thêm sản phẩm thành công!" });
             }
             catch (Exception ex)
             {
@@ -175,30 +213,39 @@ namespace WebQuanLiCuaHangTapHoa.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult ChiTiet(int id)
         {
-            var sp = _db.SanPham
-                .Include(s => s.DanhMuc)
-                .Include(s => s.DonViTinh)
-                .Include(s => s.KhuyenMai)
-                .FirstOrDefault(s => s.MaSP == id);
-
-            if (sp == null)
-                return HttpNotFound();
-
-            // ✅ Map sang ProductVM (ViewModel phẳng)
-            var vm = new WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.ProductVM
+            try
             {
-                MaSP = sp.MaSP,
-                TenSP = sp.TenSP,
-                GiaBan = sp.GiaBan,
-                TenDanhMuc = sp.DanhMuc != null ? sp.DanhMuc.TenDM : "Không có",
-                TenDonViTinh = sp.DonViTinh != null ? sp.DonViTinh.TenDVT : "Không có",
-                TenKhuyenMai = sp.KhuyenMai != null ? sp.KhuyenMai.TenKM : "Không có",
-                HoatDong = sp.HoatDong,
-                HinhAnh = sp.HinhAnh,
-                MoTaNgan = sp.MoTaNgan
-            };
+                var sp = _db.SanPham
+                    .Include(s => s.DanhMuc)
+                    .Include(s => s.DonViTinh)
+                    .Include(s => s.KhuyenMai)
+                    .FirstOrDefault(s => s.MaSP == id);
 
-            return PartialView("_ChiTietSanPham", vm);
+                if (sp == null)
+                    return HttpNotFound();
+
+                // ✅ Map sang ProductVM (ViewModel phẳng)
+                var vm = new WebQuanLiCuaHangTapHoa.Areas.Admin.Models.ViewModels.ProductVM
+                {
+                    MaSP = sp.MaSP,
+                    TenSP = sp.TenSP,
+                    GiaBan = sp.GiaBan,
+                    TenDanhMuc = sp.DanhMuc != null ? sp.DanhMuc.TenDM : "Không có",
+                    TenDonViTinh = sp.DonViTinh != null ? sp.DonViTinh.TenDVT : "Không có",
+                    TenKhuyenMai = sp.KhuyenMai != null ? sp.KhuyenMai.TenKM : "Không có",
+                    HoatDong = sp.HoatDong,
+                    HinhAnh = sp.HinhAnh,
+                    MoTaNgan = sp.MoTaNgan
+                };
+
+                // Use explicit view path to avoid view resolution issues when called via AJAX
+                return PartialView("~/Areas/Admin/Views/SanPham/_ChiTietSanPham.cshtml", vm);
+            }
+            catch (Exception ex)
+            {
+                // Return a simple error modal so client doesn't receive a 500 page
+                return PartialView("~/Areas/Admin/Views/Shared/_ErrorModal.cshtml", ex.Message);
+            }
         }
 
 

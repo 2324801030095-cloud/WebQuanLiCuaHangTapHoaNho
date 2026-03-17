@@ -1,0 +1,60 @@
+﻿@using WebQuanLiCuaHangTapHoa.Helpers
+@model IEnumerable<WebQuanLiCuaHangTapHoa.Models.DanhMuc>
+
+@{
+    ViewBag.Title = "Debug - Kiểm tra Danh Mục & Icon";
+}
+
+<div class="container py-5">
+    <h2>🔍 Debug: Danh Mục & Icon</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Tên DB</th>
+                <th>Tên Trim</th>
+                <th>Icon</th>
+                <th>Hiển thị</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dm in Model)
+            {
+                var trimmed = dm.TenDM?.Trim();
+                var icon = CategoryIconHelper.GetIcon(dm.TenDM);
+                var display = CategoryIconHelper.GetDisplayName(dm.TenDM);
+                var (displayTuple, iconTuple) = CategoryIconHelper.GetCategoryInfo(dm.TenDM);
+                
+                <tr>
+                    <td>@dm.MaDM</td>
+                    <td><code>@dm.TenDM</code> (length: @(dm.TenDM?.Length ?? 0))</td>
+                    <td><code>@trimmed</code></td>
+                    <td>
+                        <span class="badge bg-info">@icon</span>
+                        <i class="bi @icon ms-2"></i>
+                    </td>
+                    <td>
+                        <span>@displayTuple</span>
+                        <i class="bi @iconTuple ms-2"></i>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr />
+    <h3>📋 Các Icon Hỗ Trợ:</h3>
+    <ul>
+        @foreach (var mapping in CategoryIconHelper.GetAllMappings())
+        {
+            <li><code>@mapping.Key</code> → <i class="bi @mapping.Value"></i> <span class="badge bg-secondary">@mapping.Value</span></li>
+        }
+    </ul>
+</div>
+
+<style>
+    body { background: #f9fafb; }
+    table { background: white; border-radius: 8px; overflow: hidden; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+    .bi { font-size: 1.2rem; color: #16a34a; }
+</style>

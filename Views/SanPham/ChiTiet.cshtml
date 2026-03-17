@@ -1,4 +1,4 @@
-﻿@model WebQuanLiCuaHangTapHoa.Models.SanPhamDetailVM
+﻿@model WebQuanLiCuaHangTapHoa.Models.ViewModels.SanPhamDetailVM
 
 @{
     ViewBag.Title = Model.TenSP;
@@ -20,10 +20,13 @@
     </nav>
 
     <div class="row g-4">
-        <!-- ẢNH -->
+
+        <!-- ẢNH SẢN PHẨM -->
         <div class="col-lg-5">
             <div class="card shadow-sm">
-                <img src="@Model.HinhAnh" alt="@Model.TenSP" class="img-fluid rounded" />
+                <img src="@Url.Content("~/Content/Images/" + Model.HinhAnh)"
+                     alt="@Model.TenSP"
+                     class="product-detail-img" />
             </div>
         </div>
 
@@ -32,7 +35,7 @@
             <h1 class="h3 mb-3">@Model.TenSP</h1>
             <div class="text-muted mb-2">Đơn vị tính: <strong>@Model.DonViTinh</strong></div>
 
-            <!-- GIÁ / KHUYẾN MÃI -->
+            <!-- GIÁ -->
             <div class="mb-3">
                 @if (coKM)
                 {
@@ -44,7 +47,11 @@
                         </span>
                     </div>
                     <div class="small text-muted">
-                        KM: @Model.TenKM (@Model.TuNgay?.ToString("dd/MM/yyyy") - @Model.DenNgay?.ToString("dd/MM/yyyy"))
+                        KM: @(Model.TenKM) (
+                        @(Model.TuNgay.HasValue ? Model.TuNgay.Value.ToString("dd/MM/yyyy") : "")
+                        -
+                        @(Model.DenNgay.HasValue ? Model.DenNgay.Value.ToString("dd/MM/yyyy") : "")
+                        )
                     </div>
                 }
                 else
@@ -96,6 +103,29 @@
     </section>
 
 </section>
+
+@section styles{
+    <style>
+
+        .product-detail-img {
+            width: 100%;
+            height: 380px;
+            object-fit: contain;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        /* Ảnh sản phẩm trong CARDS (liên quan) */
+        .card-img-top {
+            width: 100%;
+            height: 180px !important; /* chiều cao chuẩn như trang danh mục */
+            object-fit: contain !important; /* ⭐ KHÔNG CẮT ẢNH */
+            background: #fff;
+            padding: 6px;
+        }
+    </style>
+}
 
 @section scripts{
     <script>
